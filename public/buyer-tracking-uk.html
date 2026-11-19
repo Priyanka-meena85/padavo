@@ -11,10 +11,13 @@
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#b46b38">
 
+  <!-- Tailwind & Lucide Safe Polyfills to prevent "tailwind/lucide is not defined" -->
+  <script>
+    window.tailwind = window.tailwind || {};
+    window.lucide = window.lucide || { createIcons: function() {} };
+  </script>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Safe Polyfill to prevent "lucide is not defined" under any network condition -->
-  <script>window.lucide = window.lucide || { createIcons: function() {} };</script>
   <!-- Local high-speed bundled Lucide with CDN fallback -->
   <script src="/lucide.min.js" onerror="this.onerror=null; this.src='https://unpkg.com/lucide@latest';"></script>
   <!-- Google Fonts: Playfair Display + Plus Jakarta Sans + JetBrains Mono -->
@@ -23,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <script>
-    tailwind.config = {
+    window.tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
@@ -843,7 +846,12 @@
   <!-- JAVASCRIPT CONTROLLERS: MULTI-LANGUAGE, e-FIRC & WEBSOCKETS               -->
   <!-- ======================================================================== -->
   <script>
-    lucide.createIcons();
+    function safeCreateIcons() {
+      if (typeof window.lucide !== 'undefined' && typeof window.lucide.createIcons === 'function') {
+        try { window.safeCreateIcons(); } catch (e) {}
+      }
+    }
+    safeCreateIcons();
 
     // XSS PROTECTION: HTML ESCAPE SANITIZER
     function escapeHtml(str) {
@@ -948,7 +956,7 @@
     async function approveMilestone(id) {
       const btn = document.getElementById('btn-approve');
       btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>Recording Cryptographic Sign-Off...</span>';
-      lucide.createIcons();
+      safeCreateIcons();
 
       try {
         const res = await fetch('/api/public/orders/rj-pouk8492/milestones/1/decision', {
@@ -967,7 +975,7 @@
           btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>✓ Milestone 2 Approved by Toast & Co. UK</span>';
           
           document.getElementById('wire-details-card').classList.remove('hidden');
-          lucide.createIcons();
+          safeCreateIcons();
         }
       } catch (err) {
         alert('Notice: Milestone approval stamped locally.');
@@ -992,7 +1000,7 @@
         }
       } catch (e) {}
       document.getElementById('modal-firc').classList.remove('hidden');
-      lucide.createIcons();
+      safeCreateIcons();
     }
     function closeFircModal() {
       document.getElementById('modal-firc').classList.add('hidden');
@@ -1027,7 +1035,7 @@
         }
       } catch (e) {}
       document.getElementById('modal-buyer-hub').classList.remove('hidden');
-      lucide.createIcons();
+      safeCreateIcons();
     }
     function closeBuyerHubModal() {
       document.getElementById('modal-buyer-hub').classList.add('hidden');
@@ -1036,7 +1044,7 @@
     // DISPUTE MODAL
     function openDisputeModal() {
       document.getElementById('modal-dispute').classList.remove('hidden');
-      lucide.createIcons();
+      safeCreateIcons();
     }
     function closeDisputeModal() {
       document.getElementById('modal-dispute').classList.add('hidden');
@@ -1045,7 +1053,7 @@
     // SUPPLIER INVITE CONTROLLERS (BUYER-LED VIRAL LOOP)
     function openSupplierInviteModal() {
       document.getElementById('modal-supplier-invite').classList.remove('hidden');
-      lucide.createIcons();
+      safeCreateIcons();
     }
     function closeSupplierInviteModal() {
       document.getElementById('modal-supplier-invite').classList.add('hidden');
@@ -1063,7 +1071,7 @@
 
       btn.disabled = true;
       btn.innerHTML = '<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i><span>Inviting...</span>';
-      lucide.createIcons();
+      safeCreateIcons();
 
       try {
         const res = await fetch('/api/public/buyer/invite-supplier', {
@@ -1092,7 +1100,7 @@
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Send Invitation</span>';
-        lucide.createIcons();
+        safeCreateIcons();
       }
     }
 
@@ -1100,7 +1108,7 @@
     async function openDocumentsModal() {
       const container = document.getElementById('trade-documents-list');
       container.innerHTML = '<div class="p-6 text-center text-xs text-slate-500"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2 text-brand-600"></i>Loading customs trade documents...</div>';
-      lucide.createIcons();
+      safeCreateIcons();
       document.getElementById('modal-documents-vault').classList.remove('hidden');
 
       try {
@@ -1127,7 +1135,7 @@
               </a>
             </div>
           `).join('');
-          lucide.createIcons();
+          safeCreateIcons();
         } else {
           container.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">No customs documents uploaded yet.</p>';
         }
@@ -1145,7 +1153,7 @@
       document.getElementById('lightbox-title').innerText = title;
       document.getElementById('lightbox-desc').innerText = desc;
       document.getElementById('lightbox').classList.remove('hidden');
-      lucide.createIcons();
+      safeCreateIcons();
     }
     function closeLightbox() {
       document.getElementById('lightbox').classList.add('hidden');

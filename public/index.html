@@ -12,10 +12,12 @@
   <meta name="theme-color" content="#b46b38">
 
   <!-- Tailwind CSS CDN -->
+  <!-- Lucide & Tailwind Safe Polyfill to prevent "lucide/tailwind is not defined" under any network condition -->
+  <script>
+    window.tailwind = window.tailwind || {};
+    window.lucide = window.lucide || { createIcons: function() {} };
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Lucide Safe Polyfill to prevent "lucide is not defined" under any network condition -->
-  <script>window.lucide = window.lucide || { createIcons: function() {} };</script>
   <!-- Local high-speed bundled Lucide with CDN fallback -->
   <script src="/lucide.min.js" onerror="this.onerror=null; this.src='https://unpkg.com/lucide@latest';"></script>
   
@@ -25,7 +27,7 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <script>
-    tailwind.config = {
+    window.tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
@@ -1755,6 +1757,9 @@
         .replace(/'/g, '&#39;');
     }
 
+    // AUTHENTICATION STATE & SESSION TOKEN
+    let currentToken = localStorage.getItem('padavo_auth_token') || 'f760364b8716d422709d0858fb26bcbc68b777cb0c3950a02a1b358a2b064f1e';
+
     // SAFE LUCIDE RENDER HELPER
     function safeCreateIcons() {
       if (typeof window.lucide !== 'undefined' && typeof window.lucide.createIcons === 'function') {
@@ -1781,7 +1786,7 @@
         : '<i data-lucide="alert-circle" class="w-5 h-5 text-rose-600"></i>';
       
       toast.classList.remove('translate-y-24', 'opacity-0');
-      lucide.createIcons();
+      safeCreateIcons();
 
       setTimeout(() => {
         toast.classList.add('translate-y-24', 'opacity-0');
@@ -1816,7 +1821,7 @@
       }
 
       window.scrollTo(0, 0);
-      lucide.createIcons();
+      safeCreateIcons();
     }
 
     // MOBILE DRAWER TOGGLE
@@ -1832,7 +1837,7 @@
         drawer.classList.remove('-translate-x-full');
         backdrop.classList.remove('hidden');
       }
-      lucide.createIcons();
+      safeCreateIcons();
     }
 
     // THEME TOGGLE
@@ -1847,7 +1852,7 @@
         document.documentElement.classList.add('dark');
         showToast('Dark Theme Active 🌙');
       }
-      lucide.createIcons();
+      safeCreateIcons();
     }
 
     // LIGHTBOX CONTROLS
@@ -1855,7 +1860,7 @@
       document.getElementById('lightbox-img').src = url;
       document.getElementById('lightbox-title').innerText = title || 'Photo Proof';
       document.getElementById('lightbox').classList.remove('hidden');
-      lucide.createIcons();
+      safeCreateIcons();
     }
 
     function closeLightbox() {
@@ -1892,7 +1897,7 @@
     // MODAL HELPERS
     function openNewOrderModal() {
       document.getElementById('modal-new-order').classList.remove('hidden');
-      lucide.createIcons();
+      safeCreateIcons();
     }
 
     function closeModal(id) {
@@ -1939,7 +1944,7 @@
             <span class="absolute bottom-1 left-1 bg-emerald-600 text-[9px] text-white px-2 py-0.5 rounded font-mono font-bold">New Upload</span>
           `;
           grid.prepend(newCard);
-          lucide.createIcons();
+          safeCreateIcons();
         } else {
           progressBar.style.width = `${progress}%`;
           percentText.innerText = `${progress}%`;
@@ -2100,7 +2105,7 @@ Rajesh Sharma (+91 98290 12345)`;
     // 4. WHATSAPP CLUSTER BOT MODAL & SIMULATOR
     function openWhatsAppSimModal() {
       document.getElementById('modal-whatsapp-sim').classList.remove('hidden');
-      lucide.createIcons();
+      safeCreateIcons();
     }
     function closeWhatsAppSimModal() {
       document.getElementById('modal-whatsapp-sim').classList.add('hidden');
@@ -2109,7 +2114,7 @@ Rajesh Sharma (+91 98290 12345)`;
     async function sendSimulatedWhatsAppMessage() {
       const btn = document.getElementById('btn-send-whatsapp-sim');
       btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Processing via WhatsApp Cloud Bot...';
-      lucide.createIcons();
+      safeCreateIcons();
 
       const text = document.getElementById('sim-wa-text').value;
       const po = document.getElementById('sim-wa-po').value;
@@ -2166,7 +2171,7 @@ Rajesh Sharma (+91 98290 12345)`;
     // 6. TALLY / EXCEL BULK IMPORT LOGIC
     function openTallyImportModal() {
       document.getElementById('modal-tally-import').classList.remove('hidden');
-      lucide.createIcons();
+      safeCreateIcons();
     }
     function closeTallyImportModal() {
       document.getElementById('modal-tally-import').classList.add('hidden');
@@ -2175,7 +2180,7 @@ Rajesh Sharma (+91 98290 12345)`;
     async function importSampleTallyConsignments() {
       const btn = document.getElementById('btn-load-tally-sample');
       btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Importing from Tally XML...';
-      lucide.createIcons();
+      safeCreateIcons();
 
       try {
         const resSample = await fetch('/api/orders/sample-tally-template');
@@ -2252,6 +2257,7 @@ Rajesh Sharma (+91 98290 12345)`;
         const res = await fetch(`/api/orders/${orderId}/qc-checklist`, {
           headers: { 'Authorization': `Bearer ${currentToken}` }
         });
+        if (!res.ok) return;
         const data = await res.json();
         if (data.success && data.checklists) {
           grid.innerHTML = data.checklists.map(c => `
@@ -2271,7 +2277,7 @@ Rajesh Sharma (+91 98290 12345)`;
               </div>
             </div>
           `).join('');
-          lucide.createIcons();
+          safeCreateIcons();
         }
       } catch (e) {
         console.error('Failed to load QC checklist', e);
@@ -2316,6 +2322,7 @@ Rajesh Sharma (+91 98290 12345)`;
         const res = await fetch(`/api/orders/${orderId}/documents`, {
           headers: { 'Authorization': `Bearer ${currentToken}` }
         });
+        if (!res.ok) return;
         const data = await res.json();
         if (data.success && data.documents) {
           grid.innerHTML = data.documents.map(d => `
@@ -2334,7 +2341,7 @@ Rajesh Sharma (+91 98290 12345)`;
               </a>
             </div>
           `).join('');
-          lucide.createIcons();
+          safeCreateIcons();
         }
       } catch (e) {
         console.error('Failed to load trade documents', e);
@@ -2376,7 +2383,7 @@ Rajesh Sharma (+91 98290 12345)`;
       const btn = document.getElementById('btn-email-buyer');
       btn.disabled = true;
       btn.innerHTML = '<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i><span>Sending Email...</span>';
-      lucide.createIcons();
+      safeCreateIcons();
 
       try {
         const res = await fetch(`/api/orders/${orderId}/send-buyer-email`, {
@@ -2395,14 +2402,14 @@ Rajesh Sharma (+91 98290 12345)`;
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<i data-lucide="mail" class="w-3.5 h-3.5"></i><span>Send Milestone Email to Buyer</span>';
-        lucide.createIcons();
+        safeCreateIcons();
       }
     }
 
     // 12. SAAS BILLING & RECURRING CHECKOUT CONTROLLERS
     function openBillingModal() {
       document.getElementById('modal-billing-plans').classList.remove('hidden');
-      lucide.createIcons();
+      safeCreateIcons();
     }
     function closeBillingModal() {
       document.getElementById('modal-billing-plans').classList.add('hidden');

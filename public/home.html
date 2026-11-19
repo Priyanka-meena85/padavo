@@ -8,11 +8,13 @@
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="shortcut icon" href="/favicon.ico">
   
+  <!-- Tailwind & Lucide Safe Polyfills to prevent "tailwind/lucide is not defined" -->
+  <script>
+    window.tailwind = window.tailwind || {};
+    window.lucide = window.lucide || { createIcons: function() {} };
+  </script>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Lucide Safe Polyfill to prevent "lucide is not defined" under any network condition -->
-  <script>window.lucide = window.lucide || { createIcons: function() {} };</script>
   <!-- Local high-speed bundled Lucide with CDN fallback -->
   <script src="/lucide.min.js" onerror="this.onerror=null; this.src='https://unpkg.com/lucide@latest';"></script>
   
@@ -22,7 +24,7 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <script>
-    tailwind.config = {
+    window.tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
@@ -1057,7 +1059,12 @@
   <!-- CLIENT JAVASCRIPT CONTROLLERS                                            -->
   <!-- ======================================================================== -->
   <script>
-    lucide.createIcons();
+    function safeCreateIcons() {
+      if (typeof window.lucide !== 'undefined' && typeof window.lucide.createIcons === 'function') {
+        try { window.lucide.createIcons(); } catch (e) {}
+      }
+    }
+    safeCreateIcons();
 
     // 1. DEMO VIEW SWITCHER (Buyer / Floor / Exporter)
     function switchDemoView(view) {
@@ -1079,7 +1086,7 @@
         document.getElementById('view-exporter').classList.remove('hidden');
         document.getElementById('tab-exporter').className = 'px-3.5 py-1.5 rounded-lg bg-brand-600 text-white font-bold transition-all flex items-center gap-1.5';
       }
-      lucide.createIcons();
+      safeCreateIcons();
     }
 
     // 2. CURRENCY SWITCHER IN BUYER DEMO
@@ -1099,7 +1106,7 @@
       btn.className = 'w-full sm:flex-1 inline-flex items-center justify-center gap-2 bg-emerald-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl cursor-default';
       btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>✓ Milestone 2 Approved by Toast & Co. UK</span>';
       wire.classList.remove('hidden');
-      lucide.createIcons();
+      safeCreateIcons();
     }
 
     function requestChangeDemo() {

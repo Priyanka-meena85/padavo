@@ -1,7 +1,7 @@
 // ==============================================================================
-// PADAVO SERVICE WORKER — TRUE OFFLINE PWA & BACKGROUND SYNC (v1.3)
+// PADAVO SERVICE WORKER — TRUE OFFLINE PWA & BACKGROUND SYNC (v1.4)
 // ==============================================================================
-const CACHE_NAME = 'padavo-saas-v1.3';
+const CACHE_NAME = 'padavo-saas-v1.4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -10,6 +10,11 @@ const STATIC_ASSETS = [
   '/manifest.json',
   '/logo.png',
   '/logo.jpg',
+  '/padavo-logo.png',
+  '/padavo-logo.jpg',
+  '/favicon.ico',
+  '/favicon.png',
+  '/favicon.svg',
   '/lucide.min.js'
 ];
 
@@ -29,7 +34,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
-            console.log('[Padavo SW] Clearing legacy cache:', key);
+            console.log('[Padavo SW] Purging legacy cache:', key);
             return caches.delete(key);
           }
         })
@@ -52,15 +57,10 @@ self.addEventListener('fetch', (event) => {
 
   const isSameOrigin = event.request.url.startsWith(self.location.origin);
 
-  // 3. For cross-origin third-party resources (Unsplash, Google Fonts, CDN):
-  // Let browser fetch directly; if network fails, catch gracefully without crashing SW
+  // 3. For any cross-origin requests (Tailwind CDN, Google Fonts, Unsplash images, unpkg):
+  // NEVER call event.respondWith! Returning immediately allows the browser to fetch natively
+  // without triggering connect-src CSP restrictions or Response conversion errors.
   if (!isSameOrigin) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        // Return valid empty Response on network failure so respondWith never receives undefined
-        return new Response(null, { status: 404, statusText: 'Resource Unavailable Offline' });
-      })
-    );
     return;
   }
 
@@ -94,7 +94,7 @@ self.addEventListener('fetch', (event) => {
         }
         // Fallback for images
         if (accept.includes('image/') || event.request.destination === 'image') {
-          const logoFallback = await caches.match('/logo.png');
+          const logoFallback = (await caches.match('/logo.png')) || (await caches.match('/logo.jpg'));
           if (logoFallback) return logoFallback;
           return new Response(null, { status: 404, statusText: 'Image Unavailable Offline' });
         }

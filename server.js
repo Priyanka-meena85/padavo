@@ -390,7 +390,7 @@ setInterval(() => {
       failedLoginAttempts.delete(ip);
     }
   }
-}, 5 * 60 * 1000);
+}, 5 * 60 * 1000).unref();
 
 // XSS & Control Character Input Sanitizer
 function sanitizeInput(obj) {
@@ -997,6 +997,20 @@ async function handleRequest(req, res) {
       const logoStream = fs.createReadStream(logoPath);
       logoStream.on('error', () => { if (!res.headersSent) res.writeHead(204); res.end(); });
       return logoStream.pipe(res);
+    }
+  }
+
+  // Fast-path Bundled Lucide Icon Library Handler (High Speed, Zero CDN Failure)
+  if (method === 'GET' && pathname === '/lucide.min.js') {
+    const lucidePath = path.join(PUBLIC_DIR, 'lucide.min.js');
+    if (fs.existsSync(lucidePath)) {
+      res.writeHead(200, {
+        'Content-Type': 'text/javascript; charset=utf-8',
+        'Cache-Control': 'public, max-age=604800, immutable'
+      });
+      const lucideStream = fs.createReadStream(lucidePath);
+      lucideStream.on('error', () => { if (!res.headersSent) res.writeHead(204); res.end(); });
+      return lucideStream.pipe(res);
     }
   }
 
