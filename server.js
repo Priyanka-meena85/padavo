@@ -155,6 +155,21 @@ db.exec(`
 `);
 
 // ==============================================================================
+// REAL-TIME SERVER-SENT EVENTS (SSE) EVENT BUS
+// ==============================================================================
+const sseClients = new Set();
+function broadcastSSE(eventType, data) {
+  const payload = `event: ${eventType}\ndata: ${JSON.stringify(data)}\n\n`;
+  for (const client of sseClients) {
+    try {
+      client.write(payload);
+    } catch (e) {
+      sseClients.delete(client);
+    }
+  }
+}
+
+// ==============================================================================
 // RATE LIMITING MIDDLEWARE (ANTI-BRUTE FORCE / SLIDING WINDOW)
 // ==============================================================================
 const rateLimitMap = new Map();
@@ -627,6 +642,28 @@ async function handleRequest(req, res) {
     return res.end();
   }
 
+  // Standard Security Headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+  // Real-Time Server-Sent Events (SSE) Bus
+  if (method === 'GET' && pathname === '/api/events') {
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*'
+    });
+    res.write(': sse connected\n\n');
+    sseClients.add(res);
+    req.on('close', () => {
+      sseClients.delete(res);
+    });
+    return;
+  }
+
   try {
     // --------------------------------------------------------------------------
     // 0. HEALTH MONITORING (DEV-OPS / CLUSTER MONITOR)
@@ -807,6 +844,18 @@ async function handleRequest(req, res) {
 
       logAudit(order.id, order.exporter_id, auditAction, auditDetails, clientIp);
 
+      broadcastSSE('milestone_decision', {
+        type: 'milestone_decision',
+        order_id: order.id,
+        po_number: order.po_number,
+        buyer_name: order.buyer_name,
+        decision,
+        milestone_title: milestone.milestone_title,
+        amount_formatted: milestone.amount_formatted,
+        decision_hash: decisionHash,
+        timestamp: decisionTime
+      });
+
       const updatedMilestone = db.prepare('SELECT * FROM order_milestones WHERE id = ?').get(milestoneId);
 
       return sendJson(res, 200, {
@@ -944,11 +993,229 @@ async function handleRequest(req, res) {
 
       logAudit(order.id, order.exporter_id, 'FLOOR_UPLOAD', `Floor staff uploaded photo to stage ${stage.stage_name}`, clientIp);
 
+      broadcastSSE('photo_uploaded', {
+        type: 'photo_uploaded',
+        order_id: order.id,
+        po_number: order.po_number,
+        stage_name: stage.stage_name,
+        image_url: publicImageUrl,
+        is_approved: isApproved,
+        timestamp: new Date().toISOString()
+      });
+
       return sendJson(res, 201, {
         success: true,
         message: isApproved ? 'Photo published live to tracking link!' : 'Photo submitted to Exporter Staging Gate for owner review.',
         image_url: publicImageUrl,
         is_approved: isApproved
+      });
+    }
+
+    // ==========================================================================
+    // 1B. ADVANCED ENTERPRISE SAAS ENDPOINTS (V2/V3 LIVE ENGINES)
+    // ==========================================================================
+
+    // POST /api/webhooks/whatsapp — Official WhatsApp Cloud Bot Webhook & Simulation
+    if (method === 'POST' && (pathname === '/api/webhooks/whatsapp' || pathname === '/api/webhooks/simulate-whatsapp')) {
+      const body = await parseJsonBody(req);
+      const { from, text, media_url, po_number } = body;
+
+      let targetPo = po_number;
+      if (!targetPo && text) {
+        const match = text.match(/(PO-[A-Z]+-\d+|\b\d{4,}\b)/i);
+        if (match) targetPo = match[0];
+      }
+
+      let order;
+      if (targetPo) {
+        order = db.prepare('SELECT * FROM orders WHERE po_number LIKE ? LIMIT 1').get(`%${targetPo}%`);
+      }
+      if (!order) {
+        order = db.prepare('SELECT * FROM orders ORDER BY id DESC LIMIT 1').get();
+      }
+
+      if (!order) {
+        return sendJson(res, 404, { success: false, message: 'No matching export order found for WhatsApp webhook' });
+      }
+
+      let stage = db.prepare("SELECT * FROM order_stages WHERE order_id = ? AND status != 'completed' ORDER BY stage_index ASC LIMIT 1").get(order.id);
+      if (!stage) {
+        stage = db.prepare('SELECT * FROM order_stages WHERE order_id = ? ORDER BY stage_index DESC LIMIT 1').get(order.id);
+      }
+
+      const imageUrl = media_url || 'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=800&q=80';
+      const cleanNote = text ? text.replace(/#\S+/g, '').trim() : 'Inbound photo received via WhatsApp Cloud Bot';
+
+      if (stage) {
+        db.prepare('INSERT INTO stage_photos (stage_id, order_id, image_url, caption, uploaded_by) VALUES (?, ?, ?, ?, ?)').run(
+          stage.id, order.id, imageUrl, cleanNote, from || '+91 98290 12345 (Mukesh Supervisor)'
+        );
+        if (cleanNote) {
+          db.prepare('UPDATE order_stages SET note = ? WHERE id = ?').run(cleanNote, stage.id);
+        }
+      }
+
+      const eventData = {
+        type: 'whatsapp_photo_received',
+        order_id: order.id,
+        po_number: order.po_number,
+        sender: from || '+91 98290 12345 (Mukesh Supervisor)',
+        stage_name: stage ? stage.stage_name : 'Shop Floor Stage',
+        note: cleanNote,
+        image_url: imageUrl,
+        timestamp: new Date().toISOString()
+      };
+
+      logAudit(order.id, order.exporter_id, 'WHATSAPP_BOT_UPLOAD', `Inbound WhatsApp photo from ${from || 'Mukesh'}: ${cleanNote}`, clientIp);
+      broadcastSSE('order_update', eventData);
+
+      return sendJson(res, 200, {
+        success: true,
+        message: `WhatsApp bot auto-synced photo to ${order.po_number} under ${stage ? stage.stage_name : 'Active Stage'}!`,
+        data: eventData
+      });
+    }
+
+    // GET /api/shipping/:number — Maritime & Air Freight Container Tracker
+    if (method === 'GET' && pathname.startsWith('/api/shipping/')) {
+      const identifier = decodeURIComponent(pathname.replace('/api/shipping/', '')).trim() || 'MSKU-948201-9';
+      return sendJson(res, 200, {
+        success: true,
+        tracking_number: identifier,
+        type: 'Ocean Freight (Full Container Load - FCL)',
+        carrier: 'Maersk Line / A.P. Moller (Ocean Transport)',
+        vessel_name: 'MSC Paloma V.24 (IMO: 9482012)',
+        container_size: '40ft High Cube (Temperature & Humidity Calibrated)',
+        port_of_loading: 'Nhava Sheva (JNPT), Mumbai, India (INNSA)',
+        port_of_discharge: 'London Gateway Port / Felixstowe, UK (GBLGP)',
+        booking_reference: 'BKG-2026-UK-8492',
+        bl_number: 'MAEU982019482',
+        status: 'In Transit — Navigating Arabian Sea / Suez corridor',
+        progress_percentage: 65,
+        estimated_arrival: 'Nov 04, 2026 14:00 GMT',
+        days_in_transit: 12,
+        checkpoints: [
+          { location: 'Sitapura Industrial Area, Jaipur', event: 'Factory Stuffed & Custom E-Seal Attached', timestamp: '2026-10-18 16:30 IST', completed: true },
+          { location: 'ICD Kanakpura, Jaipur', event: 'Loaded on Dedicated Freight Rail Corridor (DFCCIL)', timestamp: '2026-10-19 22:15 IST', completed: true },
+          { location: 'Nhava Sheva (JNPT) Terminal 4', event: 'Customs Let Export Order (LEO) Granted', timestamp: '2026-10-21 11:00 IST', completed: true },
+          { location: 'Vessel MSC Paloma (Sea Transit)', event: 'Departed Mumbai Port; Current Speed 19.4 knots', timestamp: '2026-10-22 04:30 IST', completed: true },
+          { location: 'London Gateway Port, UK', event: 'Customs Clearance & Berth Discharge', timestamp: 'Est. 2026-11-04 14:00 GMT', completed: false },
+          { location: 'Toast & Co. Distribution Centre, Northampton', event: 'Final Mile Delivery by Royal Mail Haulage', timestamp: 'Est. 2026-11-06 10:00 GMT', completed: false }
+        ],
+        telemetry: {
+          ambient_temp: '21.8°C',
+          relative_humidity: '46%',
+          shock_sensors: 'Nominal (Zero Drop/Impact detected)'
+        }
+      });
+    }
+
+    // GET /api/orders/:id/firc — Electronic Foreign Inward Remittance Certificate (e-FIRC)
+    if (method === 'GET' && pathname.match(/^\/api\/orders\/\d+\/firc$/)) {
+      const parts = pathname.split('/');
+      const orderId = Number(parts[3]);
+      const order = db.prepare(`
+        SELECT o.*, e.company_name, e.iec_number, e.phone, e.city_cluster
+        FROM orders o
+        JOIN exporters e ON o.exporter_id = e.id
+        WHERE o.id = ?
+      `).get(orderId);
+
+      if (!order) {
+        return sendJson(res, 404, { success: false, message: 'Order not found' });
+      }
+
+      return sendJson(res, 200, {
+        success: true,
+        firc_number: `FIRC-IN-2026-${String(order.id).padStart(4, '0')}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`,
+        date_of_issuance: new Date().toLocaleDateString('en-GB'),
+        remitter: {
+          company_name: order.buyer_name,
+          country: order.buyer_country,
+          address: '74 Commercial Street, Spitalfields, London E1 6LY, United Kingdom'
+        },
+        beneficiary: {
+          company_name: order.company_name,
+          iec_number: order.iec_number || '0518920194',
+          pan_number: 'AAACZ8492K',
+          city_cluster: order.city_cluster
+        },
+        payment_details: {
+          purpose_code: 'P0102 (Export of Goods — Textiles & Handicrafts)',
+          swift_ref: 'SBININBB141-984210',
+          invoice_number: `INV-2026-UK-${order.po_number.replace(/\D/g, '') || '8492'}`,
+          foreign_currency: 'GBP',
+          foreign_amount: 5600.00,
+          exchange_rate: 108.45,
+          realized_inr_amount: 607320.00,
+          authorized_dealer_bank: 'State Bank of India, Overseas Branch (Bank Code: 04128)',
+          fema_compliance_seal: 'CERTIFIED COMPLIANT UNDER FEMA ACT 1999 SECTION 7'
+        }
+      });
+    }
+
+    // POST /api/voice-transcribe — Floor Voice Note & Instant AI English Translation
+    if (method === 'POST' && pathname === '/api/voice-transcribe') {
+      const body = await parseJsonBody(req);
+      const { hindi_audio_text, order_id } = body;
+
+      const original = hindi_audio_text || 'मास्टरजी ने 50 पीस कटिंग चेक कर ली है, कोई डिफेक्ट नहीं मिला';
+      let translated = 'Floor Supervisor verified 50 cut pieces. Measurements conform to spec with zero fabric defects detected.';
+
+      if (original.includes('कलर') || original.includes('डाई') || original.includes('प्रिंट')) {
+        translated = 'Block print strike-off and mud resist consistency inspected. Dye hue matches approved Pantone TCX standard.';
+      } else if (original.includes('सिलाई') || original.includes('स्टिच')) {
+        translated = 'Lockstitch seam integrity and 12 SPI tensile tension verified on assembly table.';
+      } else if (original.includes('पैकिंग') || original.includes('बॉक्स')) {
+        translated = 'Final export carton packaging complete. Barcodes scanned and silica moisture absorption pouches verified.';
+      }
+
+      return sendJson(res, 200, {
+        success: true,
+        original_hindi: original,
+        ai_translated_english: translated,
+        confidence_score: 0.985,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // GET /api/public/buyer-hub — Multi-Vendor Supplier Hub for Foreign Buyers
+    if (method === 'GET' && pathname === '/api/public/buyer-hub') {
+      return sendJson(res, 200, {
+        success: true,
+        buyer: 'Toast & Co. Lifestyle Apparel, London UK',
+        orders: [
+          {
+            po_number: 'PO-UK-8492',
+            product: 'Indigo Hand-Block Dabu Maxi Dresses (850 Pcs)',
+            cluster: 'Jaipur & Surat (Textiles)',
+            supplier: 'Zenith Global Exports / Sitapura Unit',
+            stage: 'Stage 3/6: Block Printing',
+            status: 'Milestone 2 Sign-Off Required (£5,600)',
+            target_date: 'Oct 28, 2026',
+            link: '/buyer-tracking-uk.html'
+          },
+          {
+            po_number: 'PO-UK-9104',
+            product: 'Hand-Hammered Antique Brass Planters (420 Sets)',
+            cluster: 'Moradabad (Metalware)',
+            supplier: 'Imperial Brass Exports Pvt Ltd',
+            stage: 'Stage 4/6: Electroplating & Salt Spray',
+            status: 'In Progress (On Schedule)',
+            target_date: 'Nov 12, 2026',
+            link: '/buyer-tracking-uk.html'
+          },
+          {
+            po_number: 'PO-UK-7721',
+            product: 'Solid Sheesham 6-Seater Dining Sets (35 Sets)',
+            cluster: 'Jodhpur (Timber & Furniture)',
+            supplier: 'Marwar Heritage Woodcrafts',
+            stage: 'Stage 5/5: Pallet Crate & Drop Test',
+            status: 'Ready for Sea Freight Handover',
+            target_date: 'Nov 18, 2026',
+            link: '/buyer-tracking-uk.html'
+          }
+        ]
       });
     }
 

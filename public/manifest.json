@@ -1,0 +1,16 @@
+{
+  "short_name": "Padavo",
+  "name": "Padavo (पड़ाव) — Milestone & Production SaaS for Global Exporters",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23b46b38'/><text x='50' y='68' font-size='50' font-family='serif' font-weight='bold' text-anchor='middle' fill='white'>P</text></svg>",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": "/index.html",
+  "background_color": "#0f172a",
+  "theme_color": "#b46b38",
+  "display": "standalone",
+  "orientation": "portrait-primary"
+}
