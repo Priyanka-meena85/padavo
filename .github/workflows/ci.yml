@@ -1,0 +1,51 @@
+name: Padavo SaaS CI/CD & Automated Senior QA Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-and-verify:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22.x, 24.x]
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Strict Port 3000/3001 Hardcoding Audit
+      run: |
+        echo "Running strict port audit..."
+        if grep -rn "3000" --exclude="*.sqlite*" --exclude="*.log" --exclude="*.png" --exclude="*.jpg" --exclude="*deep-deploy-test.js" --exclude="*run-senior-qa-suite.js" .; then
+          echo "ERROR: Found forbidden port 3000 in repository files!"
+          exit 1
+        fi
+        if grep -rn "3001" --exclude="*.sqlite*" --exclude="*.log" --exclude="*.png" --exclude="*.jpg" --exclude="*deep-deploy-test.js" --exclude="*run-senior-qa-suite.js" .; then
+          echo "ERROR: Found forbidden port 3001 in repository files!"
+          exit 1
+        fi
+        echo "Port audit passed: Strictly Port 5500 compliant!"
+
+    - name: Start Padavo Production Server on Port 5500
+      run: |
+        PORT=5500 node server.js &
+        sleep 3
+        curl -s http://localhost:5500/health || exit 1
+
+    - name: Execute Senior QA Regression Test Suite
+      run: |
+        npm test
+
+    - name: Execute Deep Pre-Deployment Audit
+      run: |
+        node deep-deploy-test.js

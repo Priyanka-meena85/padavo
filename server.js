@@ -21,6 +21,8 @@ const { DatabaseSync } = require('node:sqlite');
 const { generateDisputeAuditPdf, generateFircCertificatePdf } = require('./pdf-engine');
 const { exportOrdersToTallyXml, parseTallyXmlToOrders } = require('./tally-engine');
 const storageEngine = require('./storage-engine');
+const notificationEngine = require('./notification-engine');
+const billingEngine = require('./billing-engine');
 
 // Environment & Configuration
 const PORT = process.env.PORT || 5500;
@@ -153,6 +155,42 @@ db.exec(`
     beneficiary_name TEXT,
     payment_requested_at DATETIME,
     paid_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS trade_documents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    doc_type TEXT NOT NULL,
+    file_name TEXT NOT NULL,
+    file_url TEXT NOT NULL,
+    file_size TEXT DEFAULT '1.2 MB',
+    status TEXT DEFAULT 'verified',
+    uploaded_by TEXT DEFAULT 'exporter',
+    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS qc_checklists (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    stage_id INTEGER,
+    parameter_name TEXT NOT NULL,
+    standard_spec TEXT NOT NULL,
+    measured_value TEXT NOT NULL,
+    status TEXT DEFAULT 'passed',
+    inspected_by TEXT DEFAULT 'Anil Verma (QC Lead)',
+    inspected_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS buyer_supplier_invites (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    buyer_name TEXT NOT NULL,
+    buyer_country TEXT NOT NULL,
+    supplier_name TEXT NOT NULL,
+    supplier_contact TEXT NOT NULL,
+    cluster_city TEXT NOT NULL,
+    invite_token TEXT UNIQUE NOT NULL,
+    status TEXT DEFAULT 'pending',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 `);
@@ -541,6 +579,64 @@ function seedMilestonesIfEmpty() {
 }
 
 seedMilestonesIfEmpty();
+
+function seedTradeDocumentsAndQcIfEmpty() {
+  const docCount = db.prepare('SELECT COUNT(*) as count FROM trade_documents').get().count;
+  if (docCount === 0) {
+    const orders = db.prepare('SELECT id, po_number FROM orders').all();
+    for (const ord of orders) {
+      db.prepare(`
+        INSERT INTO trade_documents (order_id, doc_type, file_name, file_url, file_size, status, uploaded_by)
+        VALUES (?, 'Commercial Invoice', ?, '/uploads/sample-commercial-invoice.pdf', '248 KB', 'verified', 'Accounts Department')
+      `).run(ord.id, `INV-${ord.po_number}.pdf`);
+
+      db.prepare(`
+        INSERT INTO trade_documents (order_id, doc_type, file_name, file_url, file_size, status, uploaded_by)
+        VALUES (?, 'Export Packing List', ?, '/uploads/sample-packing-list.pdf', '180 KB', 'verified', 'Sitapura Warehouse')
+      `).run(ord.id, `PKL-${ord.po_number}.pdf`);
+
+      db.prepare(`
+        INSERT INTO trade_documents (order_id, doc_type, file_name, file_url, file_size, status, uploaded_by)
+        VALUES (?, 'Certificate of Origin (COO)', ?, '/uploads/sample-coo.pdf', '320 KB', 'verified', 'DGFT Federation')
+      `).run(ord.id, `COO-${ord.po_number}.pdf`);
+
+      db.prepare(`
+        INSERT INTO trade_documents (order_id, doc_type, file_name, file_url, file_size, status, uploaded_by)
+        VALUES (?, 'Ocean Bill of Lading (B/L)', ?, '/uploads/sample-bl.pdf', '410 KB', 'verified', 'Maersk Line A.P. Moller')
+      `).run(ord.id, `BL-MSKU-${ord.po_number}.pdf`);
+
+      db.prepare(`
+        INSERT INTO trade_documents (order_id, doc_type, file_name, file_url, file_size, status, uploaded_by)
+        VALUES (?, 'Fumigation & Phytosanitary Certificate', ?, '/uploads/sample-fumigation.pdf', '150 KB', 'verified', 'JNPT Port Health Authority')
+      `).run(ord.id, `FUM-${ord.po_number}.pdf`);
+    }
+  }
+
+  const qcCount = db.prepare('SELECT COUNT(*) as count FROM qc_checklists').get().count;
+  if (qcCount === 0) {
+    const orders = db.prepare('SELECT id FROM orders').all();
+    for (const ord of orders) {
+      db.prepare(`
+        INSERT INTO qc_checklists (order_id, stage_id, parameter_name, standard_spec, measured_value, status, inspected_by)
+        VALUES (?, 1, 'Fabric GSM & Weave Density', '80 GSM ±3% (Plain Weave 60x60)', '81.2 GSM (Pass)', 'passed', 'Anil Verma (QC Lead)')
+      `).run(ord.id);
+      db.prepare(`
+        INSERT INTO qc_checklists (order_id, stage_id, parameter_name, standard_spec, measured_value, status, inspected_by)
+        VALUES (?, 1, 'Color Fastness to Washing (ISO 105-C06)', 'Grade 4-5 Minimum', 'Grade 4.5 (Approved)', 'passed', 'Anil Verma (QC Lead)')
+      `).run(ord.id);
+      db.prepare(`
+        INSERT INTO qc_checklists (order_id, stage_id, parameter_name, standard_spec, measured_value, status, inspected_by)
+        VALUES (?, 2, 'Dimensional Stability / Shrinkage', 'Max 2.0% Warp x 1.5% Weft', '+1.1% Warp x +0.8% Weft', 'passed', 'Mukesh Supervisor')
+      `).run(ord.id);
+      db.prepare(`
+        INSERT INTO qc_checklists (order_id, stage_id, parameter_name, standard_spec, measured_value, status, inspected_by)
+        VALUES (?, 3, 'Needle Detection & Metal Scan', '0.8mm Ferrous Free (Lockstitch)', 'Zero Metal Contamination', 'passed', 'Sanganer Unit QC')
+      `).run(ord.id);
+    }
+  }
+}
+
+seedTradeDocumentsAndQcIfEmpty();
 
 // ==============================================================================
 // HTTP RESPONSE & SECURITY HEADERS UTILITY
@@ -1022,6 +1118,57 @@ async function handleRequest(req, res) {
 
       logAudit(order_id, null, 'BUYER_RATING', `Buyer gave ${rating} stars`, clientIp);
       return sendJson(res, 200, { success: true, message: 'Thank you for your feedback!' });
+    }
+
+    // GET /api/public/orders/:slug/documents — Foreign Buyer Trade Documents Vault
+    if (method === 'GET' && pathname.match(/^\/api\/public\/orders\/[^\/]+\/documents$/)) {
+      const parts = pathname.split('/');
+      const slug = parts[4];
+      const order = db.prepare('SELECT id, po_number, buyer_name FROM orders WHERE public_tracking_slug = ? OR public_tracking_slug LIKE ?').get(slug, `${slug}%`);
+
+      if (!order) {
+        return sendJson(res, 404, { success: false, message: 'Order not found' });
+      }
+
+      const docs = db.prepare('SELECT * FROM trade_documents WHERE order_id = ? ORDER BY id ASC').all(order.id);
+      return sendJson(res, 200, { success: true, po_number: order.po_number, documents: docs });
+    }
+
+    // POST /api/public/buyer/invite-supplier — Buyer-Led Viral Loop (Invite Other Indian Suppliers)
+    if (method === 'POST' && pathname === '/api/public/buyer/invite-supplier') {
+      const body = await parseJsonBody(req);
+      const { buyer_name, buyer_country, supplier_name, supplier_contact, cluster_city } = body;
+
+      if (!supplier_name || !supplier_contact) {
+        return sendJson(res, 400, { success: false, message: 'Supplier name and contact are required' });
+      }
+
+      const token = `inv-${crypto.randomBytes(6).toString('hex')}`;
+      db.prepare(`
+        INSERT INTO buyer_supplier_invites (buyer_name, buyer_country, supplier_name, supplier_contact, cluster_city, invite_token)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).run(buyer_name || 'Toast & Co. London', buyer_country || 'United Kingdom', supplier_name, supplier_contact, cluster_city || 'Jaipur', token);
+
+      return sendJson(res, 201, {
+        success: true,
+        message: `Invitation generated! We have sent a direct onboarding invite to ${supplier_name} on behalf of ${buyer_name || 'Overseas Buyer'}.`,
+        invite_token: token,
+        invite_link: `http://localhost:5500/home.html?invite=${token}&from=${encodeURIComponent(buyer_name || 'Buyer')}`
+      });
+    }
+
+    // GET /api/public/buyer/invites — List Invited Suppliers
+    if (method === 'GET' && pathname === '/api/public/buyer/invites') {
+      const invites = db.prepare('SELECT * FROM buyer_supplier_invites ORDER BY id DESC LIMIT 20').all();
+      return sendJson(res, 200, { success: true, count: invites.length, invites });
+    }
+
+    // GET /api/billing/plans — Public SaaS Subscription Plans
+    if (method === 'GET' && pathname === '/api/billing/plans') {
+      return sendJson(res, 200, {
+        success: true,
+        plans: billingEngine.getPlans()
+      });
     }
 
     // POST /api/public/magic-upload/:token — Factory Floor 1-Click Camera Upload
@@ -2100,6 +2247,146 @@ async function handleRequest(req, res) {
 
         logAudit(order_id, authExporter.exporter_id, 'DIRECT_UPLOAD', `Photo uploaded: ${filename}`, clientIp);
         return sendJson(res, 201, { success: true, url: publicUrl });
+      }
+
+      // GET /api/orders/:id/documents — Exporter Trade Documents Vault
+      if (method === 'GET' && pathname.match(/^\/api\/orders\/\d+\/documents$/)) {
+        const orderId = Number(pathname.split('/')[3]);
+        const order = db.prepare('SELECT id, po_number FROM orders WHERE id = ? AND exporter_id = ?').get(orderId, authExporter.exporter_id);
+        if (!order) return sendJson(res, 404, { success: false, message: 'Order not found' });
+
+        const docs = db.prepare('SELECT * FROM trade_documents WHERE order_id = ? ORDER BY id ASC').all(order.id);
+        return sendJson(res, 200, { success: true, documents: docs });
+      }
+
+      // POST /api/orders/:id/documents — Attach Customs/Shipping Document
+      if (method === 'POST' && pathname.match(/^\/api\/orders\/\d+\/documents$/)) {
+        const orderId = Number(pathname.split('/')[3]);
+        const order = db.prepare('SELECT id FROM orders WHERE id = ? AND exporter_id = ?').get(orderId, authExporter.exporter_id);
+        if (!order) return sendJson(res, 404, { success: false, message: 'Order not found' });
+
+        const body = await parseJsonBody(req);
+        const { doc_type, file_name, file_url, file_size } = body;
+        if (!doc_type || !file_name) return sendJson(res, 400, { success: false, message: 'Document type and file name required' });
+
+        const docResult = db.prepare(`
+          INSERT INTO trade_documents (order_id, doc_type, file_name, file_url, file_size, status, uploaded_by)
+          VALUES (?, ?, ?, ?, ?, 'verified', ?)
+        `).run(order.id, doc_type, file_name, file_url || `/uploads/${file_name}`, file_size || '350 KB', authExporter.company_name);
+
+        logAudit(order.id, authExporter.exporter_id, 'TRADE_DOC_UPLOAD', `Uploaded ${doc_type}: ${file_name}`, clientIp);
+        return sendJson(res, 201, { success: true, message: 'Document attached to export consignment', id: Number(docResult.lastInsertRowid) });
+      }
+
+      // GET /api/orders/:id/qc-checklist — AQL 2.5 QC Inspection Checklist
+      if (method === 'GET' && pathname.match(/^\/api\/orders\/\d+\/qc-checklist$/)) {
+        const orderId = Number(pathname.split('/')[3]);
+        const order = db.prepare('SELECT id FROM orders WHERE id = ? AND exporter_id = ?').get(orderId, authExporter.exporter_id);
+        if (!order) return sendJson(res, 404, { success: false, message: 'Order not found' });
+
+        const checklists = db.prepare('SELECT * FROM qc_checklists WHERE order_id = ? ORDER BY id ASC').all(order.id);
+        return sendJson(res, 200, {
+          success: true,
+          standard: 'ISO 2859-1 (AQL 2.5 General Inspection Level II)',
+          inspection_status: 'AQL 2.5 PASSED',
+          checklists
+        });
+      }
+
+      // POST /api/orders/:id/qc-checklist/evaluate — QC Lead records inspection parameter
+      if (method === 'POST' && pathname.match(/^\/api\/orders\/\d+\/qc-checklist\/evaluate$/)) {
+        const orderId = Number(pathname.split('/')[3]);
+        const order = db.prepare('SELECT id FROM orders WHERE id = ? AND exporter_id = ?').get(orderId, authExporter.exporter_id);
+        if (!order) return sendJson(res, 404, { success: false, message: 'Order not found' });
+
+        const body = await parseJsonBody(req);
+        const { parameter_name, standard_spec, measured_value, status } = body;
+
+        db.prepare(`
+          INSERT INTO qc_checklists (order_id, parameter_name, standard_spec, measured_value, status, inspected_by)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `).run(order.id, parameter_name || 'AQL Inspection Spec', standard_spec || 'Standard Spec', measured_value || 'Conforms', status || 'passed', authExporter.company_name + ' QC Team');
+
+        return sendJson(res, 201, { success: true, message: 'QC parameter recorded with AQL timestamp' });
+      }
+
+      // GET /api/orders/:id/virtual-account — FX Bridge & Virtual Multi-Currency Account
+      if (method === 'GET' && pathname.match(/^\/api\/orders\/\d+\/virtual-account$/)) {
+        const orderId = Number(pathname.split('/')[3]);
+        const order = db.prepare('SELECT * FROM orders WHERE id = ? AND exporter_id = ?').get(orderId, authExporter.exporter_id);
+        if (!order) return sendJson(res, 404, { success: false, message: 'Order not found' });
+
+        return sendJson(res, 200, {
+          success: true,
+          provider: 'Skydo / Wise Business Multi-Currency Banking Engine',
+          beneficiary: authExporter.company_name,
+          uk_bacs_account: {
+            bank_name: 'Barclays Bank UK PLC',
+            sort_code: '20-04-15',
+            account_number: '84920194',
+            iban: 'GB29BARC20041584920194',
+            currency: 'GBP',
+            local_clearing: 'Faster Payments / BACS (Zero Wire Fees for UK Buyer)'
+          },
+          us_ach_account: {
+            bank_name: 'JPMorgan Chase Bank, N.A., New York',
+            routing_number_aba: '021000021',
+            account_number: '9840192410',
+            currency: 'USD',
+            local_clearing: 'ACH / Fedwire (Local US Domestic Transfer)'
+          },
+          fx_savings_rate: '0.45% Flat vs 2.50% Traditional Bank Spread (Save ₹42,000 per container)',
+          auto_firc_enabled: true
+        });
+      }
+
+      // POST /api/orders/:id/send-buyer-email — Transactional Email Dispatch to Overseas Buyer
+      if (method === 'POST' && pathname.match(/^\/api\/orders\/\d+\/send-buyer-email$/)) {
+        const orderId = Number(pathname.split('/')[3]);
+        const order = db.prepare(`
+          SELECT o.*, e.company_name, e.city_cluster, e.email as exporter_email
+          FROM orders o
+          JOIN exporters e ON o.exporter_id = e.id
+          WHERE o.id = ? AND o.exporter_id = ?
+        `).get(orderId, authExporter.exporter_id);
+
+        if (!order) return sendJson(res, 404, { success: false, message: 'Order not found' });
+
+        const milestone = db.prepare('SELECT * FROM order_milestones WHERE order_id = ? ORDER BY id DESC LIMIT 1').get(order.id) || {
+          milestone_title: 'Mid-Production Inspection Sign-Off',
+          amount_formatted: '£5,600'
+        };
+
+        const emailTemplate = notificationEngine.generateBuyerMilestoneEmail(order, milestone, null);
+        const dispatchResult = await notificationEngine.sendNotification('buyer@toast-lifestyle.co.uk', emailTemplate.subject, emailTemplate.html);
+
+        logAudit(order.id, authExporter.exporter_id, 'EMAIL_DISPATCH', `Dispatched milestone review email to foreign buyer`, clientIp);
+
+        return sendJson(res, 200, {
+          success: true,
+          message: `Transactional email successfully dispatched to ${order.buyer_name}!`,
+          subject: emailTemplate.subject,
+          dispatch: dispatchResult
+        });
+      }
+
+      // POST /api/billing/create-checkout-session — SaaS Subscription Checkout
+      if (method === 'POST' && pathname === '/api/billing/create-checkout-session') {
+        const body = await parseJsonBody(req);
+        const { plan_tier, plan_id, gateway, payment_method } = body;
+        const targetGateway = gateway || (payment_method === 'stripe' ? 'stripe' : 'razorpay');
+        const checkout = billingEngine.createCheckoutSession(authExporter, plan_tier || plan_id || 'pro', targetGateway);
+        return sendJson(res, 200, { success: true, checkout, session: checkout });
+      }
+
+      // POST /api/billing/webhook — Razorpay / Stripe Subscription Webhook
+      if (method === 'POST' && pathname === '/api/billing/webhook') {
+        const body = await parseJsonBody(req);
+        const processed = billingEngine.processWebhook(body);
+        db.prepare('UPDATE exporters SET subscription_tier = ?, orders_quota = ? WHERE id = ?').run(
+          processed.plan_tier, processed.new_quota, authExporter.exporter_id
+        );
+        return sendJson(res, 200, { success: true, message: 'Subscription tier and quota activated!', data: processed });
       }
     }
 

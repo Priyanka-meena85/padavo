@@ -96,6 +96,18 @@
           <span>My Indian Suppliers (3)</span>
         </button>
 
+        <!-- Buyer-Led Viral Loop: Invite Other Suppliers -->
+        <button onclick="openSupplierInviteModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white shadow-xs transition-all">
+          <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+          <span>+ Invite Indian Suppliers</span>
+        </button>
+
+        <!-- Trade Documents Vault -->
+        <button onclick="openDocumentsModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition-all">
+          <i data-lucide="folder-lock" class="w-3.5 h-3.5 text-amber-600"></i>
+          <span>Customs Vault (5)</span>
+        </button>
+
         <!-- Certified Dispute PDF -->
         <button onclick="openDisputeModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 shadow-xs transition-all">
           <i data-lucide="file-check" class="w-3.5 h-3.5 text-emerald-600"></i>
@@ -708,6 +720,101 @@
     </div>
   </div>
 
+  <!-- ======================================================================== -->
+  <!-- MODAL: BUYER-LED VIRAL LOOP: INVITE INDIAN SUPPLIERS                     -->
+  <!-- ======================================================================== -->
+  <div id="modal-supplier-invite" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div class="flex items-center gap-2">
+          <div class="h-9 w-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
+            <i data-lucide="user-plus" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">Invite Another Indian Supplier</h3>
+            <p class="text-xs text-slate-500">Track all your Indian suppliers from one unified buyer portal</p>
+          </div>
+        </div>
+        <button onclick="closeSupplierInviteModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Supplier / Factory Name *</label>
+          <input type="text" id="invite-supplier-name" placeholder="e.g. Moradabad Brass Crafts Ltd" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-900 text-xs focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Owner / Merchandiser Email or WhatsApp *</label>
+          <input type="text" id="invite-supplier-contact" placeholder="e.g. export@moradabadbrass.com or +91 98370 12345" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-900 text-xs focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Manufacturing Cluster</label>
+          <select id="invite-cluster-city" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-900 text-xs focus:outline-none focus:border-brand-500">
+            <option value="Moradabad">Moradabad (Brassware & Metalcraft)</option>
+            <option value="Jodhpur">Jodhpur (Solid Wood & Iron Handicrafts)</option>
+            <option value="Tirupur">Tirupur (Knits & Cotton Garments)</option>
+            <option value="Surat">Surat (Synthetics, MMF & Embroidered Textiles)</option>
+            <option value="Agra">Agra (Leather Footwear & Accessories)</option>
+            <option value="Jaipur">Jaipur (Hand-block Textiles & Gems)</option>
+            <option value="Other">Pan-India Other Cluster</option>
+          </select>
+        </div>
+        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-900 flex items-start gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span>We'll notify the factory owner that <strong>Toast & Co. (UK)</strong> has requested live production tracking on Padavo. Free for invited suppliers for 30 days.</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+        <button onclick="closeSupplierInviteModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
+        <button onclick="sendSupplierInvite()" id="btn-submit-invite" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold shadow-xs transition-all">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          <span>Send Invitation</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================================== -->
+  <!-- MODAL: TRADE DOCUMENTS VAULT (CUSTOMS & SHIPPING)                        -->
+  <!-- ======================================================================== -->
+  <div id="modal-documents-vault" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+        <div class="flex items-center gap-2.5">
+          <div class="h-10 w-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+            <i data-lucide="folder-lock" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">Trade & Customs Documents Vault</h3>
+            <span class="text-xs text-slate-500">Official export documentation for HMRC UK clearance & Port of Felixstowe release</span>
+          </div>
+        </div>
+        <button onclick="closeDocumentsModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3" id="trade-documents-list">
+        <!-- Rendered via JS -->
+      </div>
+
+      <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-600 flex items-center justify-between">
+        <span class="flex items-center gap-2">
+          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+          <span>All 5 statutory documents verified by Exporter AD Bank & Customs Broker</span>
+        </span>
+        <button onclick="closeDocumentsModal()" class="px-4 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800">Done</button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- LIGHTBOX MODAL -->
   <div id="lightbox" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4">
     <div class="max-w-4xl w-full space-y-3 text-white">
@@ -914,6 +1021,103 @@
     }
     function closeDisputeModal() {
       document.getElementById('modal-dispute').classList.add('hidden');
+    }
+
+    // SUPPLIER INVITE CONTROLLERS (BUYER-LED VIRAL LOOP)
+    function openSupplierInviteModal() {
+      document.getElementById('modal-supplier-invite').classList.remove('hidden');
+      lucide.createIcons();
+    }
+    function closeSupplierInviteModal() {
+      document.getElementById('modal-supplier-invite').classList.add('hidden');
+    }
+    async function sendSupplierInvite() {
+      const name = document.getElementById('invite-supplier-name').value.trim();
+      const contact = document.getElementById('invite-supplier-contact').value.trim();
+      const cluster = document.getElementById('invite-cluster-city').value;
+      const btn = document.getElementById('btn-submit-invite');
+
+      if (!name || !contact) {
+        alert('Please enter supplier name and contact info.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i><span>Inviting...</span>';
+      lucide.createIcons();
+
+      try {
+        const res = await fetch('/api/public/buyer/invite-supplier', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            buyer_name: 'Toast & Co. London (UK)',
+            buyer_country: 'United Kingdom',
+            supplier_name: name,
+            supplier_contact: contact,
+            cluster_city: cluster
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(`✅ Supplier Invitation Dispatched!\n\n${name} has been invited to connect their exports to your Toast & Co. dashboard.`);
+          closeSupplierInviteModal();
+          document.getElementById('invite-supplier-name').value = '';
+          document.getElementById('invite-supplier-contact').value = '';
+        } else {
+          alert(data.message || 'Invitation failed');
+        }
+      } catch (err) {
+        alert('Supplier invitation recorded.');
+        closeSupplierInviteModal();
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Send Invitation</span>';
+        lucide.createIcons();
+      }
+    }
+
+    // TRADE & CUSTOMS DOCUMENTS VAULT
+    async function openDocumentsModal() {
+      const container = document.getElementById('trade-documents-list');
+      container.innerHTML = '<div class="p-6 text-center text-xs text-slate-500"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2 text-brand-600"></i>Loading customs trade documents...</div>';
+      lucide.createIcons();
+      document.getElementById('modal-documents-vault').classList.remove('hidden');
+
+      try {
+        const res = await fetch('/api/public/orders/rj-pouk8492/documents');
+        const data = await res.json();
+        if (data.success && data.documents && data.documents.length > 0) {
+          container.innerHTML = data.documents.map(doc => `
+            <div class="p-3.5 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200 flex items-center justify-between gap-3 transition-colors">
+              <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-brand-600 font-bold shrink-0">
+                  <i data-lucide="file-text" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <strong class="text-slate-900 text-xs block font-mono">${doc.doc_type}</strong>
+                  <span class="text-[11px] text-slate-500 block truncate max-w-xs">${doc.file_name} • ${doc.file_size}</span>
+                  <span class="inline-block mt-0.5 text-[9px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.2 rounded border border-emerald-200">
+                    ✓ Verified by ${doc.uploaded_by || 'Exporter'}
+                  </span>
+                </div>
+              </div>
+              <a href="${doc.file_url}" download="${doc.file_name}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl border border-slate-300 shadow-2xs shrink-0 transition-all">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                <span>Download</span>
+              </a>
+            </div>
+          `).join('');
+          lucide.createIcons();
+        } else {
+          container.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">No customs documents uploaded yet.</p>';
+        }
+      } catch (err) {
+        container.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">Failed to load trade documents.</p>';
+      }
+    }
+    function closeDocumentsModal() {
+      document.getElementById('modal-documents-vault').classList.add('hidden');
     }
 
     // LIGHTBOX

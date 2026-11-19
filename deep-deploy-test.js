@@ -394,6 +394,11 @@ async function runDeepDeploymentAudit() {
       'public/buyer-tracking-uk.html',
       'public/manifest.json',
       'public/sw.js',
+      'pdf-engine.js',
+      'tally-engine.js',
+      'storage-engine.js',
+      'notification-engine.js',
+      'billing-engine.js',
       '.env.example',
       'Dockerfile',
       'package.json',
@@ -410,6 +415,125 @@ async function runDeepDeploymentAudit() {
         assert(!match3001, `Forbidden port 3001 in ${f}`);
       }
     }
+  });
+
+  // ============================================================================
+  // SECTION 9: NEXT-GEN ENTERPRISE SAAS ENGINES & VIRAL GROWTH AUDIT
+  // ============================================================================
+  console.log('\n🚀 SECTION 9: NEXT-GEN ENTERPRISE SAAS ENGINES & VIRAL GROWTH AUDIT');
+
+  await test('Enterprise', 'Public Trade Documents Vault returns certified customs papers for buyer', async () => {
+    const res = await request({ path: `/api/public/orders/rj-pouk8492/documents` });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(Array.isArray(res.body.documents), 'Documents must be an array');
+    assert(res.body.documents.length >= 5, 'Should have at least 5 standard customs trade documents');
+  });
+
+  await test('Enterprise', 'Buyer-Led Viral Loop invites new Indian supplier with direct onboarding link', async () => {
+    const res = await request({
+      path: '/api/public/buyer/invite-supplier',
+      method: 'POST'
+    }, {
+      buyer_name: 'Toast & Co. London (UK)',
+      buyer_country: 'United Kingdom',
+      supplier_name: 'Moradabad Metal Heritage Arts',
+      supplier_contact: 'merchandiser@moradabadmetal.com',
+      cluster_city: 'Moradabad'
+    });
+    assert(res.statusCode === 201, `Expected 201, got ${res.statusCode}`);
+    assert(res.body.invite_token, 'Invite token must be generated');
+    assert(res.body.invite_link.includes('http://localhost:5500'), 'Invite link must be on port 5500');
+  });
+
+  await test('Enterprise', 'List active buyer invitations for supplier viral analytics', async () => {
+    const res = await request({ path: '/api/public/buyer/invites' });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.count >= 1, 'Should list invited suppliers');
+  });
+
+  await test('Enterprise', 'SaaS Recurring Billing plans endpoint returns Starter, Pro, and Enterprise tiers', async () => {
+    const res = await request({ path: '/api/billing/plans' });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.plans && res.body.plans.length === 3, 'Must define 3 SaaS plans');
+    const pro = res.body.plans.find(p => p.id === 'pro');
+    assert(pro && pro.price_inr === 4999, 'Pro plan must be ₹4,999/mo');
+  });
+
+  await test('Enterprise', 'AQL 2.5 QC Checklist returns ISO 2859-1 standards and pass/fail specs', async () => {
+    const res = await request({
+      path: `/api/orders/${testOrderId}/qc-checklist`,
+      headers: { 'Authorization': `Bearer ${sessionToken}` }
+    });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.standard.includes('ISO 2859-1'), 'Standard must be ISO 2859-1 AQL 2.5');
+    assert(Array.isArray(res.body.checklists), 'Checklists must be an array');
+  });
+
+  await test('Enterprise', 'QC Lead evaluates new inspection parameter with digital sign-off', async () => {
+    const res = await request({
+      path: `/api/orders/${testOrderId}/qc-checklist/evaluate`,
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${sessionToken}` }
+    }, {
+      parameter_name: 'Kiln Seasoning Moisture Level',
+      standard_spec: 'Max 10-12% moisture content',
+      measured_value: '9.4% verified with Delmhorst pin meter',
+      status: 'passed'
+    });
+    assert(res.statusCode === 201, `Expected 201, got ${res.statusCode}`);
+    assert(res.body.success === true, 'Evaluation should succeed');
+  });
+
+  await test('Enterprise', 'Exporter attaches new trade document to customs vault', async () => {
+    const res = await request({
+      path: `/api/orders/${testOrderId}/documents`,
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${sessionToken}` }
+    }, {
+      doc_type: 'Fumigation Certificate',
+      file_name: 'FUM-CERT-JOD-2026.pdf',
+      file_url: '/uploads/fumigation-sheesham-2026.pdf',
+      file_size: '280 KB'
+    });
+    assert(res.statusCode === 201, `Expected 201, got ${res.statusCode}`);
+    assert(res.body.id > 0, 'Document ID must be returned');
+  });
+
+  await test('Enterprise', 'Virtual FX Account provides Barclays UK BACS & Chase US ACH coordinates', async () => {
+    const res = await request({
+      path: `/api/orders/${testOrderId}/virtual-account`,
+      headers: { 'Authorization': `Bearer ${sessionToken}` }
+    });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.uk_bacs_account.sort_code === '20-04-15', 'Barclays sort code mismatch');
+    assert(res.body.us_ach_account.routing_number_aba === '021000021', 'Chase routing ABA mismatch');
+    assert(res.body.fx_savings_rate.includes('0.45%'), 'Spread must be 0.45% flat');
+  });
+
+  await test('Enterprise', 'Dispatches transactional HTML milestone email notification to overseas buyer', async () => {
+    const res = await request({
+      path: `/api/orders/${testOrderId}/send-buyer-email`,
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${sessionToken}` }
+    });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.success === true, 'Email dispatch must succeed');
+    assert(res.body.subject.includes('PO-JOD-'), 'Subject must contain PO number');
+  });
+
+  await test('Enterprise', 'Create Razorpay / Stripe SaaS recurring subscription checkout session', async () => {
+    const res = await request({
+      path: '/api/billing/create-checkout-session',
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${sessionToken}` }
+    }, {
+      plan_id: 'pro',
+      payment_method: 'upi_autopay'
+    });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.session.plan_id === 'pro', 'Session must be for pro plan');
+    assert(res.body.session.amount_inr === 4999, 'Amount must be 4999 INR');
+    assert(res.body.session.checkout_url.includes('checkout'), 'Must provide checkout URL');
   });
 
   // ============================================================================
