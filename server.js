@@ -666,6 +666,12 @@ async function handleRequest(req, res) {
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 
+  // Security Guard: Prevent directory traversal & sensitive file probes
+  if (req.url.includes('..') || pathname.includes('..') || pathname.includes('/.env') || pathname.includes('.sqlite') || pathname.includes('/.git') || pathname.includes('etc/passwd')) {
+    res.writeHead(403, { 'Content-Type': 'text/plain' });
+    return res.end('Access Denied');
+  }
+
   // Real-Time Server-Sent Events (SSE) Bus
   if (method === 'GET' && pathname === '/api/events') {
     res.writeHead(200, {
@@ -1891,11 +1897,37 @@ async function handleRequest(req, res) {
           );
         });
 
+        // Auto-create standard 30-40-30 milestone tranches
+        const insertMilestoneStmt = db.prepare(`
+          INSERT INTO order_milestones (order_id, stage_index, stage_name, milestone_title, percentage, amount_formatted, status)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `);
+        const stgNames = stagesToInsert.map(s => typeof s === 'string' ? s : s.name);
+        insertMilestoneStmt.run(orderId, 1, stgNames[0] || 'Advance Stage', 'Advance Deposit (30% Contract)', 30, '£4,200', 'paid');
+        insertMilestoneStmt.run(orderId, 3, stgNames[2] || stgNames[1] || 'Mid-Production', 'Mid-Production Quality Sign-Off (40%)', 40, '£5,600', 'pending');
+        insertMilestoneStmt.run(orderId, stgNames.length, stgNames[stgNames.length - 1] || 'Pre-Dispatch', 'Pre-Dispatch Balance (30%)', 30, '£4,200', 'pending');
+
         logAudit(orderId, authExporter.exporter_id, 'ORDER_CREATED', `Created PO ${po_number} for ${buyer_name}`, clientIp);
+
+        const orderObj = {
+          id: orderId,
+          exporter_id: authExporter.exporter_id,
+          po_number: po_number.trim(),
+          buyer_name: buyer_name.trim(),
+          buyer_country: buyer_country || 'International',
+          product_name: product_name.trim(),
+          quantity: quantity || '1 Batch',
+          target_delivery_date,
+          cluster_type: cluster,
+          public_tracking_slug: trackingSlug,
+          magic_upload_token: magicToken,
+          status: 'In Progress'
+        };
 
         return sendJson(res, 201, {
           success: true,
           order_id: orderId,
+          order: orderObj,
           public_tracking_slug: trackingSlug,
           magic_upload_token: magicToken
         });
@@ -1927,7 +1959,9 @@ async function handleRequest(req, res) {
             stages: stagesWithPhotos,
             feedback,
             milestones
-          }
+          },
+          stages: stagesWithPhotos,
+          milestones
         });
       }
 
