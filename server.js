@@ -890,13 +890,28 @@ function serveStaticFile(req, res, targetPath) {
     }
 
     const ext = path.extname(safePath).toLowerCase();
-    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+    let contentType = MIME_TYPES[ext] || 'application/octet-stream';
+
+    // Auto-detect image content-type by inspecting magic bytes
+    if (ext === '.png' || ext === '.jpg' || ext === '.jpeg') {
+      try {
+        const header = Buffer.alloc(4);
+        const fd = fs.openSync(safePath, 'r');
+        fs.readSync(fd, header, 0, 4, 0);
+        fs.closeSync(fd);
+        if (header[0] === 0x89 && header[1] === 0x50 && header[2] === 0x4E && header[3] === 0x47) {
+          contentType = 'image/png';
+        } else if (header[0] === 0xFF && header[1] === 0xD8) {
+          contentType = 'image/jpeg';
+        }
+      } catch (e) {}
+    }
 
     res.writeHead(200, {
       'Content-Type': contentType,
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'SAMEORIGIN',
-      'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=604800, immutable'
+      'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=86400'
     });
     const stream = fs.createReadStream(safePath);
     stream.on('error', () => { if (!res.headersSent) res.writeHead(500); res.end(); });
