@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Padavo (पड़ाव) — Production & Milestone SaaS for Global Exporters</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="shortcut icon" href="/favicon.ico">
   
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#b46b38">
@@ -106,16 +109,10 @@
     <div>
       <!-- Drawer Logo & Close -->
       <div class="flex items-center justify-between pb-4 border-b border-slate-800">
-        <div class="flex items-center gap-2.5">
-          <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-brand-600 via-amber-600 to-amber-500 flex items-center justify-center text-white font-bold text-lg font-serif shadow-md shadow-brand-600/30">
-            P
-          </div>
-          <div>
-            <div class="flex items-center gap-1.5">
-              <span class="text-white font-bold text-base tracking-tight">Padavo</span>
-              <span class="bg-emerald-500/20 text-emerald-300 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">SaaS v1.2</span>
-            </div>
-            <p class="text-[10px] text-slate-400 font-medium">Har Padav Par Bharosa</p>
+        <div class="cursor-pointer" onclick="navigate('dashboard'); toggleMobileSidebar();">
+          <div class="bg-white rounded-xl px-2.5 py-1.5 shadow-sm flex items-center gap-2">
+            <img src="/logo.png" alt="Padavo" class="h-6 w-auto object-contain">
+            <span class="bg-emerald-500/10 text-emerald-700 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded border border-emerald-500/20">v1.2</span>
           </div>
         </div>
         <button onclick="toggleMobileSidebar()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
@@ -207,17 +204,12 @@
       <div>
         <!-- 1. Header & Brand Identity -->
         <div class="p-5 border-b border-slate-800/80">
-          <div class="flex items-center gap-3 cursor-pointer" onclick="navigate('dashboard')">
-            <div class="h-10 w-10 rounded-2xl bg-gradient-to-tr from-brand-600 via-amber-600 to-amber-500 flex items-center justify-center text-white font-bold text-xl font-serif shadow-lg shadow-brand-600/30">
-              P
+          <div class="cursor-pointer" onclick="navigate('dashboard')">
+            <div class="bg-white rounded-2xl px-3 py-2 shadow-md flex items-center justify-between">
+              <img src="/logo.png" alt="Padavo" class="h-8 w-auto object-contain">
+              <span class="bg-emerald-500/10 text-emerald-700 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-emerald-500/20">Enterprise</span>
             </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="text-white font-bold text-lg tracking-tight">Padavo</span>
-                <span class="bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">Enterprise</span>
-              </div>
-              <p class="text-[11px] text-slate-400">Har Padav Par Bharosa</p>
-            </div>
+            <p class="text-[10px] text-slate-400 mt-2 px-1">Har Padav Par Bharosa • B2B SaaS</p>
           </div>
 
           <!-- Dynamic Workspace / Exporter Switcher -->
@@ -1428,8 +1420,10 @@
         <section id="view-auth" class="space-y-6 hidden">
           <div class="max-w-md mx-auto bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-center">
             
-            <div class="h-14 w-14 rounded-2xl bg-brand-600 text-white flex items-center justify-center font-bold text-2xl font-serif mx-auto shadow-md shadow-brand-600/30 mb-4">
-              P
+            <div class="mb-5 flex justify-center">
+              <div class="bg-white p-2.5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 inline-block">
+                <img src="/logo.png" alt="Padavo" class="h-12 w-auto object-contain">
+              </div>
             </div>
             <h3 class="text-xl font-bold text-slate-900 dark:text-white">Exporter Phone Login</h3>
             <p class="text-xs text-slate-500 mt-1">No password hassle • OTP delivered directly on WhatsApp</p>
@@ -1594,6 +1588,17 @@
   <!-- JAVASCRIPT CONTROLLERS & ENGINE WIRING                                    -->
   <!-- ======================================================================== -->
   <script>
+    // XSS PROTECTION: HTML ESCAPE SANITIZER
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     // INITIALIZATION
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
@@ -2089,17 +2094,17 @@ Rajesh Sharma (+91 98290 12345)`;
           grid.innerHTML = data.checklists.map(c => `
             <div class="p-3.5 bg-slate-50 dark:bg-slate-950 rounded-2xl border ${c.status === 'passed' ? 'border-emerald-200 dark:border-emerald-800/60' : 'border-amber-200'} space-y-1.5">
               <div class="flex items-center justify-between">
-                <strong class="text-slate-900 dark:text-white text-xs block font-mono">${c.parameter_name}</strong>
+                <strong class="text-slate-900 dark:text-white text-xs block font-mono">${escapeHtml(c.parameter_name)}</strong>
                 <span class="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-full ${c.status === 'passed' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-amber-100 text-amber-800'}">
-                  ${c.status}
+                  ${escapeHtml(c.status)}
                 </span>
               </div>
               <div class="text-[11px] text-slate-500">
-                <span>Standard: <strong>${c.standard_spec}</strong></span>
+                <span>Standard: <strong>${escapeHtml(c.standard_spec)}</strong></span>
               </div>
               <div class="text-[11px] text-slate-700 dark:text-slate-300 flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-800">
-                <span>Measured: <strong>${c.measured_value}</strong></span>
-                <span class="text-[9px] text-slate-400 font-mono">${c.inspected_by || 'QC Lead'}</span>
+                <span>Measured: <strong>${escapeHtml(c.measured_value)}</strong></span>
+                <span class="text-[9px] text-slate-400 font-mono">${escapeHtml(c.inspected_by || 'QC Lead')}</span>
               </div>
             </div>
           `).join('');
@@ -2157,11 +2162,11 @@ Rajesh Sharma (+91 98290 12345)`;
                   <i data-lucide="file-check" class="w-4 h-4"></i>
                 </div>
                 <div class="min-w-0">
-                  <strong class="text-xs text-slate-900 dark:text-white block font-mono truncate">${d.doc_type}</strong>
-                  <span class="text-[10px] text-slate-400 block truncate">${d.file_name} • ${d.file_size}</span>
+                  <strong class="text-xs text-slate-900 dark:text-white block font-mono truncate">${escapeHtml(d.doc_type)}</strong>
+                  <span class="text-[10px] text-slate-400 block truncate">${escapeHtml(d.file_name)} • ${escapeHtml(d.file_size)}</span>
                 </div>
               </div>
-              <a href="${d.file_url}" download="${d.file_name}" class="px-2.5 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-700 shrink-0">
+              <a href="${encodeURI(d.file_url)}" download="${escapeHtml(d.file_name)}" class="px-2.5 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-700 shrink-0">
                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
               </a>
             </div>

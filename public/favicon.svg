@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f8fafc"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer subtle circular background -->
+  <circle cx="50" cy="50" r="48" fill="url(#bg)" stroke="#e2e8f0" stroke-width="1.5"/>
+
+  <!-- Lower stem of the 'P' (Navy Blue #0b1a30) -->
+  <path d="M 30 54 L 25 83 L 34 80 L 37 54 Z" fill="#0b1a30" />
+
+  <!-- Main Globe Circle / Upper Loop of 'P' (Navy Blue #0b1a30) -->
+  <circle cx="50" cy="38" r="26" fill="#0b1a30"/>
+
+  <!-- World Continents inside the Globe (Negative Space Silhouettes) -->
+  <path d="M 40 22 Q 45 20 52 22 Q 57 18 63 22 Q 68 26 66 31 Q 63 34 67 38 Q 64 43 58 41 Q 56 46 50 49 Q 48 42 43 40 Q 38 39 37 32 Q 38 27 40 22 Z" fill="#ffffff" opacity="0.95"/>
+  <path d="M 30 26 Q 34 24 36 28 Q 33 34 35 39 Q 38 43 37 48 Q 33 44 32 36 Z" fill="#ffffff" opacity="0.95"/>
+  <circle cx="68" cy="44" r="2.5" fill="#ffffff" opacity="0.9"/>
+
+  <!-- Dynamic Orange Milestone Trajectory (Orbit Loop) -->
+  <path d="M 16 66 Q 12 53 24 43" stroke="#f27d00" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <path d="M 22 45 Q 44 58 76 26 Q 84 30 82 42 Q 74 60 48 66 Q 32 70 16 66" fill="#f27d00"/>
+
+  <!-- Milestone Waypoint Nodes (Orange circles with white ring & center) -->
+  <!-- Node 1: Origin -->
+  <circle cx="20" cy="63" r="4" fill="#ffffff" stroke="#f27d00" stroke-width="2"/>
+  <circle cx="20" cy="63" r="1.5" fill="#f27d00"/>
+
+  <!-- Node 2: Mid-Production Inspection -->
+  <circle cx="48" cy="56" r="4.5" fill="#ffffff" stroke="#f27d00" stroke-width="2.2"/>
+  <circle cx="48" cy="56" r="1.8" fill="#f27d00"/>
+
+  <!-- Node 3: Overseas Dispatch & Delivery -->
+  <circle cx="76" cy="36" r="4" fill="#ffffff" stroke="#f27d00" stroke-width="2"/>
+  <circle cx="76" cy="36" r="1.5" fill="#f27d00"/>
+</svg>

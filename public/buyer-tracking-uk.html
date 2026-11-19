@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PO-UK-8492 Live Production Tracking — Royal Jaipur Handloom Heritage</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="shortcut icon" href="/favicon.ico">
   
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#b46b38">
@@ -66,7 +69,10 @@
     <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
       
       <!-- Left: Status & Buyer -->
-      <div class="flex items-center gap-2.5 text-xs">
+      <div class="flex items-center gap-3 text-xs">
+        <a href="/home.html" title="Padavo Portal">
+          <img src="/logo.png" alt="Padavo" class="h-6 w-auto object-contain">
+        </a>
         <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full font-medium border border-emerald-200">
           <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span>
           <span id="txt-live-active">Live Production Tracking</span>
@@ -541,8 +547,8 @@
       <!-- SECTION 4: BUYER FOOTER & REVIEW                                     -->
       <!-- ==================================================================== -->
       <footer class="p-6 sm:p-8 bg-white border-t border-slate-200 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-2">
-          <div class="h-6 w-6 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-xs font-serif">P</div>
+        <div class="flex items-center gap-2.5">
+          <img src="/logo.png" alt="Padavo" class="h-6 w-auto object-contain">
           <span>Powered by <strong>Padavo SaaS</strong> • Certified Export Milestone Platform</span>
         </div>
         <div class="flex items-center gap-4">
@@ -837,6 +843,17 @@
   <script>
     lucide.createIcons();
 
+    // XSS PROTECTION: HTML ESCAPE SANITIZER
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     // REGISTER PWA SERVICE WORKER
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -990,15 +1007,15 @@
             <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <div class="flex items-center gap-2">
-                  <strong class="text-slate-900 text-sm">${o.po_number}</strong>
-                  <span class="text-[10px] font-mono font-bold bg-brand-50 text-brand-700 px-2 py-0.5 rounded">${o.cluster}</span>
+                  <strong class="text-slate-900 text-sm">${escapeHtml(o.po_number)}</strong>
+                  <span class="text-[10px] font-mono font-bold bg-brand-50 text-brand-700 px-2 py-0.5 rounded">${escapeHtml(o.cluster)}</span>
                 </div>
-                <p class="text-xs text-slate-600 mt-0.5">${o.product}</p>
-                <span class="text-[11px] text-slate-500 font-medium">Supplier: ${o.supplier}</span>
+                <p class="text-xs text-slate-600 mt-0.5">${escapeHtml(o.product)}</p>
+                <span class="text-[11px] text-slate-500 font-medium">Supplier: ${escapeHtml(o.supplier)}</span>
               </div>
               <div class="text-right shrink-0">
-                <span class="text-xs font-mono font-bold text-amber-700 block">${o.status}</span>
-                <a href="${o.link}" class="text-xs text-brand-600 font-bold hover:underline inline-flex items-center gap-1 mt-1">
+                <span class="text-xs font-mono font-bold text-amber-700 block">${escapeHtml(o.status)}</span>
+                <a href="${encodeURI(o.link)}" class="text-xs text-brand-600 font-bold hover:underline inline-flex items-center gap-1 mt-1">
                   <span>Track Consignment</span>
                   <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                 </a>
@@ -1095,14 +1112,14 @@
                   <i data-lucide="file-text" class="w-5 h-5"></i>
                 </div>
                 <div>
-                  <strong class="text-slate-900 text-xs block font-mono">${doc.doc_type}</strong>
-                  <span class="text-[11px] text-slate-500 block truncate max-w-xs">${doc.file_name} • ${doc.file_size}</span>
+                  <strong class="text-slate-900 text-xs block font-mono">${escapeHtml(doc.doc_type)}</strong>
+                  <span class="text-[11px] text-slate-500 block truncate max-w-xs">${escapeHtml(doc.file_name)} • ${escapeHtml(doc.file_size)}</span>
                   <span class="inline-block mt-0.5 text-[9px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.2 rounded border border-emerald-200">
-                    ✓ Verified by ${doc.uploaded_by || 'Exporter'}
+                    ✓ Verified by ${escapeHtml(doc.uploaded_by || 'Exporter')}
                   </span>
                 </div>
               </div>
-              <a href="${doc.file_url}" download="${doc.file_name}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl border border-slate-300 shadow-2xs shrink-0 transition-all">
+              <a href="${encodeURI(doc.file_url)}" download="${escapeHtml(doc.file_name)}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl border border-slate-300 shadow-2xs shrink-0 transition-all">
                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
                 <span>Download</span>
               </a>

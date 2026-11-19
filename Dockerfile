@@ -10,7 +10,13 @@ ENV PORT=5500
 # Copy project files
 COPY package.json ./
 COPY server.js ./
+COPY billing-engine.js ./
+COPY notification-engine.js ./
+COPY pdf-engine.js ./
+COPY storage-engine.js ./
+COPY tally-engine.js ./
 COPY public/ ./public/
+COPY database.sqlite* ./
 
 # Create uploads directory and volumes
 RUN mkdir -p uploads

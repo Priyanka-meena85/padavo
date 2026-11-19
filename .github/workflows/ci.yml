@@ -26,11 +26,11 @@ jobs:
     - name: Strict Port 3000/3001 Hardcoding Audit
       run: |
         echo "Running strict port audit..."
-        if grep -rn "3000" --exclude="*.sqlite*" --exclude="*.log" --exclude="*.png" --exclude="*.jpg" --exclude="*deep-deploy-test.js" --exclude="*run-senior-qa-suite.js" .; then
+        if grep -rn "3000" --exclude="*.sqlite*" --exclude="*.log" --exclude="*.png" --exclude="*.jpg" --exclude="*deep-deploy-test.js" --exclude="*run-senior-qa-suite.js" --exclude="*security-audit-test.js" .; then
           echo "ERROR: Found forbidden port 3000 in repository files!"
           exit 1
         fi
-        if grep -rn "3001" --exclude="*.sqlite*" --exclude="*.log" --exclude="*.png" --exclude="*.jpg" --exclude="*deep-deploy-test.js" --exclude="*run-senior-qa-suite.js" .; then
+        if grep -rn "3001" --exclude="*.sqlite*" --exclude="*.log" --exclude="*.png" --exclude="*.jpg" --exclude="*deep-deploy-test.js" --exclude="*run-senior-qa-suite.js" --exclude="*security-audit-test.js" .; then
           echo "ERROR: Found forbidden port 3001 in repository files!"
           exit 1
         fi

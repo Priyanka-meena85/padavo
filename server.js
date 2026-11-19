@@ -16,6 +16,7 @@
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
+const os = require('node:os');
 const crypto = require('node:crypto');
 const { DatabaseSync } = require('node:sqlite');
 const { generateDisputeAuditPdf, generateFircCertificatePdf } = require('./pdf-engine');
@@ -27,32 +28,86 @@ const billingEngine = require('./billing-engine');
 // Environment & Configuration
 const PORT = process.env.PORT || 5500;
 const NODE_ENV = process.env.NODE_ENV || 'production';
-const DB_PATH = path.join(__dirname, 'database.sqlite');
-const UPLOADS_DIR = path.join(__dirname, 'uploads');
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT);
+
+// Serverless & Cloud Container Safe Paths:
+// In AWS Lambda / Vercel Serverless, the root filesystem is read-only.
+// In such environments, SQLite database and temporary uploads MUST reside in the OS temporary directory (os.tmpdir()).
+let DB_PATH = process.env.DATABASE_PATH;
+if (!DB_PATH) {
+  if (isServerless) {
+    DB_PATH = path.join(os.tmpdir(), 'database.sqlite');
+    // If a bundled database exists in the deployment package, copy to tmpdir to retain initial seeds
+    const bundledDb = path.join(__dirname, 'database.sqlite');
+    if (fs.existsSync(bundledDb) && !fs.existsSync(DB_PATH)) {
+      try {
+        fs.copyFileSync(bundledDb, DB_PATH);
+      } catch (e) {
+        console.log('Notice: Failed copying bundled db to tmpdir, will initialize fresh:', e.message);
+      }
+    }
+  } else {
+    DB_PATH = path.join(__dirname, 'database.sqlite');
+  }
+}
+
+let UPLOADS_DIR = process.env.UPLOADS_PATH;
+if (!UPLOADS_DIR) {
+  if (isServerless) {
+    UPLOADS_DIR = path.join(os.tmpdir(), 'uploads');
+  } else {
+    UPLOADS_DIR = path.join(__dirname, 'uploads');
+  }
+}
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
-// Ensure required directories exist
-if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-if (!fs.existsSync(PUBLIC_DIR)) fs.mkdirSync(PUBLIC_DIR, { recursive: true });
-
-// ==============================================================================
-// DATABASE SETUP & HIGH-CONCURRENCY WAL PRAGMAS
-// ==============================================================================
-const db = new DatabaseSync(DB_PATH);
-
-// Production SQLite Optimizations
+// Ensure required directories exist safely
 try {
+  if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+} catch (e) {
+  console.log('Notice: UPLOADS_DIR mkdir notice:', e.message);
+}
+try {
+  if (!fs.existsSync(PUBLIC_DIR)) fs.mkdirSync(PUBLIC_DIR, { recursive: true });
+} catch (e) {
+  console.log('Notice: PUBLIC_DIR mkdir notice:', e.message);
+}
+
+// ==============================================================================
+// DATABASE SETUP & HIGH-CONCURRENCY PRAGMAS
+// ==============================================================================
+let db;
+try {
+  db = new DatabaseSync(DB_PATH);
+} catch (dbErr) {
+  console.error('Notice: DatabaseSync at DB_PATH failed, attempting fallback to tmpdir database.sqlite:', dbErr.message);
+  try {
+    DB_PATH = path.join(os.tmpdir(), 'database.sqlite');
+    db = new DatabaseSync(DB_PATH);
+  } catch (dbErr2) {
+    console.error('Notice: Falling back to in-memory SQLite instance:', dbErr2.message);
+    db = new DatabaseSync(':memory:');
+  }
+}
+
+// Production SQLite Pragmas
+try {
+  if (!isServerless) {
+    db.exec(`PRAGMA journal_mode = WAL;`);
+  } else {
+    db.exec(`PRAGMA journal_mode = DELETE;`);
+  }
   db.exec(`
-    PRAGMA journal_mode = WAL;
     PRAGMA busy_timeout = 5000;
     PRAGMA synchronous = NORMAL;
     PRAGMA foreign_keys = ON;
   `);
 } catch (e) {
-  console.log('Note: WAL mode initialization notice:', e.message);
+  console.log('Note: SQLite pragmas initialization notice:', e.message);
 }
 
-db.exec(`
+try {
+  db.exec(`
   CREATE TABLE IF NOT EXISTS exporters (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT UNIQUE NOT NULL,
@@ -194,6 +249,9 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 `);
+} catch (dbSchemaErr) {
+  console.log('Notice: SQLite schema initialization notice:', dbSchemaErr.message);
+}
 
 // Database Schema Auto-Migrations (Ensures zero downtime schema sync)
 const schemaMigrations = [
@@ -228,10 +286,15 @@ function broadcastSSE(eventType, data) {
 // ==============================================================================
 // RATE LIMITING MIDDLEWARE (ANTI-BRUTE FORCE / SLIDING WINDOW)
 // ==============================================================================
+// ENTERPRISE RATE LIMITING & BRUTE FORCE DEFENSE (OWASP RESTRICTIVE)
+// ==============================================================================
 const rateLimitMap = new Map();
+const failedLoginAttempts = new Map(); // ip -> { count, firstAttempt, lockedUntil }
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 120; // 120 reqs / min for general routes
-const MAX_AUTH_REQUESTS = 20; // 20 reqs / min for auth
+const MAX_AUTH_REQUESTS = 30; // 30 reqs / min for auth
+const MAX_FAILED_LOGINS = 5; // 5 failed attempts locks IP
+const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes lockout
 
 function isRateLimited(ip, isAuthRoute = false) {
   const now = Date.now();
@@ -249,6 +312,43 @@ function isRateLimited(ip, isAuthRoute = false) {
   return record.count > limit;
 }
 
+function checkBruteForceLock(ip) {
+  const record = failedLoginAttempts.get(ip);
+  if (!record) return false;
+  const now = Date.now();
+  if (record.lockedUntil && record.lockedUntil > now) {
+    return true;
+  }
+  if (record.lockedUntil && record.lockedUntil <= now) {
+    failedLoginAttempts.delete(ip);
+    return false;
+  }
+  return false;
+}
+
+function recordFailedLogin(ip) {
+  const now = Date.now();
+  let record = failedLoginAttempts.get(ip);
+  if (!record) {
+    failedLoginAttempts.set(ip, { count: 1, firstAttempt: now, lockedUntil: 0 });
+    return;
+  }
+  if (now - record.firstAttempt > 10 * 60 * 1000) {
+    record.count = 1;
+    record.firstAttempt = now;
+    record.lockedUntil = 0;
+    return;
+  }
+  record.count += 1;
+  if (record.count >= MAX_FAILED_LOGINS) {
+    record.lockedUntil = now + LOCKOUT_DURATION;
+  }
+}
+
+function recordSuccessfulLogin(ip) {
+  failedLoginAttempts.delete(ip);
+}
+
 // Clean up old rate limit records every 5 minutes
 setInterval(() => {
   const now = Date.now();
@@ -257,7 +357,45 @@ setInterval(() => {
       rateLimitMap.delete(key);
     }
   }
+  for (const [ip, record] of failedLoginAttempts.entries()) {
+    if (record.lockedUntil && record.lockedUntil <= now) {
+      failedLoginAttempts.delete(ip);
+    }
+  }
 }, 5 * 60 * 1000);
+
+// XSS & Control Character Input Sanitizer
+function sanitizeInput(obj) {
+  if (typeof obj === 'string') {
+    return obj
+      .replace(/\0/g, '')
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+\s*=/gi, '');
+  }
+  if (obj !== null && typeof obj === 'object') {
+    if (Array.isArray(obj)) return obj.map(sanitizeInput);
+    const clean = {};
+    for (const [k, v] of Object.entries(obj)) {
+      clean[k] = sanitizeInput(v);
+    }
+    return clean;
+  }
+  return obj;
+}
+
+// Malware & Dangerous Executable Inspection
+function isDangerousExecutable(buffer) {
+  if (!buffer || buffer.length < 2) return false;
+  // Windows DOS MZ / PE Executable (exe, dll, com)
+  if (buffer[0] === 0x4D && buffer[1] === 0x5A) return true;
+  // Linux ELF Executable
+  if (buffer[0] === 0x7F && buffer[1] === 0x45 && buffer[2] === 0x4C && buffer[3] === 0x46) return true;
+  // Shell Script, PHP or executable tags
+  const head = buffer.slice(0, 120).toString('utf8').toLowerCase();
+  if (head.startsWith('#!/') || head.includes('<?php') || head.includes('<script')) return true;
+  return false;
+}
 
 // ==============================================================================
 // CLUSTER PRESETS FOR INDIAN HUBS
@@ -523,7 +661,11 @@ function seedDatabaseIfEmpty() {
   }
 }
 
-seedDatabaseIfEmpty();
+try {
+  seedDatabaseIfEmpty();
+} catch (e) {
+  console.log('Notice: seedDatabase notice:', e.message);
+}
 
 function seedMilestonesIfEmpty() {
   const count = db.prepare('SELECT COUNT(*) as count FROM order_milestones').get().count;
@@ -578,7 +720,11 @@ function seedMilestonesIfEmpty() {
   }
 }
 
-seedMilestonesIfEmpty();
+try {
+  seedMilestonesIfEmpty();
+} catch (e) {
+  console.log('Notice: seedMilestones notice:', e.message);
+}
 
 function seedTradeDocumentsAndQcIfEmpty() {
   const docCount = db.prepare('SELECT COUNT(*) as count FROM trade_documents').get().count;
@@ -636,7 +782,11 @@ function seedTradeDocumentsAndQcIfEmpty() {
   }
 }
 
-seedTradeDocumentsAndQcIfEmpty();
+try {
+  seedTradeDocumentsAndQcIfEmpty();
+} catch (e) {
+  console.log('Notice: seedTradeDocuments notice:', e.message);
+}
 
 // ==============================================================================
 // HTTP RESPONSE & SECURITY HEADERS UTILITY
@@ -658,17 +808,23 @@ function sendJson(res, statusCode, data) {
 function parseJsonBody(req) {
   return new Promise((resolve, reject) => {
     let body = '';
+    const maxLimit = 15 * 1024 * 1024; // 15MB limit
     req.on('data', chunk => {
       body += chunk.toString();
-      if (body.length > 15 * 1024 * 1024) { // 15MB limit
-        reject(new Error('Request payload too large'));
+      if (body.length > maxLimit) {
+        const err = new Error('Payload too large: Max limit 15MB');
+        err.statusCode = 413;
+        reject(err);
       }
     });
     req.on('end', () => {
       try {
-        resolve(body ? JSON.parse(body) : {});
+        const parsed = body ? JSON.parse(body) : {};
+        resolve(sanitizeInput(parsed));
       } catch (err) {
-        reject(new Error('Invalid JSON format'));
+        const parseErr = new Error('Invalid JSON format');
+        parseErr.statusCode = 400;
+        reject(parseErr);
       }
     });
     req.on('error', reject);
@@ -715,10 +871,19 @@ function serveStaticFile(req, res, targetPath) {
 
   fs.stat(safePath, (err, stats) => {
     if (err || !stats.isFile()) {
-      const indexPath = path.join(PUBLIC_DIR, 'index.html');
+      const ext = path.extname(safePath).toLowerCase();
+      // For asset requests (.png, .jpg, .ico, .css, .js), return crisp 404 rather than HTML fallback
+      if (ext && ext !== '.html') {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        return res.end('Not Found');
+      }
+
+      const indexPath = path.join(PUBLIC_DIR, 'home.html');
       if (fs.existsSync(indexPath)) {
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-        return fs.createReadStream(indexPath).pipe(res);
+        const stream = fs.createReadStream(indexPath);
+        stream.on('error', () => { if (!res.headersSent) res.writeHead(500); res.end(); });
+        return stream.pipe(res);
       }
       res.writeHead(404, { 'Content-Type': 'text/plain' });
       return res.end('Not Found');
@@ -733,7 +898,9 @@ function serveStaticFile(req, res, targetPath) {
       'X-Frame-Options': 'SAMEORIGIN',
       'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=604800, immutable'
     });
-    fs.createReadStream(safePath).pipe(res);
+    const stream = fs.createReadStream(safePath);
+    stream.on('error', () => { if (!res.headersSent) res.writeHead(500); res.end(); });
+    stream.pipe(res);
   });
 }
 
@@ -744,7 +911,28 @@ async function handleRequest(req, res) {
   const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = parsedUrl.pathname;
   const method = req.method;
-  const clientIp = req.socket.remoteAddress || '127.0.0.1';
+  const clientIp = (req.headers && (req.headers['x-forwarded-for'] || req.headers['x-real-ip']))
+    ? String(req.headers['x-forwarded-for'] || req.headers['x-real-ip']).split(',')[0].trim()
+    : (req.socket && req.socket.remoteAddress) || '127.0.0.1';
+
+  // Fast-path Favicon Handler (Prevents 500 error, missing icon issues & fallback crashes)
+  if (method === 'GET' && (pathname === '/favicon.ico' || pathname === '/favicon.png' || pathname === '/favicon.svg')) {
+    const iconFileName = pathname.slice(1);
+    const iconPath = path.join(PUBLIC_DIR, iconFileName);
+    if (fs.existsSync(iconPath)) {
+      const ext = path.extname(iconFileName).toLowerCase();
+      const contentType = ext === '.png' ? 'image/png' : (ext === '.svg' ? 'image/svg+xml' : 'image/x-icon');
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=86400, immutable'
+      });
+      const iconStream = fs.createReadStream(iconPath);
+      iconStream.on('error', () => { if (!res.headersSent) res.writeHead(204); res.end(); });
+      return iconStream.pipe(res);
+    }
+    res.writeHead(204);
+    return res.end();
+  }
 
   // Handle CORS Pre-Flight
   if (method === 'OPTIONS') {
@@ -756,14 +944,38 @@ async function handleRequest(req, res) {
     return res.end();
   }
 
-  // Standard Security Headers
+  // Standard Security Headers (OWASP Top 10 Hardened)
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://images.unsplash.com https://*.unsplash.com; connect-src 'self' ws: wss:; media-src 'self' data: blob:; object-src 'none'; frame-ancestors 'self';");
+  res.setHeader('Permissions-Policy', 'camera=(self), microphone=(self), geolocation=()');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
 
-  // Security Guard: Prevent directory traversal & sensitive file probes
-  if (req.url.includes('..') || pathname.includes('..') || pathname.includes('/.env') || pathname.includes('.sqlite') || pathname.includes('/.git') || pathname.includes('etc/passwd')) {
+  // Security Guard: Prevent directory traversal, null bytes & sensitive file probes
+  let decodedPath = '';
+  let decodedUrl = '';
+  try {
+    decodedPath = decodeURIComponent(pathname);
+    decodedUrl = decodeURIComponent(req.url);
+  } catch (e) {
+    res.writeHead(400, { 'Content-Type': 'text/plain' });
+    return res.end('Bad Request: Malformed URI');
+  }
+
+  const lowerPath = decodedPath.toLowerCase();
+  const lowerUrl = decodedUrl.toLowerCase();
+
+  const isTraversal = lowerPath.includes('..') || lowerUrl.includes('..') || lowerUrl.includes('\0');
+  const isDotFile = lowerPath.includes('/.') || lowerUrl.includes('/.');
+  const isBlockedExtension = /\.(sqlite|sqlite-wal|sqlite-shm|db|env|git|log|bak|pem|key|crt)$/i.test(lowerPath);
+  const isSensitiveFile = lowerPath.includes('etc/passwd') || lowerPath.includes('etc/shadow') || 
+                          lowerPath.includes('server.js') || lowerPath.includes('dockerfile') || 
+                          lowerPath.includes('node_modules');
+
+  if (isTraversal || isDotFile || isBlockedExtension || isSensitiveFile) {
+    logAudit(null, null, 'SECURITY_BLOCKED', `Blocked forbidden access attempt: ${decodedUrl.slice(0, 80)}`, clientIp);
     res.writeHead(403, { 'Content-Type': 'text/plain' });
     return res.end('Access Denied');
   }
@@ -1196,6 +1408,15 @@ async function handleRequest(req, res) {
         if (matches[1].includes('webp')) ext = '.webp';
       } else {
         buffer = Buffer.from(image_base64, 'base64');
+      }
+
+      // Security: File size & dangerous executable inspection
+      if (buffer.length > 10 * 1024 * 1024) {
+        return sendJson(res, 400, { success: false, message: 'Image size exceeds maximum limit of 10MB' });
+      }
+      if (isDangerousExecutable(buffer)) {
+        logAudit(order.id, order.exporter_id, 'MALWARE_BLOCKED', 'Blocked potentially dangerous executable upload', clientIp);
+        return sendJson(res, 400, { success: false, message: 'Invalid or dangerous file format detected' });
       }
 
       const filename = `padavo-${Date.now()}-${crypto.randomBytes(4).toString('hex')}${ext}`;
@@ -1841,6 +2062,14 @@ async function handleRequest(req, res) {
 
     // POST /api/auth/login
     if (method === 'POST' && pathname === '/api/auth/login') {
+      if (checkBruteForceLock(clientIp)) {
+        logAudit(null, null, 'BRUTE_FORCE_BLOCKED', `Blocked login attempt from locked IP ${clientIp}`, clientIp);
+        return sendJson(res, 429, {
+          success: false,
+          message: 'Account locked due to multiple failed login attempts. Please try again after 15 minutes.'
+        });
+      }
+
       const body = await parseJsonBody(req);
       const { email, password } = body;
 
@@ -1850,9 +2079,12 @@ async function handleRequest(req, res) {
 
       const exporter = db.prepare('SELECT * FROM exporters WHERE email = ?').get(email.toLowerCase().trim());
       if (!exporter || !verifyPassword(password, exporter.password_hash)) {
+        recordFailedLogin(clientIp);
         logAudit(null, null, 'LOGIN_FAILED', `Failed login attempt for ${email}`, clientIp);
         return sendJson(res, 401, { success: false, message: 'Invalid email or password' });
       }
+
+      recordSuccessfulLogin(clientIp);
 
       const sessionToken = generateSecureToken(32);
       const expiresAt = new Date(Date.now() + 30 * 86400000).toISOString();
@@ -2233,6 +2465,15 @@ async function handleRequest(req, res) {
           buffer = Buffer.from(image_base64, 'base64');
         }
 
+        // Security: File size & dangerous executable inspection
+        if (buffer.length > 10 * 1024 * 1024) {
+          return sendJson(res, 400, { success: false, message: 'Image size exceeds maximum limit of 10MB' });
+        }
+        if (isDangerousExecutable(buffer)) {
+          logAudit(order_id, authExporter.exporter_id, 'MALWARE_BLOCKED', 'Blocked potentially dangerous executable upload', clientIp);
+          return sendJson(res, 400, { success: false, message: 'Invalid or dangerous file format detected' });
+        }
+
         const filename = `padavo-${Date.now()}-${crypto.randomBytes(4).toString('hex')}${ext}`;
         const filePath = path.join(UPLOADS_DIR, filename);
         fs.writeFileSync(filePath, buffer);
@@ -2269,10 +2510,11 @@ async function handleRequest(req, res) {
         const { doc_type, file_name, file_url, file_size } = body;
         if (!doc_type || !file_name) return sendJson(res, 400, { success: false, message: 'Document type and file name required' });
 
+        const cleanFileName = path.basename(file_name).replace(/[^a-zA-Z0-9._-]/g, '_');
         const docResult = db.prepare(`
           INSERT INTO trade_documents (order_id, doc_type, file_name, file_url, file_size, status, uploaded_by)
           VALUES (?, ?, ?, ?, ?, 'verified', ?)
-        `).run(order.id, doc_type, file_name, file_url || `/uploads/${file_name}`, file_size || '350 KB', authExporter.company_name);
+        `).run(order.id, doc_type, cleanFileName, file_url || `/uploads/${cleanFileName}`, file_size || '350 KB', authExporter.company_name);
 
         logAudit(order.id, authExporter.exporter_id, 'TRADE_DOC_UPLOAD', `Uploaded ${doc_type}: ${file_name}`, clientIp);
         return sendJson(res, 201, { success: true, message: 'Document attached to export consignment', id: Number(docResult.lastInsertRowid) });
@@ -2411,7 +2653,8 @@ async function handleRequest(req, res) {
 
   } catch (err) {
     console.error('Padavo server execution error:', err);
-    return sendJson(res, 500, { success: false, message: 'Internal server error', error: err.message });
+    const statusCode = err.statusCode || (err.message && err.message.includes('JSON') ? 400 : 500);
+    return sendJson(res, statusCode, { success: false, message: err.message || 'Internal server error' });
   }
 }
 
@@ -2437,14 +2680,20 @@ function bindServer(port) {
 }
 
 const primaryPort = Number(process.env.PORT || 5500);
-bindServer(primaryPort);
 
-console.log(`=======================================================`);
-console.log(`PADAVO PRODUCTION SAAS ENGINE IS RUNNING! 🚀`);
-console.log(`Brand: Padavo — Har Padav Par Bharosa`);
-console.log(`Primary Local Access: http://localhost:${primaryPort}`);
-console.log(`Landing Page: http://localhost:${primaryPort}/home.html (or http://localhost:${primaryPort}/)`);
-console.log(`Exporter Portal: http://localhost:${primaryPort}/index.html (or http://localhost:${primaryPort}/app)`);
-console.log(`Public UK Buyer Tracking: http://localhost:${primaryPort}/buyer-tracking-uk.html`);
-console.log(`Health Check: http://localhost:${primaryPort}/health`);
-console.log(`=======================================================`);
+// Only listen directly when running standalone (not when required/imported as a module)
+if (require.main === module) {
+  bindServer(primaryPort);
+
+  console.log(`=======================================================`);
+  console.log(`PADAVO PRODUCTION SAAS ENGINE IS RUNNING! 🚀`);
+  console.log(`Brand: Padavo — Har Padav Par Bharosa`);
+  console.log(`Primary Local Access: http://localhost:${primaryPort}`);
+  console.log(`Landing Page: http://localhost:${primaryPort}/home.html (or http://localhost:${primaryPort}/)`);
+  console.log(`Exporter Portal: http://localhost:${primaryPort}/index.html (or http://localhost:${primaryPort}/app)`);
+  console.log(`Public UK Buyer Tracking: http://localhost:${primaryPort}/buyer-tracking-uk.html`);
+  console.log(`Health Check: http://localhost:${primaryPort}/health`);
+  console.log(`=======================================================`);
+}
+
+module.exports = handleRequest;

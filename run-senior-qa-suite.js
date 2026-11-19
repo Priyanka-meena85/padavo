@@ -5,7 +5,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const BASE_URL = 'http://localhost:5500';
+const BASE_URL = 'http://127.0.0.1:5500';
 let passCount = 0;
 let failCount = 0;
 const results = [];
@@ -63,7 +63,24 @@ function assert(condition, message) {
   if (!condition) throw new Error(message || 'Assertion failed');
 }
 
+let embeddedServer = null;
+async function ensureServerRunning() {
+  const handler = require('./server.js');
+  await new Promise((resolve, reject) => {
+    const s = http.createServer(handler);
+    s.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') resolve();
+      else reject(err);
+    });
+    s.listen(5500, () => {
+      embeddedServer = s;
+      resolve();
+    });
+  });
+}
+
 async function runTestSuite() {
+  await ensureServerRunning();
   console.log('===============================================================');
   console.log('🧪 PADAVO SAAS — SENIOR QA AUTOMATION TEST RUNNER');
   console.log(`Target Host: ${BASE_URL} (Port 5500 Isolated)`);
@@ -419,6 +436,10 @@ async function runTestSuite() {
   console.log(`   Passed:      ${passCount} ✅`);
   console.log(`   Failed:      ${failCount} ❌`);
   console.log('===============================================================\n');
+
+  if (embeddedServer) {
+    embeddedServer.close();
+  }
 
   if (failCount > 0) {
     process.exit(1);
