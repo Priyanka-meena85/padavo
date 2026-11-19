@@ -28,20 +28,28 @@ const billingEngine = require('./billing-engine');
 // Environment & Configuration
 const PORT = process.env.PORT || 5500;
 const NODE_ENV = process.env.NODE_ENV || 'production';
-const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT);
 
 // Serverless & Cloud Container Safe Paths:
 // In AWS Lambda / Vercel Serverless, the root filesystem is read-only.
 // In such environments, SQLite database and temporary uploads MUST reside in the OS temporary directory (os.tmpdir()).
+const isServerless = Boolean(
+  process.env.VERCEL ||
+  process.env.VERCEL_ENV ||
+  process.env.VERCEL_REGION ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME ||
+  process.env.LAMBDA_TASK_ROOT
+);
+
 let DB_PATH = process.env.DATABASE_PATH;
 if (!DB_PATH) {
   if (isServerless) {
     DB_PATH = path.join(os.tmpdir(), 'database.sqlite');
-    // If a bundled database exists in the deployment package, copy to tmpdir to retain initial seeds
+    // If a bundled database exists in the deployment package, copy to tmpdir and ensure read-write mode
     const bundledDb = path.join(__dirname, 'database.sqlite');
     if (fs.existsSync(bundledDb) && !fs.existsSync(DB_PATH)) {
       try {
         fs.copyFileSync(bundledDb, DB_PATH);
+        try { fs.chmodSync(DB_PATH, 0o666); } catch (e) {}
       } catch (e) {
         console.log('Notice: Failed copying bundled db to tmpdir, will initialize fresh:', e.message);
       }
@@ -74,37 +82,57 @@ try {
 }
 
 // ==============================================================================
-// DATABASE SETUP & HIGH-CONCURRENCY PRAGMAS
+// DATABASE SETUP & HIGH-CONCURRENCY PRAGMAS (CRASH-PROOF FALLBACK)
 // ==============================================================================
-let db;
-try {
-  db = new DatabaseSync(DB_PATH);
-} catch (dbErr) {
-  console.error('Notice: DatabaseSync at DB_PATH failed, attempting fallback to tmpdir database.sqlite:', dbErr.message);
-  try {
-    DB_PATH = path.join(os.tmpdir(), 'database.sqlite');
-    db = new DatabaseSync(DB_PATH);
-  } catch (dbErr2) {
-    console.error('Notice: Falling back to in-memory SQLite instance:', dbErr2.message);
-    db = new DatabaseSync(':memory:');
+function initDatabase() {
+  let instance;
+
+  // Helper: Verify if SQLite connection can execute write queries
+  function isInstanceWritable(dbConn) {
+    try {
+      dbConn.exec(`
+        PRAGMA busy_timeout = 5000;
+        PRAGMA synchronous = NORMAL;
+        PRAGMA foreign_keys = ON;
+        CREATE TABLE IF NOT EXISTS _health_check (id INTEGER PRIMARY KEY);
+        INSERT INTO _health_check (id) VALUES (1) ON CONFLICT(id) DO NOTHING;
+      `);
+      return true;
+    } catch (err) {
+      console.log('Notice: Database write probe failed:', err.message);
+      return false;
+    }
   }
+
+  try {
+    instance = new DatabaseSync(DB_PATH);
+    if (!isServerless) {
+      try { instance.exec(`PRAGMA journal_mode = WAL;`); } catch (e) {}
+    } else {
+      try { instance.exec(`PRAGMA journal_mode = DELETE;`); } catch (e) {}
+    }
+    if (!isInstanceWritable(instance)) {
+      throw new Error(`Database at ${DB_PATH} is read-only or not writable`);
+    }
+    console.log(`SQLite initialized successfully at: ${DB_PATH}`);
+  } catch (dbErr) {
+    console.error(`Notice: DatabaseSync at DB_PATH failed (${dbErr.message}), falling back to in-memory SQLite:`);
+    try {
+      instance = new DatabaseSync(':memory:');
+      instance.exec(`
+        PRAGMA foreign_keys = ON;
+        PRAGMA synchronous = NORMAL;
+      `);
+      console.log('In-memory SQLite instance initialized successfully.');
+    } catch (dbErr2) {
+      console.error('Fatal: Could not initialize in-memory SQLite:', dbErr2.message);
+      throw dbErr2;
+    }
+  }
+  return instance;
 }
 
-// Production SQLite Pragmas
-try {
-  if (!isServerless) {
-    db.exec(`PRAGMA journal_mode = WAL;`);
-  } else {
-    db.exec(`PRAGMA journal_mode = DELETE;`);
-  }
-  db.exec(`
-    PRAGMA busy_timeout = 5000;
-    PRAGMA synchronous = NORMAL;
-    PRAGMA foreign_keys = ON;
-  `);
-} catch (e) {
-  console.log('Note: SQLite pragmas initialization notice:', e.message);
-}
+const db = initDatabase();
 
 try {
   db.exec(`
@@ -947,6 +975,29 @@ async function handleRequest(req, res) {
     }
     res.writeHead(204);
     return res.end();
+  }
+
+  // Fast-path Logo Handler (Guarantees zero-lag rendering of Padavo brand logo)
+  if (method === 'GET' && (pathname === '/logo.png' || pathname === '/logo.jpg' || pathname === '/padavo-logo.png' || pathname === '/padavo-logo.jpg')) {
+    let logoFileName = pathname.slice(1);
+    let logoPath = path.join(PUBLIC_DIR, logoFileName);
+    if (!fs.existsSync(logoPath)) {
+      // Fallback to existing logo variant
+      logoPath = fs.existsSync(path.join(PUBLIC_DIR, 'logo.png'))
+        ? path.join(PUBLIC_DIR, 'logo.png')
+        : path.join(PUBLIC_DIR, 'logo.jpg');
+    }
+    if (fs.existsSync(logoPath)) {
+      const ext = path.extname(logoPath).toLowerCase();
+      const contentType = ext === '.png' ? 'image/png' : 'image/jpeg';
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=86400, immutable'
+      });
+      const logoStream = fs.createReadStream(logoPath);
+      logoStream.on('error', () => { if (!res.headersSent) res.writeHead(204); res.end(); });
+      return logoStream.pipe(res);
+    }
   }
 
   // Handle CORS Pre-Flight
