@@ -11,8 +11,10 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Lucide Safe Polyfill to prevent "lucide is not defined" under any network condition -->
+  <script>window.lucide = window.lucide || { createIcons: function() {} };</script>
+  <!-- Local high-speed bundled Lucide with CDN fallback -->
+  <script src="/lucide.min.js" onerror="this.onerror=null; this.src='https://unpkg.com/lucide@latest';"></script>
   
   <!-- Google Fonts: Plus Jakarta Sans + Playfair Display + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">

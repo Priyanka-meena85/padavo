@@ -1015,7 +1015,7 @@ async function handleRequest(req, res) {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://images.unsplash.com https://*.unsplash.com; connect-src 'self' ws: wss:; media-src 'self' data: blob:; object-src 'none'; frame-ancestors 'self';");
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://images.unsplash.com https://*.unsplash.com; connect-src 'self' ws: wss: https://images.unsplash.com https://*.unsplash.com https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com https://cdn.tailwindcss.com; media-src 'self' data: blob:; object-src 'none'; frame-ancestors 'self';");
   res.setHeader('Permissions-Policy', 'camera=(self), microphone=(self), geolocation=()');
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
 

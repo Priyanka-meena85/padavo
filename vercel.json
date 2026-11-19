@@ -47,6 +47,10 @@
       "dest": "/public/sw.js"
     },
     {
+      "src": "/lucide.min.js",
+      "dest": "/public/lucide.min.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/server.js"
     }
