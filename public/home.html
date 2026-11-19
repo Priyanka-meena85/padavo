@@ -69,122 +69,64 @@
 <body class="bg-[#f8fafc] text-slate-800 antialiased font-sans selection:bg-brand-500 selection:text-white">
 
   <!-- ======================================================================== -->
-  <!-- TOP ANNOUNCEMENT & TRUST BAR                                             -->
+  <!-- TOP ANNOUNCEMENT BANNER                                                  -->
   <!-- ======================================================================== -->
-  <div class="bg-[#070f1e] text-white text-[11px] sm:text-xs py-2 px-4 border-b border-slate-800/80">
+  <div class="bg-slate-950 text-white text-xs py-2 px-4 border-b border-slate-800">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-      <div class="flex items-center gap-2.5 truncate">
-        <span class="bg-gradient-to-r from-amber-500 to-amber-600 text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded text-slate-950 shrink-0 tracking-wider shadow-xs">
-          🇮🇳 B2B Export SaaS
-        </span>
-        <span class="truncate text-slate-300">
-          Serving Manufacturers in <strong class="text-white">Jaipur • Jodhpur • Surat • Moradabad • Panipat</strong>
-        </span>
+      <div class="flex items-center gap-2 truncate">
+        <span class="bg-brand-600 text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded text-white shrink-0 tracking-wider">New Release</span>
+        <span class="truncate text-slate-300">Milestone Approvals & Direct Bank Wire Release: Connect shop-floor QC sign-offs to faster overseas payments.</span>
       </div>
-      <div class="hidden md:flex items-center gap-5 shrink-0 text-slate-400">
-        <span class="flex items-center gap-1.5 font-mono text-[11px]">
-          <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-          <span class="text-emerald-400 font-semibold">RBI e-FIRC & FEMA Compliant</span>
-        </span>
-        <span class="text-slate-600">|</span>
-        <a href="https://wa.me/919829012345" target="_blank" class="hover:text-amber-400 transition-colors flex items-center gap-1.5 font-medium">
-          <i data-lucide="phone-call" class="w-3 h-3 text-emerald-400"></i>
-          <span>WhatsApp Helpline: +91 98290 12345</span>
+      <div class="flex items-center gap-4 shrink-0 font-medium">
+        <a href="#killer-feature" class="text-amber-300 hover:text-amber-200 transition-colors flex items-center gap-1 font-semibold">
+          <span>See How It Works</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
         </a>
       </div>
     </div>
   </div>
 
   <!-- ======================================================================== -->
-  <!-- GLOBAL HEADER & STICKY GLASSMORPHIC NAVBAR                               -->
+  <!-- GLOBAL HEADER & STICKY NAVBAR                                            -->
   <!-- ======================================================================== -->
-  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 transition-all shadow-[0_4px_25px_-5px_rgba(0,0,0,0.05)]">
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 transition-all shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
       
-      <!-- Brand Logo & Cluster Tag -->
-      <a href="/home.html" class="flex items-center gap-3.5 group shrink-0">
-        <img src="logo.svg" onerror="if(!this.t1){this.t1=true;this.src='/logo.svg';}else if(!this.t2){this.t2=true;this.src='logo.png';}else{this.src='/logo.png';}" alt="Padavo — Har Padav Par Bharosa" class="h-10 sm:h-12 w-auto object-contain group-hover:scale-102 transition-transform drop-shadow-xs">
-        <div class="hidden sm:block border-l border-slate-200 pl-3">
-          <div class="flex items-center gap-1.5">
-            <span class="bg-amber-50 text-amber-800 font-mono text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-200/80">पड़ाव</span>
-            <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 font-mono">
-              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Verified
-            </span>
-          </div>
-          <p class="text-[10px] text-slate-400 font-medium tracking-tight mt-0.5">Har Padav Par Bharosa</p>
+      <!-- Brand Logo -->
+      <a href="/home.html" class="flex items-center gap-3.5 group">
+        <img src="/logo.png?v=2" onerror="this.onerror=null; this.src='/logo.jpg';" alt="Padavo — Har Padav Par Bharosa" class="h-10 sm:h-12 w-auto object-contain group-hover:scale-105 transition-transform drop-shadow-xs">
+        <div class="hidden sm:block">
+          <span class="bg-brand-50 text-brand-700 font-mono text-[10px] font-bold px-2 py-0.5 rounded-full border border-brand-200">पड़ाव</span>
+          <p class="text-[11px] text-slate-500 font-medium tracking-tight">Har Padav Par Bharosa</p>
         </div>
       </a>
 
-      <!-- Desktop Nav Links (High Polish & Clean Spacing) -->
-      <nav class="hidden lg:flex items-center gap-1 xl:gap-2 text-xs font-semibold text-slate-600">
-        <a href="#killer-feature" class="px-3 py-2 rounded-xl hover:text-slate-900 hover:bg-slate-100/80 transition-all flex items-center gap-1.5 group">
+      <!-- Desktop Nav Links -->
+      <nav class="hidden lg:flex items-center gap-8 text-xs font-semibold text-slate-600">
+        <a href="#killer-feature" class="hover:text-brand-600 transition-colors flex items-center gap-1.5">
           <span>Milestone Payments</span>
-          <span class="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-[9px] font-mono px-1.5 py-0.5 rounded font-extrabold uppercase shadow-2xs">#1 Pick</span>
+          <span class="bg-amber-100 text-amber-800 text-[9px] font-mono px-1.5 py-0.5 rounded font-bold uppercase">#1 Pick</span>
         </a>
-        <a href="#clusters" class="px-3 py-2 rounded-xl hover:text-slate-900 hover:bg-slate-100/80 transition-all">
-          Artisan Clusters
-        </a>
-        <a href="#whatsapp-bot" class="px-3 py-2 rounded-xl hover:text-slate-900 hover:bg-slate-100/80 transition-all">
-          WhatsApp Floor Bot
-        </a>
-        <a href="#comparison" class="px-3 py-2 rounded-xl hover:text-slate-900 hover:bg-slate-100/80 transition-all">
-          WhatsApp vs Padavo
-        </a>
-        <a href="#calculator" class="px-3 py-2 rounded-xl hover:text-slate-900 hover:bg-slate-100/80 transition-all">
-          ROI Calculator
-        </a>
-        <a href="#pricing" class="px-3 py-2 rounded-xl hover:text-slate-900 hover:bg-slate-100/80 transition-all">
-          Pricing
-        </a>
-        <a href="#faq" class="px-3 py-2 rounded-xl hover:text-slate-900 hover:bg-slate-100/80 transition-all">
-          FAQ
-        </a>
+        <a href="#demo-preview" class="hover:text-brand-600 transition-colors">Interactive Demo</a>
+        <a href="#clusters" class="hover:text-brand-600 transition-colors">Pan-India Clusters</a>
+        <a href="#comparison" class="hover:text-brand-600 transition-colors">WhatsApp vs Padavo</a>
+        <a href="#calculator" class="hover:text-brand-600 transition-colors">ROI Calculator</a>
+        <a href="#pricing" class="hover:text-brand-600 transition-colors">Pricing</a>
+        <a href="#faq" class="hover:text-brand-600 transition-colors">FAQ</a>
       </nav>
 
-      <!-- Right Action CTAs -->
-      <div class="flex items-center gap-2.5 sm:gap-3">
-        <!-- Live Overseas Buyer Demo Link -->
-        <a href="/buyer-tracking-uk.html" target="_blank" class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 transition-all shadow-2xs group">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
-          </span>
-          <span>Buyer Demo</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700"></i>
+      <!-- Right CTAs -->
+      <div class="flex items-center gap-3">
+        <a href="/buyer-tracking-uk.html" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-all shadow-xs">
+          <i data-lucide="globe" class="w-3.5 h-3.5 text-blue-600"></i>
+          <span>Live Buyer Demo</span>
         </a>
-
-        <!-- High-Impact Primary CTA: Exporter Portal -->
-        <a href="/index.html" class="inline-flex items-center gap-2 bg-[#0b1b3d] hover:bg-[#132d66] text-white font-bold text-xs sm:text-sm px-4 sm:px-5 py-2.5 rounded-xl shadow-md shadow-[#0b1b3d]/25 hover:shadow-lg hover:shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all border border-[#1a3366] group">
-          <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
+        <a href="/index.html" class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl shadow-md shadow-brand-600/30 transition-all hover:scale-102">
           <span>Launch Exporter Portal</span>
-          <i data-lucide="arrow-right" class="w-4 h-4 text-amber-400 group-hover:translate-x-0.5 transition-transform"></i>
-        </a>
-
-        <!-- Mobile Menu Toggle Button -->
-        <button onclick="toggleMobileNav()" class="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
-          <i data-lucide="menu" class="w-6 h-6"></i>
-        </button>
-      </div>
-
-    </div>
-
-    <!-- Collapsible Mobile Menu Drawer -->
-    <div id="mobile-nav-panel" class="hidden lg:hidden border-t border-slate-200 bg-white/95 backdrop-blur-md px-4 py-4 space-y-2 text-xs font-semibold shadow-lg">
-      <a href="#killer-feature" onclick="toggleMobileNav()" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 text-slate-700">
-        <span>Milestone Payments Release</span>
-        <span class="bg-amber-100 text-amber-800 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded">#1 Pick</span>
-      </a>
-      <a href="#clusters" onclick="toggleMobileNav()" class="block p-2.5 rounded-xl hover:bg-slate-100 text-slate-700">Pan-India Clusters (Jaipur, Jodhpur, Surat)</a>
-      <a href="#whatsapp-bot" onclick="toggleMobileNav()" class="block p-2.5 rounded-xl hover:bg-slate-100 text-slate-700">Shop Floor WhatsApp Bot</a>
-      <a href="#calculator" onclick="toggleMobileNav()" class="block p-2.5 rounded-xl hover:bg-slate-100 text-slate-700">ROI Calculator</a>
-      <a href="#pricing" onclick="toggleMobileNav()" class="block p-2.5 rounded-xl hover:bg-slate-100 text-slate-700">Pricing & Quotas</a>
-      <a href="#faq" onclick="toggleMobileNav()" class="block p-2.5 rounded-xl hover:bg-slate-100 text-slate-700">Frequently Asked Questions</a>
-      <div class="pt-2 border-t border-slate-100 flex flex-col gap-2">
-        <a href="/buyer-tracking-uk.html" target="_blank" class="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-slate-50 text-slate-800 border border-slate-200 font-bold">
-          <i data-lucide="globe" class="w-4 h-4 text-blue-600"></i>
-          <span>View UK Buyer Tracking Portal</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </a>
       </div>
+
     </div>
   </header>
 
@@ -1079,129 +1021,31 @@
   </section>
 
   <!-- ======================================================================== -->
-  <!-- ENTERPRISE B2B SAAS FOOTER                                               -->
+  <!-- GLOBAL FOOTER                                                            -->
   <!-- ======================================================================== -->
-  <footer class="bg-[#050b14] text-slate-400 pt-16 pb-12 border-t border-slate-900 text-xs">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <footer class="bg-slate-950 text-slate-400 py-12 border-t border-slate-900 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
       
-      <!-- Top 5-Column Grid -->
-      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 pb-12 border-b border-slate-800/80">
-        
-        <!-- Brand Summary Column (Span 2) -->
-        <div class="col-span-2 space-y-4">
-          <a href="/home.html" class="inline-block bg-white rounded-2xl px-3.5 py-2 shadow-md hover:scale-102 transition-transform">
-            <img src="logo.svg" onerror="if(!this.t1){this.t1=true;this.src='/logo.svg';}else if(!this.t2){this.t2=true;this.src='logo.png';}else{this.src='/logo.png';}" alt="Padavo" class="h-8 w-auto object-contain">
-          </a>
-          <p class="text-slate-400 text-xs leading-relaxed max-w-sm">
-            <strong class="text-white">Padavo (पड़ाव) — Har Padav Par Bharosa</strong>. India's premier milestone tracking and dispute prevention SaaS built specifically for manufacturers exporting handicrafts, textiles, furniture, and engineering goods to foreign buyers.
-          </p>
-          <div class="flex flex-wrap gap-2 pt-1">
-            <span class="inline-flex items-center gap-1.5 bg-slate-900 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-800 text-[10px] font-mono">
-              <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              RBI e-FIRC Ready
-            </span>
-            <span class="inline-flex items-center gap-1.5 bg-slate-900 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-800 text-[10px] font-mono">
-              <i data-lucide="shield-check" class="w-3 h-3 text-blue-400"></i>
-              OWASP Level 2 Hardened
-            </span>
-            <span class="inline-flex items-center gap-1.5 bg-slate-900 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-800 text-[10px] font-mono">
-              ISO 2859-1 (AQL 2.5)
-            </span>
-          </div>
-          <div class="pt-2 text-xs space-y-1.5 text-slate-400">
-            <div class="flex items-center gap-2">
-              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-500"></i>
-              <span>HQ: Sitapura Industrial Area, Jaipur, Rajasthan 302022</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
-              <a href="https://wa.me/919829012345" target="_blank" class="hover:text-emerald-400 transition-colors">WhatsApp Helpline: +91 98290 12345</a>
-            </div>
-            <div class="flex items-center gap-2">
-              <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-400"></i>
-              <a href="mailto:support@padavo.io" class="hover:text-white transition-colors">merchandiser@padavo.io</a>
-            </div>
-          </div>
+      <div class="flex items-center gap-3">
+        <div class="bg-white rounded-xl p-1.5 shadow-sm">
+          <img src="/logo.png?v=2" onerror="this.onerror=null; this.src='/logo.jpg';" alt="Padavo" class="h-6 w-auto object-contain">
         </div>
-
-        <!-- Column 1: Core SaaS Engines -->
-        <div class="space-y-3">
-          <h4 class="text-white font-bold text-xs uppercase tracking-wider font-mono">Core Engines</h4>
-          <ul class="space-y-2">
-            <li><a href="#killer-feature" class="hover:text-white transition-colors">Milestone Wire Escrow</a></li>
-            <li><a href="#whatsapp-bot" class="hover:text-white transition-colors">WhatsApp Floor Bot</a></li>
-            <li><a href="#demo-preview" class="hover:text-white transition-colors">AQL 2.5 QC Audit</a></li>
-            <li><a href="#clusters" class="hover:text-white transition-colors">Tally Prime XML Sync</a></li>
-            <li><a href="#clusters" class="hover:text-white transition-colors">Customs Vault (5 Docs)</a></li>
-            <li><a href="#killer-feature" class="hover:text-white transition-colors">Statutory e-FIRC PDF</a></li>
-          </ul>
+        <div>
+          <strong class="text-white text-sm block">Padavo (पड़ाव)</strong>
+          <span class="text-[10px] text-slate-400">The Milestone & Production Tracking Engine for Global Exporters</span>
         </div>
-
-        <!-- Column 2: Export Clusters -->
-        <div class="space-y-3">
-          <h4 class="text-white font-bold text-xs uppercase tracking-wider font-mono">Artisan Clusters</h4>
-          <ul class="space-y-2">
-            <li><a href="#clusters" class="hover:text-white transition-colors">Jaipur (Handloom & Dabu)</a></li>
-            <li><a href="#clusters" class="hover:text-white transition-colors">Jodhpur (Solid Wood Craft)</a></li>
-            <li><a href="#clusters" class="hover:text-white transition-colors">Moradabad (Artisan Brass)</a></li>
-            <li><a href="#clusters" class="hover:text-white transition-colors">Surat & Tirupur (Textiles)</a></li>
-            <li><a href="#clusters" class="hover:text-white transition-colors">Bhadohi (Tufted Carpets)</a></li>
-            <li><a href="#clusters" class="hover:text-white transition-colors">Panipat (Home Furnishings)</a></li>
-          </ul>
-        </div>
-
-        <!-- Column 3: Foreign Buyer Experience -->
-        <div class="space-y-3">
-          <h4 class="text-white font-bold text-xs uppercase tracking-wider font-mono">Foreign Buyers</h4>
-          <ul class="space-y-2">
-            <li><a href="/buyer-tracking-uk.html" target="_blank" class="text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1"><span>UK Buyer Demo</span><i data-lucide="external-link" class="w-3 h-3"></i></a></li>
-            <li><a href="/buyer-tracking-uk.html" target="_blank" class="hover:text-white transition-colors">Live Container Tracker</a></li>
-            <li><a href="#killer-feature" class="hover:text-white transition-colors">Dispute Proof Certificate</a></li>
-            <li><a href="#comparison" class="hover:text-white transition-colors">Barclays BACS Wire</a></li>
-            <li><a href="#comparison" class="hover:text-white transition-colors">US ACH Direct Clearing</a></li>
-            <li><a href="#comparison" class="hover:text-white transition-colors">Zero-Login Magic Slugs</a></li>
-          </ul>
-        </div>
-
-        <!-- Column 4: Platform & Compliance -->
-        <div class="space-y-3">
-          <h4 class="text-white font-bold text-xs uppercase tracking-wider font-mono">Compliance & Trust</h4>
-          <ul class="space-y-2">
-            <li><a href="/health" target="_blank" class="text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span><span>System Health (/health)</span></a></li>
-            <li><a href="#faq" class="hover:text-white transition-colors">DGFT IEC Compliance</a></li>
-            <li><a href="#pricing" class="hover:text-white transition-colors">Pricing & Plans</a></li>
-            <li><a href="#calculator" class="hover:text-white transition-colors">ROI Calculator</a></li>
-            <li><a href="/index.html" class="hover:text-white transition-colors">Exporter Portal Login</a></li>
-            <li><a href="#faq" class="hover:text-white transition-colors">FAQ & Security Docs</a></li>
-          </ul>
-        </div>
-
       </div>
 
-      <!-- Bottom Status & Copyright Bar -->
-      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
-        
-        <div class="flex items-center gap-2">
-          <span>© 2026 Padavo Technologies Private Limited. All rights reserved.</span>
-          <span class="text-slate-700">|</span>
-          <span class="font-mono text-slate-400">Strict Port 5500 Engine</span>
-        </div>
+      <div class="flex items-center gap-6 font-medium">
+        <a href="/home.html" class="hover:text-white transition-colors">Home</a>
+        <a href="/index.html" class="hover:text-white transition-colors">Exporter Portal</a>
+        <a href="/buyer-tracking-uk.html" class="hover:text-white transition-colors">UK Buyer Demo</a>
+        <a href="/health" class="hover:text-white transition-colors">System Health</a>
+        <a href="https://wa.me/919829012345" target="_blank" class="text-emerald-400 hover:underline">WhatsApp Support</a>
+      </div>
 
-        <div class="flex items-center gap-6 font-medium">
-          <span class="inline-flex items-center gap-1 text-slate-400">
-            <i data-lucide="lock" class="w-3 h-3 text-emerald-400"></i>
-            <span>End-to-End Encrypted</span>
-          </span>
-          <a href="/health" target="_blank" class="text-emerald-400 hover:underline flex items-center gap-1">
-            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-            <span>All Systems Operational (99.99%)</span>
-          </a>
-          <a href="#top" class="hover:text-white transition-colors flex items-center gap-1">
-            <span>Back to top</span>
-            <i data-lucide="arrow-up" class="w-3 h-3"></i>
-          </a>
-        </div>
-
+      <div class="text-[11px] text-slate-500 font-mono">
+        © 2026 Padavo SaaS OS. Port 5500.
       </div>
 
     </div>
@@ -1402,14 +1246,6 @@
       } else {
         ans.classList.add('hidden');
         icon.classList.remove('rotate-180');
-      }
-    }
-
-    // 8. MOBILE NAV TOGGLE
-    function toggleMobileNav() {
-      const panel = document.getElementById('mobile-nav-panel');
-      if (panel) {
-        panel.classList.toggle('hidden');
       }
     }
   </script>
