@@ -11,7 +11,7 @@
 
 ---
 
-## ⚡ 1-Click Launch (Zero Dependency Architecture)
+## ⚡ 1-Click Launch (Isolated Port 5500 Architecture)
 
 Padavo uses **Node.js 24's native `node:sqlite` (with WAL mode) and `node:crypto`**. No `npm install` compilation errors, no external databases required for local dev, and blazing fast performance.
 
@@ -22,7 +22,11 @@ npm start
 ```
 
 Open your browser at:
-👉 **[http://localhost:3001](http://localhost:3001)**
+👉 **[http://localhost:5500](http://localhost:5500)**
+* **Landing Page:** [http://localhost:5500/home.html](http://localhost:5500/home.html)
+* **Exporter Dashboard:** [http://localhost:5500/index.html](http://localhost:5500/index.html)
+* **Buyer Tracking Portal:** [http://localhost:5500/buyer-tracking-uk.html](http://localhost:5500/buyer-tracking-uk.html)
+* **Health Check API:** [http://localhost:5500/health](http://localhost:5500/health)
 
 ### 🔑 Demo Exporter Credentials (Pre-loaded):
 * **Email:** `demo@jaipurcrafts.com`
@@ -31,89 +35,62 @@ Open your browser at:
 
 ---
 
-## 📱 The 5 Core Designed Screens
+## 📱 The Core Production Capabilities
 
-1. **Screen 1: Buyer Public Tracking (`/buyer-tracking-uk.html`):**
-   * Zero-login branded URL (`/track/rj-pouk8492-9a4f`).
+1. **Buyer Public Tracking (`/buyer-tracking-uk.html`):**
+   * Zero-login branded URL (`/track/rj-pouk8492`).
+   * 1-Click 5-Language Switcher (English, German, French, Spanish, Arabic with native RTL).
+   * Live Maritime Container Telemetry (Maersk / MSC Paloma with AIS GPS tracking and humidity sensors).
    * Exporter IEC verified badge, order summary (UK sizes, quantity, delivery countdown).
-   * Segmented progress bar (50% complete) and 6-stage vertical timeline.
-   * High-definition photo gallery with full-screen lightbox, GPS & timestamp verification badges.
-   * Direct WhatsApp connect button and downloadable Marketing Media Kit for UK retail teams.
+   * Milestone Payment Release Engine with cryptographic verification (`PDV-SIG-...`).
+   * Electronic Foreign Inward Remittance Certificate (e-FIRC) generator for RBI / FEMA compliance.
+   * Multi-Vendor Consolidated Foreign Buyer Hub.
+   * ICC International Court of Arbitration Dispute Clause.
 
-2. **Screen 2: Exporter Login (Mobile-First Phone OTP):**
-   * Mobile phone input with `+91` flag prefix.
-   * 6-digit auto-advancing OTP boxes with WhatsApp resend fallback.
-   * 1-Click Instant Demo login shortcut for fast onboarding.
+2. **Exporter Operations Portal (`/index.html`):**
+   * Role-Based Access Control (RBAC): Owner, QC Manager (AQL 2.5), Floor Staff (Financial Blur Masking).
+   * Shop Floor Hindi Voice Note AI Transcriber (translates factory dialect into technical export spec).
+   * Two-Way Official Meta WhatsApp Cloud Bot Inbound Webhook Simulator.
+   * 1-Click Tally ERP & Excel Batch Consignment Import Engine.
+   * Direct Cloudflare R2 / AWS S3 Presigned URL Zero-Egress Storage.
+   * Custom Domain White-Label CNAME DNS configuration card.
+   * True Offline PWA Support with Service Worker shell caching.
 
-3. **Screen 3: Orders Dashboard:**
-   * Mobile-first order cards with status badges: `In Progress` (Amber), `Delayed` (Rose with weather reason), `Dispatched` (Blue).
-   * Filter pills (*All*, *In Progress*, *Delayed*, *Dispatched*).
-   * Bilingual hints in Hindi & English (*"चालू आर्डर"*, *"फोटो डालें"*).
-   * Floating Action Button (FAB) for 1-tap new order creation.
-
-4. **Screen 4: New Order Form Wizard (Under 60 Seconds):**
-   * 5 Pre-calibrated Manufacturing Cluster Presets:
-     * 🌸 **Jaipur** (Hand-block textiles, Dabu, garments)
-     * 🪵 **Jodhpur** (Solid sheesham/mango wood furniture)
-     * 🪔 **Moradabad** (Brassware & metalware)
-     * 👞 **Agra** (Leather footwear & bags)
-     * 🧶 **Bhadohi** (Hand-tufted wool carpets)
-   * Auto-populates production stages instantly.
-
-5. **Screen 5: Order Detail & 30-Second Photo Upload:**
-   * Active stage hero card with glowing pulse indicator.
-   * Giant 64px camera CTA (*"फोटो खींचें या गैलरी से चुनें"*).
-   * Client-side image compression (downscales 5MB photos to ~240KB in 300ms before sending).
-   * Bilingual note field with voice-to-text mic input.
-   * QC verification checkbox (touch target 48px).
-   * *"Mark Stage Complete & Notify Buyer"* + 1-tap *"Share on WhatsApp"*.
-
----
-
-## 🏆 The #1 Killer SaaS Feature: Milestone Approval + Payment Link
-
-Exporters don't just care about "tracking" — **they care about getting paid on time without advance payment disputes**. Padavo bridges trust by linking payment tranches directly to verified production milestones:
-
-1. **Buyer Milestone Sign-Off:**
-   Overseas buyers review timestamped artisan workshop photos on their zero-login tracking link and click **"✓ Approve Milestone (मंज़ूर करें)"** or **"⚠️ Request Modification (बदलाव चाहिए)"**.
-2. **Cryptographic Proof & SHA-256 Hash:**
-   Every approval is sealed with an unalterable timestamp and SHA-256 digital signature stored directly in the SQLite audit ledger.
-3. **Instant Wire Instructions & Invoice Download:**
-   Approving a milestone instantly unlocks the exporter's verified international wire details (Bank, SWIFT/BIC, IBAN, Proforma Invoice) — **without taking regulatory escrow custody** (zero RBI/licensing barriers).
-4. **1-Click Certified Dispute Evidence Certificate (PDF):**
-   Full audit packet compiled in 1 click for banks, freight forwarders, and insurance claims.
+3. **Production SaaS Landing Page (`/home.html`):**
+   * Pan-India Industrial Clusters Showcase (Jaipur, Moradabad, Jodhpur, Agra, Bhadohi).
+   * Live Milestone Payment Escrow & Cash Flow Calculator.
+   * Interactive ROI & Trust Calculator.
 
 ---
 
 ## 🛡️ Production SaaS Architecture & Hardening
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          PADAVO SAAS ARCHITECTURE                           │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  Frontend (public/index.html & buyer-tracking-uk.html)                      │
-│  • Modern Industrial Heritage Luxury Light Theme (default) + Dark Mode      │
-│  • Dual-Stack Engine: Responsive on both Port 3001 & 3000 (IPv4 + IPv6)     │
-│  • Milestone Approval & Wire Details Engine (Instant Invoice Generator)     │
-│  • Floor Staff WhatsApp Magic Link Simulator & Offline Auto-Sync Queue      │
-│  • Certified Dispute Audit Certificate Generator (Print / PDF)              │
-│  • Client-side Canvas Image Downscaler (<250KB per photo)                   │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  REST API & Engine (server.js)                                              │
-│  • Dual-Port Binding (Auto-serves localhost:3001 and localhost:3000)        │
-│  • Dual-Stack IPv4/IPv6 Support (Prevents Windows ERR_CONNECTION_REFUSED)   │
-│  • Health Check Monitoring (/health) for Docker, AWS, Render, Railway       │
-│  • Sliding-Window Rate Limiting (120 reqs/min general, 20 reqs/min auth)     │
-│  • Full Audit Logs Trail (audit_logs table)                                 │
-│  • scrypt Password Hashing (16-byte random salt + constant-time comparison) │
-│  • The Owner Staging Gate (floor uploads remain draft until owner approves) │
-│  • Magic Upload Links (factory floor workers snap photos with zero login)   │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  Database (database.sqlite)                                                 │
-│  • SQLite Write-Ahead Logging (WAL mode) for concurrent multi-tenant I/O   │
-│  • Tables: exporters, sessions, orders, order_stages, stage_photos,         │
-│            order_milestones, buyer_feedback, audit_logs                     │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          PADAVO SAAS ARCHITECTURE                       │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Frontend (public/index.html, home.html, buyer-tracking-uk.html)        │
+│  • Modern Industrial Heritage Luxury Responsive Design                  │
+│  • Strict Port 5500 Binding (Dual-Stack IPv4/IPv6 Support)              │
+│  • Milestone Approval & Wire Details Engine (Instant Invoice Generator) │
+│  • Floor Staff WhatsApp Magic Link Simulator & Offline Auto-Sync Queue  │
+│  • Certified Dispute Audit Certificate Generator (Print / PDF)          │
+│  • Client-side Canvas Image Downscaler (<250KB per photo)               │
+├─────────────────────────────────────────────────────────────────────────┤
+│  REST API & Engine (server.js)                                          │
+│  • Port 5500 Dedicated Binding with zero dependency footprint           │
+│  • Real-Time Server-Sent Events (SSE) live feed bus                     │
+│  • Health Check Monitoring (/health) for Docker, AWS, Render, Railway   │
+│  • Sliding-Window Rate Limiting (120 reqs/min general, 20 reqs/min auth)│
+│  • Full Audit Logs Trail (audit_logs table)                             │
+│  • scrypt Password Hashing (16-byte random salt + constant-time check)  │
+│  • The Owner Staging Gate (floor uploads remain draft until approved)   │
+│  • Self-healing zero-downtime database schema auto-migrations           │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Database (database.sqlite & PostgreSQL Supabase Schema)                │
+│  • SQLite Write-Ahead Logging (WAL mode) for concurrent I/O             │
+│  • Cloud ready: supabase_schema.sql with Row-Level Security (RLS)       │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -127,22 +104,25 @@ Padavo includes production deployment manifests ready for zero-configuration dep
 # Build the container
 docker build -t padavo:latest .
 
-# Run the container
-docker run -p 3001:3001 -v $(pwd)/uploads:/app/uploads padavo:latest
+# Run the container on Port 5500
+docker run -p 5500:5500 -v $(pwd)/uploads:/app/uploads padavo:latest
 ```
 
 ### Health Check Endpoint:
 ```bash
-curl http://localhost:3001/health
-# Returns: { "status": "healthy", "app": "Padavo SaaS Engine", "database": "connected", "uptime": "..." }
+curl http://localhost:5500/health
+# Returns: { "status": "healthy", "success": true, "database": "connected", "port": 5500 }
 ```
 
 ---
 
-## 💰 SaaS Pricing & Monetization Model
+## 🧪 Automated Senior QA Regression Suite
 
-* **Free Trial:** 3 active orders 100% Free (zero commitment).
-* **Pay-As-You-Go:** ₹199 per order (scales with export volume; feels like a courier charge).
-* **Export House Growth Plan:** ₹2,499/month for up to 25 concurrent orders with custom branded domain (`track.yourbrand.com`).
-#   p a d a v o  
- 
+Run the full automated test suite verifying all 26 business flows, security rules, and API contracts:
+```bash
+node run-senior-qa-suite.js
+```
+Expected output:
+```
+Total Tests: 26 | Passed: 26 ✅ | Failed: 0 ❌
+```

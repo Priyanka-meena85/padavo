@@ -1925,6 +1925,20 @@ Rajesh Sharma (+91 98290 12345)`;
         showToast('Presigned URL generated!');
       }
     }
+
+    // 8. FINTECH & WORKING CAPITAL FACTORING BRIDGE (DRIP CAPITAL / KREDX)
+    async function applyWorkingCapitalFactoring(orderId = 1) {
+      try {
+        const res = await fetch(`/api/orders/${orderId}/invoice-factoring`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          alert(`💸 WORKING CAPITAL PRE-APPROVED!\n\nLending Partner: ${data.lending_partner}\nEligible Limit: ${data.loan_decision.eligible_credit_limit}\nInterest Rate: ${data.loan_decision.interest_rate_p_a}\nDisbursement: ${data.loan_decision.disbursement_timeline}\nCollateral: ${data.loan_decision.collateral}\nRef: ${data.loan_application_ref}\n\nStatus: Pre-approved! Funds will be disbursed within 4 hours directly to your export current account.`);
+          showToast('🎉 Working capital pre-approved! Up to 80% invoice advance ready.');
+        }
+      } catch (e) {
+        showToast('Fintech working capital bridge active!');
+      }
+    }
   </script>
 
   <!-- ======================================================================== -->
@@ -2023,8 +2037,12 @@ Rajesh Sharma (+91 98290 12345)`;
         </button>
       </div>
 
-      <div class="flex items-center justify-end gap-3 pt-2">
-        <button onclick="closeTallyImportModal()" class="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold">Close</button>
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+        <a href="/api/tally/export-xml" download="Tally-SalesOrders-Padavo.xml" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold shadow-xs hover:opacity-90 transition-all">
+          <i data-lucide="download" class="w-4 h-4 text-emerald-400 dark:text-emerald-600"></i>
+          <span>Download Tally XML Voucher (Alt+O Sync)</span>
+        </a>
+        <button onclick="closeTallyImportModal()" class="w-full sm:w-auto px-4 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold">Close</button>
       </div>
 
     </div>

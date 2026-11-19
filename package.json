@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "node server.js",
     "health": "node -e \"fetch('http://localhost:5500/health').then(r=>r.json()).then(console.log)\"",
-    "test": "node -e \"console.log('Padavo tests passing!')\""
+    "test": "node run-senior-qa-suite.js"
   },
   "keywords": [
     "padavo",
