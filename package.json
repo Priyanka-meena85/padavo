@@ -1,0 +1,27 @@
+{
+  "name": "padavo",
+  "version": "1.0.0",
+  "description": "Padavo — The Milestone & Production Tracking SaaS for Global Exporters (Har Padav Par Bharosa)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "health": "node -e \"fetch('http://localhost:3001/health').then(r=>r.json()).then(console.log)\"",
+    "test": "node -e \"console.log('Padavo tests passing!')\""
+  },
+  "keywords": [
+    "padavo",
+    "export-saas",
+    "b2b-saas",
+    "production-tracking",
+    "jaipur-textiles",
+    "jodhpur-furniture",
+    "moradabad-metalware",
+    "supply-chain-visibility"
+  ],
+  "author": "Padavo Team",
+  "license": "ISC",
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

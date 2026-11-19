@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TraceCraft — Multi-Cluster Production Status Portal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#fbf7f4',
+              100: '#f5eee6',
+              200: '#ebdcce',
+              500: '#b46b38',
+              600: '#9b562a',
+              700: '#7f4422',
+              800: '#68381e',
+              900: '#542d19',
+            },
+            craft: {
+              emerald: '#0f5132',
+              indigo: '#203a43',
+              gold: '#c59b27',
+              charcoal: '#1a1d20',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .phone-mockup {
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.3), 0 0 0 12px #1e293b, 0 0 0 14px #475569;
+    }
+    .badge-shimmer {
+      background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 2.5s infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800 antialiased min-h-screen font-sans selection:bg-brand-500 selection:text-white">
+
+  <!-- TOP BAR: GLOBAL CONTROL CENTER & CLUSTER PICKER -->
+  <header class="bg-slate-950 border-b border-slate-800 sticky top-0 z-50 shadow-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        
+        <!-- Logo & Product Pitch -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-600 via-amber-600 to-amber-400 flex items-center justify-center text-white shadow-lg shadow-brand-900/40 font-bold text-xl font-serif">
+              TC
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-white font-bold tracking-tight text-lg">TraceCraft</span>
+                <span class="bg-brand-500/20 text-brand-300 border border-brand-500/30 text-[10px] font-mono uppercase px-2 py-0.5 rounded-full font-semibold">Multi-Cluster OS</span>
+              </div>
+              <p class="text-slate-400 text-xs hidden sm:block">Pan-India Export Production Visibility Engine</p>
+            </div>
+          </div>
+
+          <!-- View Persona Tabs (Mobile) -->
+          <div class="flex md:hidden items-center bg-slate-900 p-1 rounded-lg border border-slate-800 text-xs">
+            <button onclick="switchView('buyer')" id="tab-buyer-m" class="px-3 py-1.5 rounded-md font-medium transition-all text-white bg-brand-600 shadow-sm">Buyer Link</button>
+            <button onclick="switchView('exporter')" id="tab-exporter-m" class="px-3 py-1.5 rounded-md font-medium transition-all text-slate-400 hover:text-white">Exporter App</button>
+          </div>
+        </div>
+
+        <!-- Center: Cluster Selector Switcher -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none py-1">
+          <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider mr-1 hidden lg:inline">Hub:</span>
+          
+          <button onclick="selectCluster('jaipur')" id="cluster-btn-jaipur" class="cluster-btn active flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-brand-600 text-white shadow-sm shadow-brand-900/50 whitespace-nowrap">
+            <span>🌸</span>
+            <span>Jaipur Textiles</span>
+          </button>
+          
+          <button onclick="selectCluster('jodhpur')" id="cluster-btn-jodhpur" class="cluster-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap">
+            <span>🪵</span>
+            <span>Jodhpur Furniture</span>
+          </button>
+          
+          <button onclick="selectCluster('moradabad')" id="cluster-btn-moradabad" class="cluster-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap">
+            <span>🪔</span>
+            <span>Moradabad Brass</span>
+          </button>
+          
+          <button onclick="selectCluster('agra')" id="cluster-btn-agra" class="cluster-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap">
+            <span>👞</span>
+            <span>Agra Leather</span>
+          </button>
+
+          <button onclick="selectCluster('bhadohi')" id="cluster-btn-bhadohi" class="cluster-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap">
+            <span>🧶</span>
+            <span>Bhadohi Carpets</span>
+          </button>
+        </div>
+
+        <!-- Right: View Toggle (Buyer vs Exporter) & Device Simulator -->
+        <div class="hidden md:flex items-center gap-3">
+          <div class="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
+            <button onclick="switchView('buyer')" id="tab-buyer" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-medium transition-all text-white bg-brand-600 shadow-sm">
+              <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+              <span>Foreign Buyer Link (No Login)</span>
+            </button>
+            <button onclick="switchView('exporter')" id="tab-exporter" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+              <span>Exporter Portal & Gate</span>
+            </button>
+          </div>
+
+          <!-- Phone Frame Toggle (Buyer View Only) -->
+          <button onclick="toggleDeviceMode()" id="device-toggle-btn" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors border border-slate-700" title="Toggle Mobile Mockup View">
+            <i data-lucide="smartphone" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="py-6 px-3 sm:px-6">
+
+    <!-- ========================================== -->
+    <!-- VIEW A: FOREIGN BUYER LIVE TRACKING VIEW   -->
+    <!-- ========================================== -->
+    <div id="view-buyer" class="transition-all duration-300">
+      
+      <!-- Device Wrapper: Desktop or Mobile Phone Frame -->
+      <div id="buyer-frame-wrapper" class="max-w-4xl mx-auto transition-all duration-300">
+        
+        <!-- Live Public Tracking Page Container -->
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+          
+          <!-- Top Trust & Exporter Header -->
+          <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-5 sm:p-7 relative overflow-hidden">
+            <div class="absolute -right-16 -top-16 w-56 h-56 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+              <div class="flex items-center gap-4">
+                <div id="b-exporter-logo" class="h-14 w-14 rounded-xl bg-white p-2 shadow-md flex items-center justify-center font-bold text-brand-700 text-xl font-serif">
+                  RJ
+                </div>
+                <div>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h1 id="b-exporter-name" class="text-xl sm:text-2xl font-bold tracking-tight text-white font-serif">Royal Jaipur Crafts</h1>
+                    <span class="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-medium px-2.5 py-0.5 rounded-full">
+                      <i data-lucide="badge-check" class="w-3 h-3"></i>
+                      <span>Verified Export House</span>
+                    </span>
+                  </div>
+                  <p id="b-cluster-tag" class="text-xs text-slate-300 mt-1 flex items-center gap-1.5">
+                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-400"></i>
+                    <span>Sitapura Industrial Area, Jaipur • IEC Registered</span>
+                  </p>
+                </div>
+              </div>
+
+              <!-- Exporter Quick Direct Connect -->
+              <div class="flex items-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-700">
+                <a id="b-whatsapp-link" href="#" target="_blank" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition-colors shadow-sm">
+                  <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                  <span>Message Supplier</span>
+                </a>
+                <button onclick="openMediaKitModal()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-semibold px-3 py-2 rounded-xl transition-colors">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  <span class="hidden sm:inline">Marketing</span> Kit
+                </button>
+              </div>
+            </div>
+
+            <!-- Public Order Meta Card -->
+            <div class="mt-6 bg-slate-800/80 rounded-xl p-4 sm:p-5 border border-slate-700 backdrop-blur-sm">
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                <div>
+                  <span class="text-slate-400 uppercase tracking-wider font-mono text-[10px] block">Buyer PO Number</span>
+                  <span id="b-po-number" class="text-white font-bold text-sm font-mono mt-0.5 block">PO-US-8941</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 uppercase tracking-wider font-mono text-[10px] block">Destination</span>
+                  <span id="b-buyer-info" class="text-white font-bold text-sm mt-0.5 block">SOHO Studio, New York (US)</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 uppercase tracking-wider font-mono text-[10px] block">Batch Quantity</span>
+                  <span id="b-quantity" class="text-white font-bold text-sm mt-0.5 block">1,200 Pcs (5 Colorways)</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 uppercase tracking-wider font-mono text-[10px] block">Target Ex-Factory</span>
+                  <span id="b-delivery-date" class="text-emerald-400 font-bold text-sm mt-0.5 block">Dec 08, 2026</span>
+                </div>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="mt-5 pt-4 border-t border-slate-700/80">
+                <div class="flex items-center justify-between text-xs mb-2">
+                  <span class="text-slate-300 font-medium flex items-center gap-2">
+                    <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="b-current-stage-label">Current Stage: <strong>Hand Block Printing</strong></span>
+                  </span>
+                  <span id="b-progress-percent" class="font-bold text-white font-mono bg-brand-600 px-2 py-0.5 rounded text-[11px]">60% Complete</span>
+                </div>
+                <div class="w-full bg-slate-700 h-2.5 rounded-full overflow-hidden p-0.5">
+                  <div id="b-progress-bar" class="bg-gradient-to-r from-brand-500 via-amber-400 to-emerald-400 h-full rounded-full transition-all duration-700" style="width: 60%"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Production Timeline Body -->
+          <div class="p-5 sm:p-8 bg-slate-50/60">
+            
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h2 class="text-lg font-bold text-slate-900 tracking-tight">Production Milestones & Evidence</h2>
+                <p class="text-xs text-slate-500">Live photographic proof logged directly from the factory floor</p>
+              </div>
+              <span class="inline-flex items-center gap-1.5 text-xs text-slate-500 font-mono bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-sm">
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-emerald-600"></i>
+                <span id="b-last-updated">Updated 3h ago</span>
+              </span>
+            </div>
+
+            <!-- Stages Vertical Flow Container -->
+            <div id="stages-container" class="space-y-6 relative before:absolute before:inset-0 before:left-5 before:w-0.5 before:bg-slate-200">
+              <!-- Dynamically rendered via JS based on selected cluster -->
+            </div>
+
+            <!-- Buyer Feedback & Trust Section -->
+            <div class="mt-10 p-5 bg-white rounded-xl border border-slate-200 shadow-sm">
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <h3 class="text-sm font-bold text-slate-900">How is this production run going for your team?</h3>
+                  <p class="text-xs text-slate-500 mt-0.5">Your rating notifies the factory owner directly via WhatsApp</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button onclick="submitRating(5)" class="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-brand-500 hover:bg-brand-50 text-xs font-medium text-slate-700 transition-colors">
+                    <span>⭐️ 5.0</span>
+                    <span class="text-slate-400 hidden sm:inline">(Flawless)</span>
+                  </button>
+                  <button onclick="submitRating(4)" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-medium text-slate-700 transition-colors">
+                    <span>⭐️ 4.0</span>
+                  </button>
+                  <button onclick="openDisputeModal()" class="px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-200 hover:bg-amber-100 text-xs font-semibold text-amber-800 transition-colors">
+                    Flag Issue
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Zero-Login Security Footer -->
+            <div class="mt-8 pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+              <div class="flex items-center gap-2">
+                <i data-lucide="shield" class="w-4 h-4 text-emerald-600"></i>
+                <span>Private Encrypted Tracking Link • No login required</span>
+              </div>
+              <div class="font-mono text-[11px]">
+                Powered by <strong class="text-slate-700">TraceCraft OS</strong>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- VIEW B: EXPORTER MANAGEMENT & STAGING GATE -->
+    <!-- ========================================== -->
+    <div id="view-exporter" class="hidden max-w-6xl mx-auto transition-all duration-300">
+      
+      <!-- Top Action Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-xl font-bold text-white tracking-tight">Exporter Command Center</h2>
+          <p class="text-xs text-slate-400">Manage orders, approve floor photos before buyers see them, and generate links</p>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <button onclick="openNewOrderModal()" class="inline-flex items-center gap-2 bg-gradient-to-r from-brand-600 to-amber-600 hover:from-brand-500 hover:to-amber-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-brand-900/40 transition-all">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>+ Create New Export Order</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid: Order List + WhatsApp Staging Gate Simulation -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Column 1 & 2: Active Orders Across Clusters -->
+        <div class="lg:col-span-2 space-y-4">
+          <div class="bg-slate-900 rounded-2xl border border-slate-800 p-5 shadow-xl">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono text-slate-400">Active Export Orders</h3>
+              <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full border border-slate-700">5 Orders in Production</span>
+            </div>
+
+            <!-- Orders Table / Card List -->
+            <div class="space-y-3" id="exporter-orders-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 3: The "Owner Staging Gate" (Delay Chupane ka Tod) -->
+        <div class="space-y-4">
+          <div class="bg-slate-900 rounded-2xl border border-amber-500/30 p-5 shadow-xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none"></div>
+
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="flex h-2.5 w-2.5 relative">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                </span>
+                <h3 class="text-sm font-bold text-white">Owner Staging Gate</h3>
+              </div>
+              <span class="text-[10px] font-mono text-amber-400 bg-amber-950/80 border border-amber-800 px-2 py-0.5 rounded">1 Pending Approval</span>
+            </div>
+
+            <p class="text-xs text-slate-400 mb-4">
+              Photos uploaded by floor staff do <strong>NOT</strong> go live to the buyer automatically. You approve or edit notes here first.
+            </p>
+
+            <!-- Pending Review Card -->
+            <div id="staging-card" class="bg-slate-950 rounded-xl p-4 border border-slate-800 space-y-3">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-mono text-brand-400 font-semibold" id="stg-po">PO-US-8941</span>
+                <span class="text-slate-400 text-[11px]" id="stg-time">Uploaded 12 mins ago</span>
+              </div>
+              
+              <div class="flex items-center gap-3">
+                <img id="stg-thumb" src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=300&q=80" alt="Proof" class="w-16 h-16 rounded-lg object-cover border border-slate-700">
+                <div class="text-xs">
+                  <div class="font-bold text-white" id="stg-stage">QC Measurement Check</div>
+                  <div class="text-slate-400 text-[11px] mt-0.5">By: Mukesh (Sitapura Floor Master)</div>
+                  <div class="text-emerald-400 text-[11px] mt-0.5 flex items-center gap-1 font-mono">
+                    <i data-lucide="check" class="w-3 h-3"></i> Tape spec: Chest 38" OK
+                  </div>
+                </div>
+              </div>
+
+              <!-- Internal Staff Note -->
+              <div class="bg-slate-900 rounded p-2 text-[11px] text-slate-300 font-mono border border-slate-800">
+                <span class="text-slate-500">Floor Note:</span> "Masterji 10 piece ka measurement check kar diya, sab sahi hai."
+              </div>
+
+              <!-- Buyer-Facing Note Input (Editable) -->
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Buyer-Facing Polished Note:</label>
+                <input type="text" id="stg-buyer-note" value="In-line measurement audit completed against approved spec sheet. All tolerances within +/- 0.5cm." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-brand-500">
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="grid grid-cols-2 gap-2 pt-1">
+                <button onclick="approveStagingGate()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1">
+                  <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                  <span>Approve & Publish</span>
+                </button>
+                <button onclick="rejectStagingGate()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs py-2 rounded-lg transition-colors border border-slate-700">
+                  Hold / Re-take
+                </button>
+              </div>
+            </div>
+
+            <!-- WhatsApp Ingestion Explainer -->
+            <div class="mt-4 p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 text-[11px] text-slate-400">
+              <div class="flex items-center gap-1.5 text-emerald-400 font-semibold mb-1">
+                <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                <span>"WhatsApp-In, Web-Out" Live</span>
+              </div>
+              Staff sends photo to WhatsApp group with caption <code class="text-amber-300 bg-slate-900 px-1 py-0.5 rounded">#cutting</code> ➔ lands here automatically. Zero app login for factory workers.
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODAL: CREATE NEW EXPORT ORDER (CLUSTER ENGINE) -->
+  <!-- ========================================== -->
+  <div id="modal-new-order" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div>
+          <h3 class="text-lg font-bold text-white">Create New Export Order</h3>
+          <p class="text-xs text-slate-400">Pick an industry cluster to auto-fill calibrated stages</p>
+        </div>
+        <button onclick="closeNewOrderModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleCreateOrder(event)" class="mt-4 space-y-4">
+        
+        <!-- Cluster Selector Dropdown -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase font-mono">1. Select Industry Hub / Cluster</label>
+          <select id="form-cluster-select" onchange="updatePresetStagesInForm(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 font-medium">
+            <option value="jaipur">🌸 Jaipur (Textiles, Hand-Block Print, Garments)</option>
+            <option value="jodhpur">🪵 Jodhpur (Solid Sheesham/Mango Furniture & Decor)</option>
+            <option value="moradabad">🪔 Moradabad (Brassware, Metal Lighting & Tableware)</option>
+            <option value="agra">👞 Agra & Kanpur (Leather Footwear, Bags & Saddlery)</option>
+            <option value="bhadohi">🧶 Bhadohi & Mirzapur (Hand-Tufted Wool Carpets & Rugs)</option>
+          </select>
+        </div>
+
+        <!-- Order Basics -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Buyer Company Name</label>
+            <input type="text" id="form-buyer-name" required placeholder="e.g. West Elm / Maison Bohème" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Buyer Country</label>
+            <input type="text" id="form-buyer-country" required placeholder="e.g. United States / France" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">PO / Order Reference</label>
+            <input type="text" id="form-po-ref" required placeholder="PO-2026-904" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500 font-mono">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Product Description</label>
+            <input type="text" id="form-product-name" required placeholder="Hand-block printed quilts" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Batch Quantity</label>
+            <input type="text" id="form-quantity" required placeholder="850 pcs" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Promised Ex-Factory Date</label>
+          <input type="date" id="form-delivery-date" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <!-- Dynamic Stages Review -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-semibold text-slate-300 uppercase font-mono">2. Production Workflow Stages</label>
+            <span class="text-[11px] text-brand-400">Auto-filled from cluster preset</span>
+          </div>
+          <div id="form-stages-preview" class="space-y-1.5 bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs">
+            <!-- Stage pills rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="pt-3 border-t border-slate-800 flex items-center justify-end gap-3">
+          <button type="button" onclick="closeNewOrderModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-colors">
+            Cancel
+          </button>
+          <button type="submit" class="bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-brand-900/40 transition-all flex items-center gap-1.5">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Generate Branded Tracking Link</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: PHOTO LIGHTBOX & ZOOM               -->
+  <!-- ========================================== -->
+  <div id="modal-lightbox" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex items-center justify-center p-4" onclick="closeLightbox()">
+    <div class="max-w-3xl w-full bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl" onclick="event.stopPropagation()">
+      <div class="relative">
+        <img id="lightbox-img" src="" alt="Proof High Res" class="w-full max-h-[70vh] object-contain bg-black">
+        <button onclick="closeLightbox()" class="absolute top-4 right-4 bg-slate-950/80 hover:bg-black text-white p-2 rounded-full border border-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-slate-900">
+        <div>
+          <div id="lightbox-title" class="font-bold text-white text-sm">Stage Photo Proof</div>
+          <div id="lightbox-caption" class="text-slate-400 mt-0.5">Logged with GPS & Timestamp Verification</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-lg font-mono text-[11px]">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+            <span>Watermark Authentic</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: BUYER MARKETING MEDIA KIT           -->
+  <!-- ========================================== -->
+  <div id="modal-mediakit" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <i data-lucide="camera" class="w-5 h-5 text-brand-400"></i>
+          <h3 class="text-base font-bold text-white">Artisan Marketing & Media Kit</h3>
+        </div>
+        <button onclick="closeMediaKitModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-300 mt-3">
+        Use high-resolution photos and short clips of your batch being crafted in India for your brand's Instagram, Shopify page, or email campaigns!
+      </p>
+      <div class="mt-4 space-y-2 text-xs">
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between">
+          <div>
+            <div class="font-semibold text-white">All Stage High-Res Photos (ZIP)</div>
+            <div class="text-[11px] text-slate-400">12 raw photos • Color corrected</div>
+          </div>
+          <button onclick="alert('Media pack downloaded! (Mockup simulation)')" class="bg-brand-600 hover:bg-brand-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs">
+            Download ZIP
+          </button>
+        </div>
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between">
+          <div>
+            <div class="font-semibold text-white">Artisan Story & Provenance Certificate</div>
+            <div class="text-[11px] text-slate-400">PDF printable card for retail hangtags</div>
+          </div>
+          <button onclick="alert('Provenance certificate PDF generated! (Mockup simulation)')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-3 py-1.5 rounded-lg text-xs border border-slate-700">
+            Get PDF
+          </button>
+        </div>
+      </div>
+      <div class="mt-5 text-center">
+        <button onclick="closeMediaKitModal()" class="text-xs text-slate-400 hover:text-white">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT: DATA & INTERACTION LOGIC -->
+  <script>
+    // ========================================================
+    // CLUSTER DATABASE WITH REALISTIC MULTI-HUB PRODUCTION DATA
+    // ========================================================
+    const CLUSTER_DATA = {
+      jaipur: {
+        id: 'jaipur',
+        name: 'Jaipur (Textiles & Garments)',
+        exporterName: 'Royal Jaipur Textiles & Crafts',
+        exporterInitials: 'RJ',
+        clusterLocation: 'Sitapura Industrial Area, Jaipur • RIICO Apparel Park',
+        poNumber: 'PO-US-8941',
+        buyerInfo: 'SOHO Studio, New York (US)',
+        productName: 'Hand-Block Printed Organic Cotton Maxi Dress',
+        quantity: '1,200 Pcs (5 Colorways)',
+        deliveryDate: 'Dec 08, 2026',
+        currentStage: 'Hand Block Printing',
+        progressPercent: 60,
+        stages: [
+          {
+            title: '1. Lab Dip & Fabric Dyeing',
+            status: 'completed',
+            completedDate: 'Nov 04, 2026 • 11:30 AM IST',
+            note: 'Organic cotton base fabric bleached and dyed to custom Pantone TCX shades. D65 standard lightbox test passed.',
+            qcProof: 'Pantone 18-1662 TCX Match Approved',
+            photos: [
+              'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80',
+              'https://images.unsplash.com/photo-1528458876861-544fd1761a91?auto=format&fit=crop&w=600&q=80'
+            ]
+          },
+          {
+            title: '2. Pattern Marker & Precision Cutting',
+            status: 'completed',
+            completedDate: 'Nov 10, 2026 • 04:15 PM IST',
+            note: 'Master pattern markers graded for US sizes XS to XL. Cutting bundles verified with serial tags.',
+            qcProof: 'Bundle Count: 1,200/1,200 Units Verified',
+            photos: [
+              'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?auto=format&fit=crop&w=600&q=80'
+            ]
+          },
+          {
+            title: '3. Hand Block Printing (Artisan Cluster)',
+            status: 'in-progress',
+            completedDate: 'In Progress • Estimated Nov 22',
+            note: 'Traditional wooden block carving registration check passed. Printing 4-color mud-resist Dabu technique in Sanganer workshop.',
+            qcProof: 'Registration alignment checked on strike-off',
+            photos: [
+              'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=600&q=80',
+              'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=600&q=80'
+            ]
+          },
+          {
+            title: '4. Stitching & Tailoring Assembly',
+            status: 'pending',
+            completedDate: 'Scheduled: Nov 23 - Nov 29',
+            note: 'Dedicated production line ready. Seam integrity (12 SPI) and cotton thread matching pre-inspected.',
+            qcProof: 'Wash/care label tech pack approved',
+            photos: []
+          },
+          {
+            title: '5. In-Line QC & Measuring Tape Audit',
+            status: 'pending',
+            completedDate: 'Scheduled: Dec 01',
+            note: 'AQL 2.5 standard measurement audit on chest, waist, and length across all sizes.',
+            qcProof: 'Measurement Spec Checklist Pending',
+            photos: []
+          },
+          {
+            title: '6. Steam Press, Barcode & Export Packing',
+            status: 'pending',
+            completedDate: 'Scheduled: Dec 06',
+            note: '7-ply export master cartons with moisture desiccant pouches. Polybag warning tags attached.',
+            qcProof: 'Carton gross weight & barcode test',
+            photos: []
+          }
+        ]
+      },
+
+      jodhpur: {
+        id: 'jodhpur',
+        name: 'Jodhpur (Solid Wood Furniture)',
+        exporterName: 'Marwar Heritage Furniture Exports',
+        exporterInitials: 'MH',
+        clusterLocation: 'Boranada Industrial Park, Jodhpur • JHEA Member',
+        poNumber: 'PO-EU-4412',
+        buyerInfo: 'Nordic Living Copenhagen (Denmark)',
+        productName: 'Reclaimed Solid Sheesham Dining Tables & Bench Set',
+        quantity: '85 Sets (1 x 40ft High Cube Container)',
+        deliveryDate: 'Dec 18, 2026',
+        currentStage: 'Hand Sanding & Assembly',
+        progressPercent: 50,
+        stages: [
+          {
+            title: '1. Wood Seasoning & Moisture Verification',
+            status: 'completed',
+            completedDate: 'Nov 02, 2026 • 10:00 AM IST',
+            note: 'Kiln drying completed. Wagner pinless moisture meter certified average moisture at 9.4% (strictly under 12% export limit).',
+            qcProof: 'Moisture Audit: 9.4% Passed',
+            photos: [
+              'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80',
+              'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80'
+            ]
+          },
+          {
+            title: '2. Mortise & Tenon Joinery Carpentry',
+            status: 'completed',
+            completedDate: 'Nov 09, 2026 • 05:30 PM IST',
+            note: 'Traditional wooden joinery fitted without external nails for maximum tensile load capacity.',
+            qcProof: 'Joint tensile strength load test verified',
+            photos: [
+              'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=600&q=80'
+            ]
+          },
+          {
+            title: '3. Hand Sanding & Assembly',
+            status: 'in-progress',
+            completedDate: 'In Progress • Estimated Nov 24',
+            note: 'Fine 320-grit manual sanding on table tops to expose natural wood grain. Corner bevels smoothed.',
+            qcProof: 'Surface flatness gauge checked',
+            photos: [
+              'https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=600&q=80'
+            ]
+          },
+          {
+            title: '4. Non-Toxic Honey Stain & Matt Polyurethane Seal',
+            status: 'pending',
+            completedDate: 'Scheduled: Nov 26 - Dec 03',
+            note: 'Lead-free eco stain meeting EU REACH standards. 3 coats of polyurethane waterproof sealer.',
+            qcProof: 'EU REACH Compliance Certificate',
+            photos: []
+          },
+          {
+            title: '5. Heavy-Duty Crate & Corner Foam Packaging',
+            status: 'pending',
+            completedDate: 'Scheduled: Dec 12',
+            note: '5-layer foam edge protectors with wooden skeletal pallets for safe sea transport.',
+            qcProof: 'Drop Test from 1.2m Height Verified',
+            photos: []
+          }
+        ]
+      },
+
+      moradabad: {
+        id: 'moradabad',
+        name: 'Moradabad (Brass & Metalware)',
+        exporterName: 'Peetal City Artisans Consortium',
+        exporterInitials: 'PC',
+        clusterLocation: 'Lakri Fazalpur Industrial Area, Moradabad (Peetal Nagri)',
+        poNumber: 'PO-UK-7109',
+        buyerInfo: 'The White Company, London (UK)',
+        productName: 'Hammered Antique Brass Tabletop Planters & Candlesticks',
+        quantity: '2,500 Pcs',
+        deliveryDate: 'Dec 02, 2026',
+        currentStage: 'Electroplating & Clear Lacquer Coating',
+        progressPercent: 75,
+        stages: [
+          {
+            title: '1. Brass Ingot Melting & Sand Casting',
+            status: 'completed',
+            completedDate: 'Oct 28, 2026 • 02:00 PM IST',
+            note: 'Pure 65/35 virgin brass ingots melted in induction furnace. Sand core molds checked for zero air voids.',
+            qcProof: 'Spectrometer metal purity: 65.2% Copper OK',
+            photos: [
+              'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=600&q=80'
+            ]
+          },
+          {
+            title: '2. Seam Grinding & Artisan Hand Hammering',
+            status: 'completed',
+            completedDate: 'Nov 06, 2026 • 06:00 PM IST',
+            note: 'Manual chasing and indent hammering by master peetal artisans. Dimensional consistency maintained.',
+            qcProof: 'Wall thickness tolerance: 1.5mm uniform',
+            photos: [
+              'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=600&q=80'
+            ]
+          },
+          {
+            title: '3. Electroplating & Clear Lacquer Coating',
+            status: 'in-progress',
+            completedDate: 'In Progress • Estimated Nov 20',
+            note: 'Electrophoretic brass bath followed by high-bake clear lacquer to eliminate tarnishing.',
+            qcProof: 'Plating Thickness: 12 Microns Tested',
+            photos: [
+              'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80'
+            ]
+          },
+          {
+            title: '4. Salt-Spray Anti-Tarnish Testing & Drop Test',
+            status: 'pending',
+            completedDate: 'Scheduled: Nov 25',
+            note: '24-hour salt spray chamber simulation to verify zero corrosion in ocean transit.',
+            qcProof: 'Anti-tarnish lab certificate',
+            photos: []
+          },
+          {
+            title: '5. Individual Gift Box & Master Carton Packing',
+            status: 'pending',
+            completedDate: 'Scheduled: Nov 29',
+            note: 'Recycled kraft gift packaging with custom UK EAN barcode labels applied.',
+            qcProof: 'Barcode scanner readability 100%',
+            photos: []
+          }
+        ]
+      },
+
+      agra: {
+        id: 'agra',
+        name: 'Agra (Leather Footwear & Bags)',
+        exporterName: 'Taj Leathercraft & Footwear Corp',
+        exporterInitials: 'TL',
+        clusterLocation: 'Nunhai Industrial Estate, Agra • CLE Registered',
+        poNumber: 'PO-AU-3091',
+        buyerInfo: 'R.M. Heritage Footwear, Melbourne (Australia)',
+        productName: 'Handmade Full-Grain Leather Chelsea Boots',
+        quantity: '600 Pairs',
+        deliveryDate: 'Dec 15, 2026',
+        currentStage: 'Goodyear Welt Stitching & Sole Assembly',
+        progressPercent: 65,
+        stages: [
+          {
+            title: '1. Full-Grain Cowhide Grading & Selection',
+            status: 'completed',
+            completedDate: 'Nov 01, 2026',
+            note: 'Vegetable-tanned full grain hides inspected for zero natural scars. Uniform 1.8mm thickness calibrated.',
+            qcProof: 'Hide Grade A++ Certified',
+            photos: [
+              'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=600&q=80'
+            ]
+          },
+          {
+            title: '2. Precision Clicking (Cutting) & Skiving',
+            status: 'completed',
+            completedDate: 'Nov 07, 2026',
+            note: 'Laser cut upper components with edge skiving for seamless overlay stitching.',
+            qcProof: 'Cutting yield: 82% efficiency verified',
+            photos: [
+              'https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&w=600&q=80'
+            ]
+          },
+          {
+            title: '3. Goodyear Welt Stitching & Sole Assembly',
+            status: 'in-progress',
+            completedDate: 'In Progress • Estimated Nov 23',
+            note: 'Genuine leather welt stitched to insole rib. Natural cork filler inserted for footbed cushioning.',
+            qcProof: 'Welt stitch density: 8 SPI verified',
+            photos: [
+              'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80'
+            ]
+          },
+          {
+            title: '4. Hand Cream Patina & Burnishing',
+            status: 'pending',
+            completedDate: 'Scheduled: Nov 28',
+            note: 'Artisanal hand-burnished toe finish with carnauba wax polish.',
+            qcProof: 'Color shade variance check against gold sample',
+            photos: []
+          },
+          {
+            title: '5. Fit Audit & Branded Box Packaging',
+            status: 'pending',
+            completedDate: 'Scheduled: Dec 05',
+            note: 'Cotton dust bags, spare laces, and branded shoe boxes in reinforced export cartons.',
+            qcProof: 'Australian custom size chart audit',
+            photos: []
+          }
+        ]
+      },
+
+      bhadohi: {
+        id: 'bhadohi',
+        name: 'Bhadohi (Hand-Tufted Carpets)',
+        exporterName: 'Bhadohi Loom Craft Exporters',
+        exporterInitials: 'BL',
+        clusterLocation: 'Main Carpet Park, Bhadohi (Carpet City, UP) • CEPC Member',
+        poNumber: 'PO-UAE-5520',
+        buyerInfo: 'Al-Dar Luxury Interiors, Dubai (UAE)',
+        productName: 'Hand-Tufted New Zealand Wool Architectural Rugs',
+        quantity: '140 Large Format Rugs (8x10 & 9x12 ft)',
+        deliveryDate: 'Dec 24, 2026',
+        currentStage: 'Artisan Frame Tufting (Looms)',
+        progressPercent: 40,
+        stages: [
+          {
+            title: '1. 100% NZ Wool Yarn Spinning & Dyeing',
+            status: 'completed',
+            completedDate: 'Oct 25, 2026',
+            note: 'Imported New Zealand long-staple wool dyed in pot dyeing vats to custom charcoal & beige shades.',
+            qcProof: 'Woolmark Fiber Purity Passed',
+            photos: [
+              'https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=600&q=80'
+            ]
+          },
+          {
+            title: '2. Cotton Primary Canvas Stenciling',
+            status: 'completed',
+            completedDate: 'Nov 03, 2026',
+            note: 'Full-scale 1:1 CAD artwork projected and stenciled onto high-tensile cotton canvas frames.',
+            qcProof: 'Dimensional geometric check: zero distortion',
+            photos: [
+              'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80'
+            ]
+          },
+          {
+            title: '3. Artisan Frame Tufting (Looms)',
+            status: 'in-progress',
+            completedDate: 'In Progress • Estimated Dec 02',
+            note: 'Skilled village artisans hand-tufting with pneumatic tools. High pile density of 4.5 lbs/sq yard.',
+            qcProof: 'Pile Height Gauge: 14mm Uniform',
+            photos: [
+              'https://images.unsplash.com/photo-1579656381226-5fc0f0100c3b?auto=format&fit=crop&w=600&q=80'
+            ]
+          },
+          {
+            title: '4. Natural Latex Backing & Secondary Cloth Bonding',
+            status: 'pending',
+            completedDate: 'Scheduled: Dec 08',
+            note: 'Odorless natural latex vulcanized under sunlight to lock tufts permanently into place.',
+            qcProof: 'Tuft lock pull strength test',
+            photos: []
+          },
+          {
+            title: '5. Manual Shearing, Carving & Roll Packing',
+            status: 'pending',
+            completedDate: 'Scheduled: Dec 18',
+            note: 'Bevel carving along pattern edges. Rolled in waterproof PVC sleeves with desiccants.',
+            qcProof: 'Heavy poly roll drop test',
+            photos: []
+          }
+        ]
+      }
+    };
+
+    // CURRENT STATE
+    let currentCluster = 'jaipur';
+    let currentView = 'buyer';
+    let isPhoneFrame = false;
+
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      renderCluster(currentCluster);
+      renderExporterOrders();
+      updatePresetStagesInForm(currentCluster);
+      lucide.createIcons();
+    });
+
+    // ========================================================
+    // CLUSTER SELECTOR SWITCHER
+    // ========================================================
+    function selectCluster(clusterKey) {
+      if (!CLUSTER_DATA[clusterKey]) return;
+      currentCluster = clusterKey;
+
+      // Update Top Nav Button States
+      document.querySelectorAll('.cluster-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-brand-600', 'text-white');
+        btn.classList.add('bg-slate-800', 'text-slate-300');
+      });
+      const activeBtn = document.getElementById(`cluster-btn-${clusterKey}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-slate-800', 'text-slate-300');
+        activeBtn.classList.add('active', 'bg-brand-600', 'text-white');
+      }
+
+      // Re-render Views
+      renderCluster(clusterKey);
+      renderExporterOrders();
+      updateStagingGatePreview(clusterKey);
+    }
+
+    // ========================================================
+    // RENDER BUYER LIVE TRACKING VIEW
+    // ========================================================
+    function renderCluster(clusterKey) {
+      const data = CLUSTER_DATA[clusterKey];
+
+      // Header Meta
+      document.getElementById('b-exporter-logo').innerText = data.exporterInitials;
+      document.getElementById('b-exporter-name').innerText = data.exporterName;
+      document.getElementById('b-cluster-tag').innerHTML = `
+        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-400"></i>
+        <span>${data.clusterLocation}</span>
+      `;
+      document.getElementById('b-po-number').innerText = data.poNumber;
+      document.getElementById('b-buyer-info').innerText = data.buyerInfo;
+      document.getElementById('b-quantity').innerText = `${data.quantity} • ${data.productName}`;
+      document.getElementById('b-delivery-date').innerText = data.deliveryDate;
+      document.getElementById('b-current-stage-label').innerHTML = `Current Stage: <strong>${data.currentStage}</strong>`;
+      document.getElementById('b-progress-percent').innerText = `${data.progressPercent}% Complete`;
+      document.getElementById('b-progress-bar').style.width = `${data.progressPercent}%`;
+
+      // Stages Flow Render
+      const container = document.getElementById('stages-container');
+      container.innerHTML = '';
+
+      data.stages.forEach((stage, idx) => {
+        const isDone = stage.status === 'completed';
+        const isCurrent = stage.status === 'in-progress';
+        const isPending = stage.status === 'pending';
+
+        const stageCard = document.createElement('div');
+        stageCard.className = `relative pl-12 transition-all ${isPending ? 'opacity-50' : 'opacity-100'}`;
+
+        // Status Node Indicator
+        let iconHtml = '';
+        if (isDone) {
+          iconHtml = `<div class="absolute left-2.5 top-1 -translate-x-1/2 w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-900/30 ring-4 ring-white"><i data-lucide="check" class="w-3.5 h-3.5"></i></div>`;
+        } else if (isCurrent) {
+          iconHtml = `<div class="absolute left-2.5 top-1 -translate-x-1/2 w-6 h-6 rounded-full bg-brand-500 text-white flex items-center justify-center shadow-lg shadow-brand-900/40 ring-4 ring-white animate-pulse"><i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i></div>`;
+        } else {
+          iconHtml = `<div class="absolute left-2.5 top-1 -translate-x-1/2 w-5 h-5 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center ring-4 ring-white text-[10px] font-mono">${idx + 1}</div>`;
+        }
+
+        // Photos HTML
+        let photosHtml = '';
+        if (stage.photos && stage.photos.length > 0) {
+          photosHtml = `
+            <div class="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              ${stage.photos.map(p => `
+                <div onclick="openLightbox('${p}', '${stage.title}', '${data.clusterLocation}')" class="group relative rounded-xl overflow-hidden bg-slate-100 cursor-pointer aspect-video border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                  <img src="${p}" alt="${stage.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
+                    <span class="text-white text-[10px] font-medium flex items-center gap-1">
+                      <i data-lucide="zoom-in" class="w-3 h-3"></i> View High-Res
+                    </span>
+                  </div>
+                  <div class="absolute top-1.5 right-1.5 bg-black/60 backdrop-blur-sm text-white text-[9px] font-mono px-1.5 py-0.5 rounded">
+                    Verified
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+
+        stageCard.innerHTML = `
+          ${iconHtml}
+          <div class="bg-white rounded-xl p-4 sm:p-5 border ${isCurrent ? 'border-brand-500/50 shadow-md ring-1 ring-brand-500/20' : 'border-slate-200'} shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
+              <h3 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+                <span>${stage.title}</span>
+                ${isCurrent ? '<span class="bg-brand-50 text-brand-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-brand-200">Active Stage</span>' : ''}
+              </h3>
+              <span class="text-xs font-mono text-slate-400">${stage.completedDate}</span>
+            </div>
+            
+            <p class="text-xs text-slate-600 leading-relaxed">${stage.note}</p>
+
+            ${stage.qcProof ? `
+              <div class="mt-2.5 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 text-[11px] font-medium px-2.5 py-1 rounded-lg border border-emerald-200">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
+                <span>QC Verified: ${stage.qcProof}</span>
+              </div>
+            ` : ''}
+
+            ${photosHtml}
+          </div>
+        `;
+
+        container.appendChild(stageCard);
+      });
+
+      lucide.createIcons();
+    }
+
+    // ========================================================
+    // RENDER EXPORTER DASHBOARD ORDERS
+    // ========================================================
+    function renderExporterOrders() {
+      const listContainer = document.getElementById('exporter-orders-list');
+      if (!listContainer) return;
+      listContainer.innerHTML = '';
+
+      Object.values(CLUSTER_DATA).forEach(order => {
+        const isSelected = order.id === currentCluster;
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-xl border transition-all cursor-pointer ${isSelected ? 'bg-slate-800 border-brand-500 ring-1 ring-brand-500/30' : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'}`;
+        card.onclick = () => selectCluster(order.id);
+
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-bold text-white text-sm font-mono">${order.poNumber}</span>
+                <span class="text-xs text-slate-300">• ${order.buyerInfo}</span>
+                <span class="bg-slate-800 text-brand-300 text-[10px] font-mono px-2 py-0.5 rounded border border-slate-700">${order.name}</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-1">${order.productName} • <strong>${order.quantity}</strong></p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${order.progressPercent === 100 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
+                ${order.currentStage}
+              </span>
+              <button onclick="copyTrackingLink('${order.id}', event)" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs" title="Copy Public Tracking Link">
+                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="mt-3 flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-800/80">
+            <span>Target Ex-Factory: <strong class="text-white">${order.deliveryDate}</strong></span>
+            <span class="font-mono text-emerald-400">${order.progressPercent}% Completed</span>
+          </div>
+        `;
+        listContainer.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    // ========================================================
+    // UPDATE STAGING GATE PREVIEW
+    // ========================================================
+    function updateStagingGatePreview(clusterKey) {
+      const data = CLUSTER_DATA[clusterKey];
+      document.getElementById('stg-po').innerText = data.poNumber;
+      document.getElementById('stg-stage').innerText = `${data.currentStage} Proof`;
+      if (data.stages[2] && data.stages[2].photos[0]) {
+        document.getElementById('stg-thumb').src = data.stages[2].photos[0];
+      }
+    }
+
+    function approveStagingGate() {
+      const note = document.getElementById('stg-buyer-note').value;
+      alert(`✅ APPROVED BY EXPORTER OWNER!\n\nNote published to Buyer Tracking Link:\n"${note}"\n\nForeign buyer notified automatically.`);
+      document.getElementById('staging-card').classList.add('opacity-40', 'pointer-events-none');
+    }
+
+    function rejectStagingGate() {
+      alert(`⚠️ HELD IN STAGING:\n\nMessage sent back to factory floor supervisor on WhatsApp: "Mukesh, photo blur hai, dubara lo."\nBuyer has NOT seen this.`);
+    }
+
+    // ========================================================
+    // VIEW SWITCHING (BUYER VS EXPORTER)
+    // ========================================================
+    function switchView(view) {
+      currentView = view;
+      const vBuyer = document.getElementById('view-buyer');
+      const vExporter = document.getElementById('view-exporter');
+
+      const btnBuyer = document.getElementById('tab-buyer');
+      const btnExporter = document.getElementById('tab-exporter');
+      const btnBuyerM = document.getElementById('tab-buyer-m');
+      const btnExporterM = document.getElementById('tab-exporter-m');
+
+      if (view === 'buyer') {
+        vBuyer.classList.remove('hidden');
+        vExporter.classList.add('hidden');
+        
+        btnBuyer.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-medium transition-all text-white bg-brand-600 shadow-sm';
+        btnExporter.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white';
+        if (btnBuyerM) {
+          btnBuyerM.className = 'px-3 py-1.5 rounded-md font-medium transition-all text-white bg-brand-600 shadow-sm';
+          btnExporterM.className = 'px-3 py-1.5 rounded-md font-medium transition-all text-slate-400 hover:text-white';
+        }
+      } else {
+        vBuyer.classList.add('hidden');
+        vExporter.classList.remove('hidden');
+
+        btnExporter.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-medium transition-all text-white bg-brand-600 shadow-sm';
+        btnBuyer.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white';
+        if (btnExporterM) {
+          btnExporterM.className = 'px-3 py-1.5 rounded-md font-medium transition-all text-white bg-brand-600 shadow-sm';
+          btnBuyerM.className = 'px-3 py-1.5 rounded-md font-medium transition-all text-slate-400 hover:text-white';
+        }
+      }
+      lucide.createIcons();
+    }
+
+    // ========================================================
+    // DEVICE TOGGLE (PHONE FRAME MOCKUP)
+    // ========================================================
+    function toggleDeviceMode() {
+      isPhoneFrame = !isPhoneFrame;
+      const wrapper = document.getElementById('buyer-frame-wrapper');
+      const toggleBtn = document.getElementById('device-toggle-btn');
+
+      if (isPhoneFrame) {
+        wrapper.className = 'max-w-sm mx-auto phone-mockup rounded-[40px] overflow-hidden my-6 transition-all duration-300';
+        toggleBtn.classList.add('bg-brand-600', 'text-white');
+        toggleBtn.classList.remove('bg-slate-800', 'text-slate-300');
+      } else {
+        wrapper.className = 'max-w-4xl mx-auto transition-all duration-300';
+        toggleBtn.classList.remove('bg-brand-600', 'text-white');
+        toggleBtn.classList.add('bg-slate-800', 'text-slate-300');
+      }
+    }
+
+    // ========================================================
+    // LIGHTBOX CONTROLS
+    // ========================================================
+    function openLightbox(url, title, caption) {
+      document.getElementById('lightbox-img').src = url;
+      document.getElementById('lightbox-title').innerText = title;
+      document.getElementById('lightbox-caption').innerText = caption;
+      document.getElementById('modal-lightbox').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeLightbox() {
+      document.getElementById('modal-lightbox').classList.add('hidden');
+    }
+
+    // ========================================================
+    // MEDIA KIT & RATING MODALS
+    // ========================================================
+    function openMediaKitModal() {
+      document.getElementById('modal-mediakit').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeMediaKitModal() {
+      document.getElementById('modal-mediakit').classList.add('hidden');
+    }
+
+    function submitRating(stars) {
+      alert(`⭐️ THANK YOU!\nYou submitted a ${stars}.0 star rating.\nThe factory owner and merchandiser have received your feedback on WhatsApp!`);
+    }
+
+    function openDisputeModal() {
+      const reason = prompt("Describe the specification or quality concern you'd like the factory owner to investigate:");
+      if (reason) {
+        alert(`🚨 Priority Notification Sent to Factory Managing Partner:\n\n"${reason}"\n\nThe exporter will respond within 4 business hours.`);
+      }
+    }
+
+    function copyTrackingLink(clusterKey, event) {
+      if (event) event.stopPropagation();
+      const dummyUrl = `https://track.tracecraft.in/${clusterKey}/po-${CLUSTER_DATA[clusterKey].poNumber.toLowerCase()}`;
+      navigator.clipboard.writeText(dummyUrl).then(() => {
+        alert(`🔗 PUBLIC TRACKING LINK COPIED!\n\n${dummyUrl}\n\nSend this directly to the overseas buyer via email or WhatsApp!`);
+      }).catch(() => {
+        alert(`Tracking Link:\n${dummyUrl}`);
+      });
+    }
+
+    // ========================================================
+    // NEW ORDER MODAL & PRESET STAGES
+    // ========================================================
+    function openNewOrderModal() {
+      document.getElementById('modal-new-order').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeNewOrderModal() {
+      document.getElementById('modal-new-order').classList.add('hidden');
+    }
+
+    function updatePresetStagesInForm(clusterKey) {
+      const preview = document.getElementById('form-stages-preview');
+      if (!preview || !CLUSTER_DATA[clusterKey]) return;
+
+      const stages = CLUSTER_DATA[clusterKey].stages;
+      preview.innerHTML = stages.map((s, i) => `
+        <div class="flex items-center justify-between py-1 px-2 rounded bg-slate-900 border border-slate-800">
+          <span class="text-white font-medium">${s.title}</span>
+          <span class="text-[10px] text-slate-500">Stage ${i + 1}</span>
+        </div>
+      `).join('');
+    }
+
+    function handleCreateOrder(e) {
+      e.preventDefault();
+      const cluster = document.getElementById('form-cluster-select').value;
+      const buyer = document.getElementById('form-buyer-name').value;
+      const po = document.getElementById('form-po-ref').value;
+      const product = document.getElementById('form-product-name').value;
+
+      alert(`🎉 ORDER CREATED SUCCESSFULLY!\n\nPO: ${po}\nBuyer: ${buyer}\nHub: ${CLUSTER_DATA[cluster].name}\n\nLive tracking link generated: track.tracecraft.in/export/${po.toLowerCase()}`);
+      closeNewOrderModal();
+      selectCluster(cluster);
+      switchView('buyer');
+    }
+  </script>
+</body>
+</html>

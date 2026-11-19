@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Padavo (पड़ाव) — Production & Milestone SaaS for Global Exporters</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Google Fonts: Plus Jakarta Sans + Playfair Display + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#fbf7f4',
+              100: '#f5eee6',
+              200: '#ebdcce',
+              300: '#dbbfab',
+              400: '#c59577',
+              500: '#b46b38',
+              600: '#9b562a',
+              700: '#7f4422',
+              800: '#68381e',
+              900: '#542d19',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom refined scrollbars */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .dark ::-webkit-scrollbar-thumb { background: #334155; }
+
+    /* Timeline connecting thread */
+    .timeline-thread::before {
+      content: '';
+      position: absolute;
+      top: 1.5rem;
+      bottom: 1.5rem;
+      left: 1.25rem;
+      width: 2px;
+      background: #e2e8f0;
+      z-index: 0;
+    }
+    .dark .timeline-thread::before {
+      background: #334155;
+    }
+
+    /* Print styles for dispute audit certificates */
+    @media print {
+      body * { visibility: hidden; }
+      #printable-dispute-area, #printable-dispute-area * { visibility: visible; }
+      #printable-dispute-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white !important;
+        color: black !important;
+        padding: 0 !important;
+      }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-[#f8fafc] dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased min-h-screen font-sans selection:bg-brand-500 selection:text-white transition-colors duration-200">
+
+  <!-- ======================================================================== -->
+  <!-- TOAST NOTIFICATION CONTAINER                                             -->
+  <!-- ======================================================================== -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 max-w-md pointer-events-none">
+    <div id="toast-icon" class="text-emerald-600 dark:text-emerald-400 shrink-0"><i data-lucide="check-circle" class="w-5 h-5"></i></div>
+    <div id="toast-message" class="text-xs font-semibold">Action completed successfully</div>
+  </div>
+
+  <!-- ======================================================================== -->
+  <!-- MOBILE SIDEBAR OVERLAY / DRAWER                                          -->
+  <!-- ======================================================================== -->
+  <div id="mobile-sidebar-backdrop" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 hidden lg:hidden transition-opacity" onclick="toggleMobileSidebar()"></div>
+  <aside id="mobile-sidebar" class="fixed top-0 bottom-0 left-0 w-72 bg-slate-900 text-white z-50 transform -translate-x-full transition-transform duration-300 lg:hidden flex flex-col justify-between p-4 shadow-2xl">
+    <div>
+      <!-- Drawer Logo & Close -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-brand-600 via-amber-600 to-amber-500 flex items-center justify-center text-white font-bold text-lg font-serif shadow-md shadow-brand-600/30">
+            P
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-white font-bold text-base tracking-tight">Padavo</span>
+              <span class="bg-emerald-500/20 text-emerald-300 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">SaaS v1.2</span>
+            </div>
+            <p class="text-[10px] text-slate-400 font-medium">Har Padav Par Bharosa</p>
+          </div>
+        </div>
+        <button onclick="toggleMobileSidebar()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="mt-4 space-y-1 text-xs">
+        <button onclick="navigate('dashboard'); toggleMobileSidebar();" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-colors bg-brand-600 text-white">
+          <span class="flex items-center gap-2.5">
+            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+            <span>Active Orders</span>
+          </span>
+          <span class="bg-white/20 text-white text-[10px] font-mono px-2 py-0.5 rounded-full font-bold">3</span>
+        </button>
+        <button onclick="navigate('milestones'); toggleMobileSidebar();" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
+          <span class="flex items-center gap-2.5">
+            <i data-lucide="coins" class="w-4 h-4 text-amber-400"></i>
+            <span>Milestones & Wires</span>
+          </span>
+          <span class="bg-amber-500/20 text-amber-300 text-[10px] font-mono px-2 py-0.5 rounded-full font-bold">1 Action</span>
+        </button>
+        <button onclick="navigate('order-detail'); toggleMobileSidebar();" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl font-semibold transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
+          <i data-lucide="camera" class="w-4 h-4 text-emerald-400"></i>
+          <span>Floor Tracking (30s)</span>
+        </button>
+        <button onclick="navigate('floor-staff'); toggleMobileSidebar();" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl font-semibold transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
+          <i data-lucide="message-circle" class="w-4 h-4 text-emerald-400"></i>
+          <span>Staff WhatsApp Links</span>
+        </button>
+        <button onclick="navigate('dispute'); toggleMobileSidebar();" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl font-semibold transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
+          <i data-lucide="shield-check" class="w-4 h-4 text-blue-400"></i>
+          <span>Dispute Evidence Vault</span>
+        </button>
+        <button onclick="navigate('settings'); toggleMobileSidebar();" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl font-semibold transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
+          <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
+          <span>Company & Wire Settings</span>
+        </button>
+        <a href="/buyer-tracking-uk.html" target="_blank" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
+          <span class="flex items-center gap-2.5">
+            <i data-lucide="external-link" class="w-4 h-4 text-cyan-400"></i>
+            <span>Buyer Live Tracking (UK)</span>
+          </span>
+          <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500"></i>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Mobile Footer Info -->
+    <div class="pt-4 border-t border-slate-800 text-xs">
+      <div class="flex items-center gap-2.5 mb-2">
+        <div class="h-8 w-8 rounded-full bg-brand-700 flex items-center justify-center text-white font-bold text-xs">RS</div>
+        <div>
+          <strong class="block text-white text-xs" id="mobile-user-name">Rajesh Sharma</strong>
+          <span class="block text-slate-400 text-[10px]">Zenith Global Exports</span>
+        </div>
+      </div>
+      <button onclick="navigate('auth'); toggleMobileSidebar();" class="w-full text-left py-1 text-slate-400 hover:text-rose-400 text-[11px] flex items-center gap-1.5">
+        <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Log Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ======================================================================== -->
+  <!-- MAIN APP CONTAINER WITH FIXED LEFT SIDEBAR                               -->
+  <!-- ======================================================================== -->
+  <div class="min-h-screen flex flex-col lg:flex-row">
+    
+    <!-- ====================================================================== -->
+    <!-- DESKTOP PROPER SIDEBAR (w-64 FIXED & HIGH-END SAAS)                    -->
+    <!-- ====================================================================== -->
+    <aside class="w-64 bg-slate-900 text-white shrink-0 min-h-screen sticky top-0 hidden lg:flex flex-col justify-between border-r border-slate-800/80 z-30 select-none">
+      
+      <div>
+        <!-- 1. Header & Brand Identity -->
+        <div class="p-5 border-b border-slate-800/80">
+          <div class="flex items-center gap-3 cursor-pointer" onclick="navigate('dashboard')">
+            <div class="h-10 w-10 rounded-2xl bg-gradient-to-tr from-brand-600 via-amber-600 to-amber-500 flex items-center justify-center text-white font-bold text-xl font-serif shadow-lg shadow-brand-600/30">
+              P
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-white font-bold text-lg tracking-tight">Padavo</span>
+                <span class="bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">Enterprise</span>
+              </div>
+              <p class="text-[11px] text-slate-400">Har Padav Par Bharosa</p>
+            </div>
+          </div>
+
+          <!-- Dynamic Workspace / Exporter Switcher -->
+          <div class="mt-4 p-2.5 bg-slate-800/70 rounded-xl border border-slate-700/80 hover:border-slate-600 transition-all cursor-pointer" onclick="navigate('settings')">
+            <div class="flex items-center justify-between">
+              <span class="text-[9px] font-mono uppercase tracking-wider text-brand-400 font-bold block">Current Exporter</span>
+              <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 text-slate-400"></i>
+            </div>
+            <strong class="text-white text-xs block truncate mt-0.5" id="sidebar-company-name">Zenith Global Exports Pvt Ltd</strong>
+            <span class="text-slate-400 text-[10px] block truncate" id="sidebar-cluster-name">Pan-India Multi-Cluster Hub</span>
+          </div>
+        </div>
+
+        <!-- 2. Navigation Sections -->
+        <div class="p-3 space-y-6">
+          
+          <!-- Operations Section -->
+          <div>
+            <span class="px-3 text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block mb-1.5">Operations</span>
+            <nav class="space-y-1 text-xs">
+              
+              <button onclick="navigate('dashboard')" id="nav-item-dashboard" class="sidebar-nav-item active w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-all bg-brand-600 text-white shadow-xs">
+                <span class="flex items-center gap-2.5">
+                  <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                  <span>Active Orders</span>
+                </span>
+                <span class="bg-white/20 text-white text-[10px] font-mono px-2 py-0.5 rounded-full font-bold">3</span>
+              </button>
+
+              <button onclick="navigate('milestones')" id="nav-item-milestones" class="sidebar-nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">
+                <span class="flex items-center gap-2.5">
+                  <i data-lucide="coins" class="w-4 h-4 text-amber-400"></i>
+                  <span>Milestones & Wires</span>
+                </span>
+                <span class="bg-amber-500/20 text-amber-300 text-[10px] font-mono px-2 py-0.5 rounded-full font-bold">1 Action</span>
+              </button>
+
+              <button onclick="navigate('order-detail')" id="nav-item-order-detail" class="sidebar-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">
+                <i data-lucide="camera" class="w-4 h-4 text-emerald-400"></i>
+                <span>Floor Tracking (30s)</span>
+              </button>
+
+              <button onclick="navigate('floor-staff')" id="nav-item-floor-staff" class="sidebar-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">
+                <i data-lucide="message-circle" class="w-4 h-4 text-emerald-400"></i>
+                <span>Staff WhatsApp Links</span>
+              </button>
+
+            </nav>
+          </div>
+
+          <!-- Trust & Legal Section -->
+          <div>
+            <span class="px-3 text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block mb-1.5">Buyer & Compliance</span>
+            <nav class="space-y-1 text-xs">
+              
+              <button onclick="navigate('dispute')" id="nav-item-dispute" class="sidebar-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">
+                <i data-lucide="shield-check" class="w-4 h-4 text-blue-400"></i>
+                <span>Dispute Evidence Vault</span>
+              </button>
+
+              <a href="/buyer-tracking-uk.html" target="_blank" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">
+                <span class="flex items-center gap-2.5">
+                  <i data-lucide="external-link" class="w-4 h-4 text-cyan-400"></i>
+                  <span>Buyer Portal (UK Live)</span>
+                </span>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500"></i>
+              </a>
+
+            </nav>
+          </div>
+
+          <!-- Settings Section -->
+          <div>
+            <span class="px-3 text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block mb-1.5">Settings</span>
+            <nav class="space-y-1 text-xs">
+              
+              <button onclick="navigate('settings')" id="nav-item-settings" class="sidebar-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">
+                <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
+                <span>Company & Wire Settings</span>
+              </button>
+
+            </nav>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 3. Sidebar Footer: Quota & User Profile -->
+      <div class="p-4 border-t border-slate-800 bg-slate-950/40">
+        
+        <!-- Quota Pill -->
+        <div class="mb-4 p-3 bg-slate-800/50 rounded-xl border border-slate-800 text-[11px]">
+          <div class="flex items-center justify-between text-slate-400 mb-1">
+            <span>Growth Plan</span>
+            <span class="font-mono font-bold text-white">3 / 100 POs</span>
+          </div>
+          <div class="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
+            <div class="bg-brand-500 h-full rounded-full" style="width: 3%"></div>
+          </div>
+        </div>
+
+        <!-- User Identity & Logout -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="h-9 w-9 rounded-xl bg-brand-700 flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-xs">
+              RS
+            </div>
+            <div class="min-w-0">
+              <strong class="text-white text-xs block truncate" id="sidebar-user-name">Rajesh Sharma</strong>
+              <span class="text-emerald-400 text-[10px] flex items-center gap-1">
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Director of Exports</span>
+              </span>
+            </div>
+          </div>
+          <button onclick="navigate('auth')" class="p-1.5 text-slate-400 hover:text-rose-400 transition-colors" title="Log Out">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+      </div>
+
+    </aside>
+
+    <!-- ====================================================================== -->
+    <!-- RIGHT MAIN WORKSPACE (RESPONSIVE FLUID CANVAS)                          -->
+    <!-- ====================================================================== -->
+    <div class="flex-1 flex flex-col min-w-0">
+      
+      <!-- Top Application Header Bar -->
+      <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-8 py-3.5 sticky top-0 z-20 flex items-center justify-between gap-4 shadow-2xs">
+        
+        <!-- Left: Mobile Hamburger & Search -->
+        <div class="flex items-center gap-3 flex-1 max-w-xl">
+          <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+
+          <!-- Search Field -->
+          <div class="relative w-full">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
+            <input type="text" id="global-search-input" onkeyup="filterOrdersBySearch(this.value)" placeholder="Search Purchase Order, Buyer, Destination Port, or Product..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-brand-500 focus:bg-white transition-all shadow-2xs">
+          </div>
+        </div>
+
+        <!-- Right: Multi-Cluster Hub Badge & Actions -->
+        <div class="flex items-center gap-2.5 shrink-0">
+          
+          <!-- Pan-India Hub Indicator -->
+          <div class="hidden md:flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+            <span class="text-slate-700 dark:text-slate-300 font-semibold" id="top-bar-cluster-label">Multi-Cluster Hub</span>
+            <span class="text-slate-400 font-mono text-[10px] hidden xl:inline">• Pan-India Manufacturing</span>
+          </div>
+
+          <!-- Create New Order CTA -->
+          <button onclick="openNewOrderModal()" class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm shadow-brand-600/30 transition-all min-h-[40px]">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">New Export PO</span>
+            <span class="sm:hidden">New PO</span>
+          </button>
+
+          <!-- Theme Toggle -->
+          <button onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition-colors" title="Toggle Light/Dark Theme">
+            <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
+            <i data-lucide="moon" class="w-4 h-4 block dark:hidden text-slate-600"></i>
+          </button>
+
+        </div>
+
+      </header>
+
+      <!-- Main Routed View Canvas -->
+      <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-6">
+
+        <!-- ================================================================== -->
+        <!-- VIEW 1: ACTIVE ORDERS DASHBOARD                                    -->
+        <!-- ================================================================== -->
+        <section id="view-dashboard" class="space-y-6">
+          
+          <!-- Welcome Hero Banner (PAN-INDIA ENTERPRISE) -->
+          <div class="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="text-[11px] font-mono uppercase tracking-wider text-brand-600 dark:text-brand-400 font-bold bg-brand-50 dark:bg-brand-950/40 px-2.5 py-0.5 rounded-md border border-brand-200 dark:border-brand-800">
+                  Pan-India Manufacturing Hub • All Industries
+                </span>
+                <span class="inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-md">
+                  <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> IEC: 0512098411
+                </span>
+              </div>
+              <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight" id="hero-company-heading">
+                Zenith Global Exports & Manufacturing
+              </h1>
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Real-time production evidence, unalterable milestone approvals, and instant wire release for foreign buyers.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2.5 shrink-0">
+              <button onclick="navigate('milestones')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 font-bold text-xs shadow-xs hover:bg-amber-100 transition-all">
+                <i data-lucide="coins" class="w-4 h-4 text-amber-600"></i>
+                <span>Review Pending Milestones (£5,600)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Metrics Summary -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[11px] font-mono text-slate-400 uppercase font-bold block">Active Consignments</span>
+              <span class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mt-1 block">3 Orders</span>
+              <span class="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Live Tracking Active
+              </span>
+            </div>
+            
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[11px] font-mono text-slate-400 uppercase font-bold block">In-Production Batches</span>
+              <span class="text-2xl sm:text-3xl font-bold text-amber-600 mt-1 block">2 Batches</span>
+              <span class="text-xs text-amber-700 font-semibold mt-1">Block Printing & Assembly</span>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[11px] font-mono text-slate-400 uppercase font-bold block">Milestone Tranches Ready</span>
+              <span class="text-2xl sm:text-3xl font-bold text-brand-600 mt-1 block">£5,600</span>
+              <span class="text-xs text-brand-700 font-semibold mt-1">Action Required by UK Buyer</span>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[11px] font-mono text-slate-400 uppercase font-bold block">Overseas Buyer Opens</span>
+              <span class="text-2xl sm:text-3xl font-bold text-blue-600 mt-1 block">14 Views</span>
+              <span class="text-xs text-slate-500 font-semibold mt-1">London, NY & Copenhagen</span>
+            </div>
+          </div>
+
+          <!-- Order Filter Bar -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+              <button onclick="filterOrders('all')" id="filter-all" class="filter-pill active px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xs whitespace-nowrap">
+                All Orders (3)
+              </button>
+              <button onclick="filterOrders('progress')" id="filter-progress" class="filter-pill px-4 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 whitespace-nowrap">
+                In Progress (2)
+              </button>
+              <button onclick="filterOrders('milestone')" id="filter-milestone" class="filter-pill px-4 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-900 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-slate-700 hover:bg-amber-50 whitespace-nowrap">
+                Milestone Action (1)
+              </button>
+              <button onclick="filterOrders('delayed')" id="filter-delayed" class="filter-pill px-4 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 whitespace-nowrap">
+                Weather Alerts (1)
+              </button>
+              <button onclick="filterOrders('dispatched')" id="filter-dispatched" class="filter-pill px-4 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 whitespace-nowrap">
+                Dispatched (0)
+              </button>
+            </div>
+
+            <span class="text-xs font-mono text-slate-400">Multi-Industry View • Pan-India</span>
+          </div>
+
+          <!-- Orders Grid (Mobile-First, Fluid Desktop Grid) -->
+          <div id="orders-cards-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            
+            <!-- ORDER 1: UK BUYER (TEXTILE CLUSTER) -->
+            <div class="order-card bg-white dark:bg-slate-900 rounded-3xl border-2 border-brand-500/80 p-6 shadow-xs hover:shadow-md transition-all cursor-pointer relative" onclick="openOrderDetail(1)">
+              
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono font-bold text-slate-900 dark:text-white text-lg">PO-UK-8492</span>
+                    <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-amber-200">
+                      <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                      <span>In Progress</span>
+                    </span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                    <span>🇬🇧</span> <strong class="text-slate-800 dark:text-slate-200">Toast & Co. Lifestyle Apparel, London (UK)</strong>
+                  </p>
+                </div>
+                
+                <button onclick="event.stopPropagation(); shareOrderOnWhatsApp('PO-UK-8492', 'Toast & Co.', 'rj-pouk8492-9a4f82bc10de')" class="h-9 w-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center border border-emerald-200 transition-colors" title="Share Tracking Link on WhatsApp">
+                  <i data-lucide="share-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+
+              <!-- Product Summary -->
+              <div class="mt-4 flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <img src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=150&q=80" alt="Block Print Dress" class="h-12 w-12 rounded-xl object-cover border border-slate-200">
+                <div class="text-xs">
+                  <h4 class="font-bold text-slate-800 dark:text-white">Indigo Dabu Organic Midi Dress</h4>
+                  <p class="text-slate-500 text-[11px]">850 Pcs (UK 8–18) • Jaipur & Surat Textile Hub</p>
+                </div>
+              </div>
+
+              <!-- #1 KILLER FEATURE CALLOUT BADGE -->
+              <div class="mt-4 p-3 bg-amber-50/80 rounded-xl border border-amber-300 text-xs">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-bold text-amber-950 flex items-center gap-1">
+                    <i data-lucide="coins" class="w-3.5 h-3.5 text-amber-600"></i>
+                    <span>Milestone 2 (40%): £5,600</span>
+                  </span>
+                  <span class="text-[10px] font-bold text-amber-800 bg-white px-2 py-0.5 rounded border border-amber-200">Action Ready</span>
+                </div>
+                <p class="text-[11px] text-amber-900 leading-snug">Buyer can approve printing proofs to release wire transfer details.</p>
+              </div>
+
+              <!-- Stage & Progress Bar -->
+              <div class="mt-4">
+                <div class="flex items-center justify-between text-xs mb-1.5">
+                  <span class="text-slate-600 dark:text-slate-400 font-medium">Stage 3 of 6: <strong>Hand Block Printing</strong></span>
+                  <span class="font-mono font-bold text-brand-600 text-xs">50% Done</span>
+                </div>
+                <div class="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                  <div class="bg-gradient-to-r from-brand-500 to-amber-500 h-full rounded-full" style="width: 50%"></div>
+                </div>
+              </div>
+
+              <!-- Card Footer -->
+              <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
+                <span>Target: <strong class="text-slate-800 dark:text-slate-200">Dec 12, 2026</strong></span>
+                <span class="text-brand-600 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  <span>Manage Consignment</span>
+                  <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                </span>
+              </div>
+
+            </div>
+
+            <!-- ORDER 2: US BUYER (GARMENTS) -->
+            <div class="order-card bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs hover:shadow-md transition-all cursor-pointer relative" onclick="openOrderDetail(1)">
+              
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono font-bold text-slate-900 dark:text-white text-lg">PO-US-8941</span>
+                    <span class="inline-flex items-center gap-1 bg-rose-50 text-rose-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-rose-200">
+                      <i data-lucide="alert-triangle" class="w-3 h-3 text-rose-600"></i>
+                      <span>Rain Delay (2 Days)</span>
+                    </span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                    <span>🇺🇸</span> <strong class="text-slate-800 dark:text-slate-200">SOHO Studio, New York (US)</strong>
+                  </p>
+                </div>
+                
+                <button onclick="event.stopPropagation(); shareOrderOnWhatsApp('PO-US-8941', 'SOHO Studio', 'rj-pous8941')" class="h-9 w-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center border border-slate-200 transition-colors">
+                  <i data-lucide="share-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+
+              <!-- Product Summary -->
+              <div class="mt-4 flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=150&q=80" alt="Maxi Dress" class="h-12 w-12 rounded-xl object-cover border border-slate-200">
+                <div class="text-xs">
+                  <h4 class="font-bold text-slate-800 dark:text-white">Organic Cotton Maxi Dress (5 Colors)</h4>
+                  <p class="text-slate-500 text-[11px]">1,200 Pcs • Tirupur / Surat Knitting Hub</p>
+                </div>
+              </div>
+
+              <!-- Delay Notice -->
+              <div class="mt-4 p-3 bg-rose-50/70 rounded-xl border border-rose-200 text-xs text-rose-900">
+                <span class="font-bold block">Rain Delay Staged:</span>
+                <span class="text-[11px]">Unseasonal rainfall delayed natural yard drying. Auto-buyer notification queued.</span>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="mt-4">
+                <div class="flex items-center justify-between text-xs mb-1.5">
+                  <span class="text-slate-600 dark:text-slate-400 font-medium">Stage 2 of 6: <strong>Fabric Cutting</strong></span>
+                  <span class="font-mono font-bold text-slate-700 text-xs">33% Done</span>
+                </div>
+                <div class="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                  <div class="bg-amber-500 h-full rounded-full" style="width: 33%"></div>
+                </div>
+              </div>
+
+              <!-- Card Footer -->
+              <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
+                <span>Target: <strong class="text-slate-800 dark:text-slate-200">Dec 14, 2026</strong></span>
+                <span class="text-slate-600 font-bold flex items-center gap-1">
+                  <span>View Details</span>
+                  <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                </span>
+              </div>
+
+            </div>
+
+            <!-- ORDER 3: EU BUYER (FURNITURE CLUSTER) -->
+            <div class="order-card bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs hover:shadow-md transition-all cursor-pointer relative" onclick="openOrderDetail(1)">
+              
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono font-bold text-slate-900 dark:text-white text-lg">PO-EU-4412</span>
+                    <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
+                      <span>In Assembly</span>
+                    </span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                    <span>🇩🇰</span> <strong class="text-slate-800 dark:text-slate-200">Nordic Living Copenhagen (Denmark)</strong>
+                  </p>
+                </div>
+                
+                <button onclick="event.stopPropagation(); shareOrderOnWhatsApp('PO-EU-4412', 'Nordic Living', 'rj-poeu4412')" class="h-9 w-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center border border-slate-200 transition-colors">
+                  <i data-lucide="share-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+
+              <!-- Product Summary -->
+              <div class="mt-4 flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=150&q=80" alt="Wood Furniture" class="h-12 w-12 rounded-xl object-cover border border-slate-200">
+                <div class="text-xs">
+                  <h4 class="font-bold text-slate-800 dark:text-white">Solid Sheesham Dining Sets (40ft HC)</h4>
+                  <p class="text-slate-500 text-[11px]">85 Sets • Jodhpur & Saharanpur Woodcraft Hub</p>
+                </div>
+              </div>
+
+              <!-- Proof Spec -->
+              <div class="mt-4 p-3 bg-emerald-50/70 rounded-xl border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2">
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                <span>Moisture meter certified at 9.4% (EU Compliant)</span>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="mt-4">
+                <div class="flex items-center justify-between text-xs mb-1.5">
+                  <span class="text-slate-600 dark:text-slate-400 font-medium">Stage 3 of 5: <strong>Hand Sanding & Assembly</strong></span>
+                  <span class="font-mono font-bold text-slate-700 text-xs">60% Done</span>
+                </div>
+                <div class="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                  <div class="bg-emerald-500 h-full rounded-full" style="width: 60%"></div>
+                </div>
+              </div>
+
+              <!-- Card Footer -->
+              <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
+                <span>Target: <strong class="text-slate-800 dark:text-slate-200">Dec 18, 2026</strong></span>
+                <span class="text-slate-600 font-bold flex items-center gap-1">
+                  <span>View Details</span>
+                  <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                </span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ================================================================== -->
+        <!-- VIEW 2: MILESTONES & PAYMENT TRANCHES CENTER                       -->
+        <!-- ================================================================== -->
+        <section id="view-milestones" class="space-y-6 hidden">
+          
+          <div class="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="bg-amber-100 text-amber-900 text-xs font-bold px-2.5 py-0.5 rounded-full font-mono">#1 Killer SaaS Feature</span>
+                <span class="text-xs text-slate-500">Zero-Escrow Direct Bank Wire Linking</span>
+              </div>
+              <h2 class="text-2xl font-bold text-slate-900 dark:text-white mt-1">Milestone Approvals & Payment Demands</h2>
+              <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Tie factory stage sign-offs directly to exporter payment releases</p>
+            </div>
+
+            <button onclick="sendWhatsAppPaymentDemand()" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-xs transition-all">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>⚡ Send WhatsApp Wire Request (£5,600)</span>
+            </button>
+          </div>
+
+          <!-- Active Milestones Table -->
+          <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
+            <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <h3 class="font-bold text-slate-900 dark:text-white text-base">All Scheduled Milestone Tranches (PO-UK-8492)</h3>
+              <span class="font-mono text-xs text-brand-600 font-bold">Total Contract: £14,000 GBP</span>
+            </div>
+
+            <div class="divide-y divide-slate-200 dark:divide-slate-800 text-xs">
+              
+              <!-- Milestone 1 -->
+              <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                <div class="flex items-start gap-3">
+                  <div class="h-8 w-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold shrink-0">1</div>
+                  <div>
+                    <strong class="text-slate-900 dark:text-white text-sm block">30% Advance on Contract Signing</strong>
+                    <span class="text-slate-500 text-[11px] block">Triggered on Lab Dip & Swatch Sign-Off • Invoice: INV-2026-UK-0849-M1</span>
+                    <span class="font-mono text-emerald-600 text-[10px] block mt-0.5">Hash: #PDV-SIG-ADV-8492A • Wire Received on Nov 05</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="font-mono font-bold text-emerald-700 text-sm">£4,200 GBP</span>
+                  <span class="bg-emerald-50 text-emerald-800 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200">Paid & Cleared ✓</span>
+                </div>
+              </div>
+
+              <!-- Milestone 2 (ACTION REQUIRED) -->
+              <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-amber-50/40 dark:bg-amber-950/20 border-l-4 border-amber-500">
+                <div class="flex items-start gap-3">
+                  <div class="h-8 w-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shrink-0">2</div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <strong class="text-slate-900 dark:text-white text-sm block">40% Mid-Production & Printing Sign-Off</strong>
+                      <span class="bg-amber-100 text-amber-900 px-2 py-0.5 rounded text-[10px] font-bold">Action Ready</span>
+                    </div>
+                    <span class="text-slate-600 dark:text-slate-400 text-[11px] block mt-0.5">Sanganer & Bagru artisan block printing proofs awaiting buyer approval</span>
+                    <span class="font-mono text-amber-700 text-[10px] block mt-0.5" id="view-milestone-hash">Status: Ready for Toast & Co. digital sign-off</span>
+                  </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2.5">
+                  <span class="font-mono font-bold text-slate-900 dark:text-white text-sm">£5,600 GBP</span>
+                  <button onclick="markMilestonePaid(8)" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-all shadow-xs">
+                    Mark Wire Received ✓
+                  </button>
+                  <button onclick="copyBuyerApprovalLink()" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs hover:bg-slate-50 transition-all shadow-xs">
+                    Copy Buyer Link
+                  </button>
+                </div>
+              </div>
+
+              <!-- Milestone 3 -->
+              <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors opacity-70">
+                <div class="flex items-start gap-3">
+                  <div class="h-8 w-8 rounded-xl bg-slate-200 text-slate-600 flex items-center justify-center font-bold shrink-0">3</div>
+                  <div>
+                    <strong class="text-slate-900 dark:text-white text-sm block">30% Final Balance Prior to Air Cargo Dispatch</strong>
+                    <span class="text-slate-500 text-[11px] block">Triggered after AQL 2.5 final inspection & master carton barcodes</span>
+                    <span class="text-slate-400 font-mono text-[10px] block mt-0.5">Scheduled for Dec 08</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="font-mono font-bold text-slate-500 text-sm">£4,200 GBP</span>
+                  <span class="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-xs font-semibold">Scheduled</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ================================================================== -->
+        <!-- VIEW 3: ORDER DETAIL & 30-SEC PHOTO UPLOAD                         -->
+        <!-- ================================================================== -->
+        <section id="view-order-detail" class="space-y-6 hidden">
+          
+          <!-- Back Bar & Quick Actions -->
+          <div class="flex items-center justify-between gap-4">
+            <button onclick="navigate('dashboard')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 font-semibold text-xs shadow-xs hover:bg-slate-50">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>
+              <span>Back to Active Orders</span>
+            </button>
+
+            <div class="flex items-center gap-2">
+              <button onclick="shareActiveOrderWhatsApp()" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-xs transition-all">
+                <i data-lucide="share-2" class="w-4 h-4"></i>
+                <span>Share Live Tracking Link</span>
+              </button>
+              <a href="/buyer-tracking-uk.html" target="_blank" class="inline-flex items-center gap-1.5 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 font-semibold text-xs px-3.5 py-2 rounded-xl shadow-xs hover:bg-slate-50">
+                <i data-lucide="external-link" class="w-4 h-4"></i>
+                <span>Open Buyer View</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Order Summary Card -->
+          <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-2xl font-bold font-mono text-slate-900 dark:text-white">PO-UK-8492</h2>
+                  <span class="bg-amber-50 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-amber-200">
+                    In Progress • 50%
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">Toast & Co. Lifestyle Apparel, London (UK) • 850 Pcs Indigo Dabu Organic Cotton Midi Dress</p>
+              </div>
+              <div class="text-left sm:text-right font-mono text-xs">
+                <span class="text-slate-400 block text-[10px] uppercase">Target Ex-Factory</span>
+                <strong class="text-emerald-600 text-sm block">Dec 12, 2026 (23 Days left)</strong>
+              </div>
+            </div>
+
+            <!-- Milestone Callout -->
+            <div class="mt-4 p-4 bg-amber-50/70 rounded-2xl border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div class="flex items-center gap-2.5">
+                <i data-lucide="coins" class="w-5 h-5 text-amber-600 shrink-0"></i>
+                <div>
+                  <strong class="text-amber-950 font-bold block">Milestone 2 (40% - £5,600) Ready for Sign-Off</strong>
+                  <span class="text-amber-900 text-[11px]">Buyer approves block printing proofs to release wire instructions.</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <button onclick="sendWhatsAppPaymentDemand()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-all shadow-xs">
+                  ⚡ Send WhatsApp Demand
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- HERO 30-SECOND UPLOAD BOX (WHATSAPP ERGONOMICS) -->
+          <div class="bg-white dark:bg-slate-900 rounded-3xl border-2 border-brand-500 p-6 sm:p-8 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span class="h-2.5 w-2.5 rounded-full bg-brand-500 animate-ping"></span>
+                <span class="text-xs font-mono uppercase tracking-wider text-brand-700 font-bold bg-brand-50 px-2.5 py-0.5 rounded-md border border-brand-200">
+                  Current Floor Stage
+                </span>
+              </div>
+              <span class="text-xs font-mono text-slate-400">Due Nov 24</span>
+            </div>
+
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white">
+              Stage 3: Hand Block Printing (Artisan Cluster Workshop)
+            </h3>
+            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
+              4-layer mud-resist Dabu technique stamping on teakwood printing tables.
+            </p>
+
+            <!-- THE GIANT 64PX CAMERA TRIGGER -->
+            <div class="mt-6">
+              <label for="camera-direct-input" class="group flex flex-col items-center justify-center p-8 border-2 border-dashed border-emerald-500 hover:border-emerald-600 bg-emerald-50/40 hover:bg-emerald-50 dark:bg-emerald-950/20 rounded-3xl cursor-pointer transition-all active:scale-[0.99] min-h-[64px]">
+                <div class="h-16 w-16 rounded-full bg-emerald-600 group-hover:bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 mb-3 transition-transform group-hover:scale-110">
+                  <i data-lucide="camera" class="w-8 h-8"></i>
+                </div>
+                <span class="text-base sm:text-lg font-bold text-emerald-900 dark:text-emerald-200 text-center">
+                  Tap to Take Live Photo or Pick from Gallery
+                </span>
+                <span class="text-xs text-slate-500 mt-1 text-center">
+                  Instant 30-sec upload • Client-side image compression downscales to ~240KB
+                </span>
+                <input type="file" id="camera-direct-input" accept="image/*" capture="environment" onchange="handleFloorPhotoSelect(event)" class="hidden">
+              </label>
+            </div>
+
+            <!-- Upload Progress Bar (Hidden by default) -->
+            <div id="upload-progress-box" class="hidden mt-4 p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <div class="flex items-center justify-between text-xs mb-2">
+                <span class="flex items-center gap-2 font-medium">
+                  <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-brand-600"></i>
+                  <span>Compressing & Uploading photo to order stream...</span>
+                </span>
+                <span id="upload-percent-text" class="font-mono font-bold text-brand-600">68%</span>
+              </div>
+              <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div id="upload-progress-bar" class="bg-brand-600 h-full rounded-full transition-all duration-300" style="width: 68%"></div>
+              </div>
+            </div>
+
+            <!-- Uploaded Photos Grid -->
+            <div class="mt-6">
+              <span class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">Stage Photo Proofs:</span>
+              <div id="current-stage-photos-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="relative group rounded-2xl overflow-hidden aspect-video bg-black border border-slate-200 shadow-xs cursor-pointer" onclick="openLightbox('https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=800&q=80', 'Teakwood Block Print Registration')">
+                  <img src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover">
+                  <span class="absolute bottom-1 left-1 bg-black/70 text-[9px] text-white px-2 py-0.5 rounded font-mono">Artisan Table</span>
+                </div>
+                <div class="relative group rounded-2xl overflow-hidden aspect-video bg-black border border-slate-200 shadow-xs cursor-pointer" onclick="openLightbox('https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=800&q=80', 'Sun Drying Yard in Bagru')">
+                  <img src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover">
+                  <span class="absolute bottom-1 left-1 bg-black/70 text-[9px] text-white px-2 py-0.5 rounded font-mono">Dye Yard</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bilingual Note Field -->
+            <div class="mt-5">
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Note for Overseas Buyer (एक लाइन का नोट लिखें):
+              </label>
+              <div class="relative">
+                <textarea id="stage-note-input" rows="2" placeholder="e.g. Dabu mud printing complete on 850 dresses. Sun drying in Bagru today." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-brand-500 resize-none shadow-2xs"></textarea>
+                <button onclick="simulateVoiceInput()" class="absolute right-3 bottom-3 p-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-600 hover:text-brand-600 transition-colors" title="Voice Input / बोलकर लिखें">
+                  <i data-lucide="mic" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- QC Verification Checkbox -->
+            <div class="mt-4 flex items-center gap-3 p-3.5 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <input type="checkbox" id="qc-verified-check" checked class="h-5 w-5 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 cursor-pointer">
+              <label for="qc-verified-check" class="text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                <strong>QC Verified:</strong> Strike-off block alignment checked against approved tech pack.
+              </label>
+            </div>
+
+            <!-- Mark Complete Button -->
+            <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <button onclick="markStageComplete(1, 3)" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-2xl shadow-md shadow-emerald-600/30 transition-all flex items-center gap-2 min-h-[48px]">
+                <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                <span>Mark Stage Complete & Update Buyer Stream</span>
+              </button>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ================================================================== -->
+        <!-- VIEW 4: FLOOR STAFF & WHATSAPP MAGIC LINKS                         -->
+        <!-- ================================================================== -->
+        <section id="view-floor-staff" class="space-y-6 hidden">
+          
+          <div class="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <span class="bg-emerald-100 text-emerald-900 text-xs font-bold px-2.5 py-0.5 rounded-full font-mono">Zero-Login WhatsApp Simplicity</span>
+              <h2 class="text-2xl font-bold text-slate-900 dark:text-white mt-1">Factory Floor Staff Magic Upload Links</h2>
+              <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Floor workers (Mukesh, Ramu, Iqbal) upload photos directly from WhatsApp without app downloads or passwords</p>
+            </div>
+
+            <button onclick="simulateFloorStaffUpload()" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-xs transition-all">
+              <i data-lucide="zap" class="w-4 h-4"></i>
+              <span>🤖 Test WhatsApp Floor Upload Simulation</span>
+            </button>
+          </div>
+
+          <!-- Staff Links Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="h-10 w-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold">
+                    <i data-lucide="smartphone" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <strong class="text-slate-900 dark:text-white text-sm block">PO-UK-8492 Magic Floor Token</strong>
+                    <span class="text-slate-500 text-xs">Assigned to Sanganer Printing Unit</span>
+                  </div>
+                </div>
+                <span class="bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-full text-[10px] font-bold">Active Token</span>
+              </div>
+
+              <div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 font-mono text-xs text-slate-600 dark:text-slate-400 break-all">
+                http://localhost:3001/api/public/magic-upload/magic-uk-8492-token
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button onclick="copyStaffMagicLink()" class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-all shadow-xs">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                  <span>Copy Magic Link</span>
+                </button>
+                <a href="https://wa.me/?text=Mukesh%20ji,%20PO-UK-8492%20ki%20printing%20photos%20yahan%20upload%20karein:%20http://localhost:3001/api/public/magic-upload/magic-uk-8492-token" target="_blank" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-all shadow-xs">
+                  <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                  <span>Send on WhatsApp</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Weak Internet & Offline Protection Card -->
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+              <div class="flex items-center gap-2 text-brand-600">
+                <i data-lucide="wifi" class="w-5 h-5"></i>
+                <h4 class="font-bold text-slate-900 dark:text-white text-sm">Shop Floor Offline Protection Engine</h4>
+              </div>
+              <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Factory basements in Sitapura and dye yards in Bagru often have weak 2G/3G connections. Padavo includes a client-side offline queue: photos taken by floor staff are stored locally and will <strong>auto-sync immediately</strong> when the worker steps into Wi-Fi or 4G range.
+              </p>
+              <div class="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-300 flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Auto-sync engine active • Zero lost uploads</span>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ================================================================== -->
+        <!-- VIEW 5: DISPUTE EVIDENCE VAULT & CERTIFICATES                      -->
+        <!-- ================================================================== -->
+        <section id="view-dispute" class="space-y-6 hidden">
+          
+          <div class="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <span class="bg-blue-100 text-blue-900 text-xs font-bold px-2.5 py-0.5 rounded-full font-mono">UNCITRAL Electronic Proof Compliant</span>
+              <h2 class="text-2xl font-bold text-slate-900 dark:text-white mt-1">Dispute Evidence & Audit Vault</h2>
+              <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Unalterable photographic proofs and buyer milestone approval certificates</p>
+            </div>
+
+            <button onclick="window.print()" class="inline-flex items-center gap-2 bg-slate-900 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-xs hover:bg-slate-800 transition-all">
+              <i data-lucide="printer" class="w-4 h-4"></i>
+              <span>Print / Save Certificate PDF</span>
+            </button>
+          </div>
+
+          <!-- Printable Dispute Certificate -->
+          <div id="printable-dispute-area" class="bg-white rounded-3xl border-2 border-slate-900 p-8 sm:p-10 shadow-sm text-slate-900">
+            
+            <!-- Certificate Header -->
+            <div class="border-b-2 border-slate-900 pb-6 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span class="text-xs font-mono font-bold tracking-widest uppercase text-slate-500">Government of India IEC Recognized Format</span>
+                <h3 class="text-2xl font-bold font-serif text-slate-900 mt-0.5">Official Certificate of Milestone & Quality Verification</h3>
+                <p class="text-xs text-slate-600 mt-1">Padavo Blockchain-Style Unalterable Production Audit Trail</p>
+              </div>
+              <div class="font-mono text-xs text-right">
+                <span class="text-slate-400 block text-[10px]">CERTIFICATE ID</span>
+                <strong class="text-slate-900 text-sm block">PDV-CERT-POUK8492</strong>
+                <span class="text-slate-500 text-[10px] block mt-0.5">Generated: Nov 19, 2026</span>
+              </div>
+            </div>
+
+            <!-- SHA-256 Cryptographic Hash -->
+            <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 mb-6 font-mono text-xs">
+              <span class="text-slate-400 block text-[10px] uppercase font-bold">SHA-256 Digital Integrity Proof (Tamper-Proof)</span>
+              <strong class="text-brand-700 break-all block mt-0.5">70E98CC2C2311B942C95ED42DBA23BC9AE33622DD3AA1E06A0B13C5EEB3A2972</strong>
+            </div>
+
+            <!-- Two-Column Exporter / Buyer Details -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs mb-8">
+              <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                <h5 class="font-bold uppercase font-mono text-[11px] mb-2 text-brand-700">1. Exporter Information</h5>
+                <p><strong>Company:</strong> <span id="cert-exporter-company">Zenith Global Exports & Manufacturing Pvt Ltd</span></p>
+                <p><strong>Cluster:</strong> Multi-Cluster Manufacturing Hub, India</p>
+                <p><strong>IEC Number:</strong> <span class="font-mono">0512098411</span></p>
+                <p><strong>Authorized Director:</strong> Rajesh Sharma (+91 98290 12345)</p>
+              </div>
+
+              <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                <h5 class="font-bold uppercase font-mono text-[11px] mb-2 text-brand-700">2. Foreign Buyer & Order Details</h5>
+                <p><strong>Buyer Entity:</strong> Toast & Co. Lifestyle Apparel, London (UK)</p>
+                <p><strong>Purchase Order:</strong> <span class="font-mono font-bold">PO-UK-8492</span></p>
+                <p><strong>Product:</strong> Hand-Block Printed Indigo Organic Cotton Midi Dress</p>
+                <p><strong>Contract Value:</strong> £14,000 GBP | Quantity: 850 Pcs</p>
+              </div>
+            </div>
+
+            <!-- Milestones Sign-off Table -->
+            <div class="mb-8">
+              <h5 class="font-bold uppercase font-mono text-[11px] mb-3 text-brand-700">3. Milestone Sign-off Ledger</h5>
+              <div class="border border-slate-200 rounded-2xl overflow-hidden text-xs">
+                <table class="w-full text-left font-mono text-[11px]">
+                  <thead class="bg-slate-100 border-b border-slate-200 text-slate-700">
+                    <tr>
+                      <th class="p-3">Milestone Tranche</th>
+                      <th class="p-3">Amount</th>
+                      <th class="p-3">Sign-off State</th>
+                      <th class="p-3">Cryptographic Seal</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-200">
+                    <tr>
+                      <td class="p-3">Milestone 1 (30% Advance)</td>
+                      <td class="p-3 font-bold text-emerald-700">£4,200</td>
+                      <td class="p-3"><span class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded font-bold">Paid & Cleared ✓</span></td>
+                      <td class="p-3 text-slate-500">PDV-SIG-ADV-8492A</td>
+                    </tr>
+                    <tr>
+                      <td class="p-3">Milestone 2 (40% Printing)</td>
+                      <td class="p-3 font-bold text-amber-700">£5,600</td>
+                      <td class="p-3"><span class="bg-amber-50 text-amber-800 px-2 py-0.5 rounded font-bold">Approved by Buyer ✓</span></td>
+                      <td class="p-3 text-slate-700 font-bold">PDV-SIG-657E83934735DF87</td>
+                    </tr>
+                    <tr>
+                      <td class="p-3">Milestone 3 (30% Dispatch)</td>
+                      <td class="p-3 font-bold text-slate-500">£4,200</td>
+                      <td class="p-3"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Pending (Stage 6)</span></td>
+                      <td class="p-3 text-slate-400">Scheduled Dec 08</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Certified Signatures -->
+            <div class="border-t-2 border-slate-900 pt-6 flex flex-col sm:flex-row items-center justify-between gap-6 text-[11px] text-slate-500">
+              <p>Generated by <strong>Padavo OS</strong> • Tamper-proof certificate for international trade</p>
+              <div class="flex items-center gap-8 font-mono text-center">
+                <div>
+                  <strong class="block text-slate-900 font-bold">Rajesh Sharma</strong>
+                  <span class="block text-[10px] text-slate-400">Exporter Director</span>
+                </div>
+                <div>
+                  <strong class="block text-slate-900 font-bold">Toast & Co. London</strong>
+                  <span class="block text-[10px] text-slate-400">Foreign Buyer QA</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ================================================================== -->
+        <!-- VIEW 6: COMPANY & WIRE SETTINGS                                    -->
+        <!-- ================================================================== -->
+        <section id="view-settings" class="space-y-6 hidden">
+          
+          <div class="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Company Profile & International Wire Settings</h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Configure your factory cluster and bank wire details shown on buyer tracking links</p>
+            
+            <form onsubmit="handleSettingsSave(event)" class="mt-6 space-y-4 max-w-2xl text-xs">
+              
+              <div>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Company / Export House Name:</label>
+                <input type="text" id="setting-company-name" value="Zenith Global Exports Pvt Ltd" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-slate-900 dark:text-white font-semibold focus:outline-none focus:border-brand-500">
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Manufacturing Industry / Cluster:</label>
+                  <select id="setting-cluster" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-slate-900 dark:text-white font-semibold focus:outline-none focus:border-brand-500">
+                    <option value="jaipur">Textiles & Garments (Jaipur / Surat / Tirupur)</option>
+                    <option value="moradabad">Brass & Metalware (Moradabad / Aligarh)</option>
+                    <option value="jodhpur">Solid Wood Furniture (Jodhpur / Saharanpur)</option>
+                    <option value="agra">Leather Footwear & Bags (Agra / Kanpur)</option>
+                    <option value="bhadohi">Hand-Tufted Carpets (Bhadohi / Panipat)</option>
+                    <option value="custom">Custom Global Manufacturing Line</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">IEC Number (Import Export Code):</label>
+                  <input type="text" id="setting-iec" value="0512098411" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-slate-900 dark:text-white font-mono focus:outline-none focus:border-brand-500">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Contact Phone:</label>
+                  <input type="text" id="setting-phone" value="+91 141 277 8900" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">WhatsApp Business Number:</label>
+                  <input type="text" id="setting-whatsapp" value="+91 98290 12345" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand-500">
+                </div>
+              </div>
+
+              <div class="pt-4 border-t border-slate-200 dark:border-slate-800">
+                <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-3">Default International Wire Transfer Coordinates</h4>
+                <div class="space-y-3">
+                  <div>
+                    <label class="block font-medium text-slate-500 mb-1">Bank Name & Branch:</label>
+                    <input type="text" id="setting-bank" value="State Bank of India, Overseas Branch" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-slate-900 dark:text-white font-mono focus:outline-none focus:border-brand-500">
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block font-medium text-slate-500 mb-1">SWIFT / BIC Code:</label>
+                      <input type="text" id="setting-swift" value="SBININBB141" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-slate-900 dark:text-white font-mono focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                      <label class="block font-medium text-slate-500 mb-1">IBAN / Export Account #:</label>
+                      <input type="text" id="setting-iban" value="IN64000201994827103" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-slate-900 dark:text-white font-mono focus:outline-none focus:border-brand-500">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-4">
+                <button type="submit" class="bg-brand-600 hover:bg-brand-500 text-white font-bold px-6 py-3 rounded-xl shadow-xs transition-all">
+                  Save Changes
+                </button>
+              </div>
+
+            </form>
+          </div>
+
+        </section>
+
+        <!-- ================================================================== -->
+        <!-- VIEW 7: PHONE OTP LOGIN                                            -->
+        <!-- ================================================================== -->
+        <section id="view-auth" class="space-y-6 hidden">
+          <div class="max-w-md mx-auto bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+            
+            <div class="h-14 w-14 rounded-2xl bg-brand-600 text-white flex items-center justify-center font-bold text-2xl font-serif mx-auto shadow-md shadow-brand-600/30 mb-4">
+              P
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white">Exporter Phone Login</h3>
+            <p class="text-xs text-slate-500 mt-1">No password hassle • OTP delivered directly on WhatsApp</p>
+
+            <div id="otp-phone-step" class="mt-6 space-y-4">
+              <div class="flex items-center rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-50 dark:bg-slate-950">
+                <span class="px-3.5 py-3 text-xs font-bold text-slate-600 border-r border-slate-200 dark:border-slate-800">🇮🇳 +91</span>
+                <input type="tel" id="login-phone-input" value="9829012345" class="w-full p-3 text-xs bg-transparent text-slate-900 dark:text-white font-mono focus:outline-none">
+              </div>
+              <button onclick="requestPhoneOTP()" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs py-3.5 rounded-2xl shadow-xs transition-all">
+                Send 6-Digit WhatsApp OTP
+              </button>
+              <button onclick="verifyPhoneOTP()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-white font-bold text-xs py-3 rounded-2xl transition-all">
+                ⚡ Instant Demo Login (Rajesh Sharma)
+              </button>
+            </div>
+
+            <div id="otp-boxes-step" class="mt-6 space-y-4 hidden">
+              <div class="flex justify-center gap-2">
+                <input type="text" maxlength="1" value="7" class="otp-box w-10 h-12 text-center text-lg font-bold font-mono border border-slate-200 rounded-xl bg-slate-50 text-slate-900 focus:border-brand-500 focus:outline-none">
+                <input type="text" maxlength="1" value="4" class="otp-box w-10 h-12 text-center text-lg font-bold font-mono border border-slate-200 rounded-xl bg-slate-50 text-slate-900 focus:border-brand-500 focus:outline-none">
+                <input type="text" maxlength="1" value="1" class="otp-box w-10 h-12 text-center text-lg font-bold font-mono border border-slate-200 rounded-xl bg-slate-50 text-slate-900 focus:border-brand-500 focus:outline-none">
+                <input type="text" maxlength="1" value="9" class="otp-box w-10 h-12 text-center text-lg font-bold font-mono border border-slate-200 rounded-xl bg-slate-50 text-slate-900 focus:border-brand-500 focus:outline-none">
+                <input type="text" maxlength="1" value="8" class="otp-box w-10 h-12 text-center text-lg font-bold font-mono border border-slate-200 rounded-xl bg-slate-50 text-slate-900 focus:border-brand-500 focus:outline-none">
+                <input type="text" maxlength="1" value="2" class="otp-box w-10 h-12 text-center text-lg font-bold font-mono border border-slate-200 rounded-xl bg-slate-50 text-slate-900 focus:border-brand-500 focus:outline-none">
+              </div>
+              <button onclick="verifyPhoneOTP()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 rounded-2xl shadow-xs transition-all">
+                Verify OTP & Enter Portal
+              </button>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Bottom Mobile Bar (Thumb-Friendly on Phones) -->
+      <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-30 px-3 py-2 flex items-center justify-around text-[10px]">
+        <button onclick="navigate('dashboard')" class="flex flex-col items-center gap-1 text-brand-600 font-bold">
+          <i data-lucide="layout-grid" class="w-5 h-5"></i>
+          <span>Orders</span>
+        </button>
+        <button onclick="navigate('milestones')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-900">
+          <i data-lucide="coins" class="w-5 h-5 text-amber-500"></i>
+          <span>Milestones</span>
+        </button>
+        <button onclick="navigate('order-detail')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-900">
+          <i data-lucide="camera" class="w-5 h-5 text-emerald-500"></i>
+          <span>30s Upload</span>
+        </button>
+        <button onclick="openNewOrderModal()" class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-900">
+          <i data-lucide="plus-circle" class="w-5 h-5 text-brand-600"></i>
+          <span>New PO</span>
+        </button>
+        <button onclick="toggleMobileSidebar()" class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-900">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+          <span>Menu</span>
+        </button>
+      </nav>
+
+    </div>
+
+  </div>
+
+  <!-- ======================================================================== -->
+  <!-- MODAL: NEW ORDER CREATION WIZARD (PAN-INDIA MULTI-INDUSTRY)              -->
+  <!-- ======================================================================== -->
+  <div id="modal-new-order" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="max-w-xl w-full bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-2xl my-8">
+      
+      <div class="p-6 sm:p-7 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-lg">Create New Export Order</h3>
+          <p class="text-xs text-slate-500">Generates encrypted buyer tracking link & floor magic token</p>
+        </div>
+        <button onclick="closeModal('modal-new-order')" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleCreateOrderSubmit(event)" class="p-6 sm:p-7 space-y-4 text-xs">
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">PO Number (खरीद आर्डर संख्या):</label>
+            <input type="text" id="ord-po-num" required placeholder="e.g. PO-DXB-9102" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Foreign Buyer & Destination:</label>
+            <input type="text" id="ord-buyer" required placeholder="e.g. Al-Futtaim Luxury, Dubai" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Product Description:</label>
+          <input type="text" id="ord-product" required placeholder="e.g. Hand-Hammered Antique Brass Tabletop Planters" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Quantity:</label>
+            <input type="text" id="ord-qty" required placeholder="e.g. 2,500 Pcs" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Contract Value:</label>
+            <input type="text" id="ord-val" required placeholder="e.g. $28,500 USD" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 font-mono text-slate-900 dark:text-white focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Target Ex-Factory:</label>
+            <input type="date" id="ord-date" required value="2026-12-20" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Manufacturing Hub & Cluster Template:</label>
+          <select id="ord-cluster" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-slate-900 dark:text-white font-semibold focus:outline-none focus:border-brand-500">
+            <option value="moradabad">Moradabad (Brass & Metalware: Melting, Hammering, Plating, Packing)</option>
+            <option value="jaipur">Jaipur (Hand-Block Textiles: Dyeing, Cutting, Block Print, Stitching, QC)</option>
+            <option value="tirupur">Tirupur / Surat (Knitted Garments: Yarn, Dyeing, Spreading, Overlock)</option>
+            <option value="jodhpur">Jodhpur (Solid Sheesham Furniture: Moisture, Carpentry, Sanding, Finish)</option>
+            <option value="agra">Agra (Leather Footwear: Hides, Clicking, Welt Stitching, Patina)</option>
+            <option value="bhadohi">Bhadohi (Hand-Tufted Carpets: Yarn, Stenciling, Tufting, Shearing)</option>
+            <option value="custom">Custom Production Line (Tailored Stages)</option>
+          </select>
+        </div>
+
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-order')" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 font-semibold">
+            Cancel
+          </button>
+          <button type="submit" class="bg-brand-600 hover:bg-brand-500 text-white font-bold px-6 py-2.5 rounded-xl shadow-xs transition-all">
+            Create Order & Generate Tracking Link
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================== -->
+  <!-- MODAL: FULL RESOLUTION LIGHTBOX                                          -->
+  <!-- ======================================================================== -->
+  <div id="lightbox" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4" onclick="closeLightbox()">
+    <div class="max-w-4xl w-full bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl" onclick="event.stopPropagation()">
+      <div class="relative bg-black flex items-center justify-center min-h-[50vh]">
+        <img id="lightbox-img" src="" alt="Proof High Res" class="max-h-[75vh] w-auto max-w-full object-contain">
+        <button onclick="closeLightbox()" class="absolute top-4 right-4 bg-slate-900/80 hover:bg-slate-800 text-white p-2.5 rounded-full border border-slate-700 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-6 bg-slate-900 text-white flex items-center justify-between text-xs">
+        <div>
+          <h4 id="lightbox-title" class="font-bold text-base">Photo Evidence</h4>
+          <span class="text-slate-400 text-xs">GPS & Workshop Timestamp Authenticated</span>
+        </div>
+        <span class="bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-mono text-xs border border-emerald-500/30">Verified Proof ✓</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================== -->
+  <!-- JAVASCRIPT CONTROLLERS & ENGINE WIRING                                    -->
+  <!-- ======================================================================== -->
+  <script>
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
+
+    // TOAST HELPER
+    function showToast(msg, isSuccess = true) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastMsg.innerText = msg;
+      toastIcon.innerHTML = isSuccess 
+        ? '<i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>' 
+        : '<i data-lucide="alert-circle" class="w-5 h-5 text-rose-600"></i>';
+      
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3500);
+    }
+
+    // NAVIGATION SYSTEM (SIDEBAR + VIEWS)
+    function navigate(screenName) {
+      const screens = ['dashboard', 'milestones', 'order-detail', 'floor-staff', 'dispute', 'settings', 'auth'];
+      screens.forEach(s => {
+        const el = document.getElementById(`view-${s}`);
+        if (el) el.classList.add('hidden');
+      });
+
+      const activeEl = document.getElementById(`view-${screenName}`);
+      if (activeEl) activeEl.classList.remove('hidden');
+
+      // Update Desktop Sidebar active styling
+      document.querySelectorAll('.sidebar-nav-item').forEach(btn => {
+        btn.classList.remove('bg-brand-600', 'text-white', 'shadow-xs');
+        btn.classList.add('text-slate-300');
+      });
+      const activeNav = document.getElementById(`nav-item-${screenName}`);
+      if (activeNav) {
+        activeNav.classList.remove('text-slate-300');
+        activeNav.classList.add('bg-brand-600', 'text-white', 'shadow-xs');
+      }
+
+      window.scrollTo(0, 0);
+      lucide.createIcons();
+    }
+
+    // MOBILE DRAWER TOGGLE
+    function toggleMobileSidebar() {
+      const drawer = document.getElementById('mobile-sidebar');
+      const backdrop = document.getElementById('mobile-sidebar-backdrop');
+      const isOpen = !drawer.classList.contains('-translate-x-full');
+
+      if (isOpen) {
+        drawer.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      } else {
+        drawer.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+      lucide.createIcons();
+    }
+
+    // THEME TOGGLE
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        showToast('Light Theme Active ☀️');
+      } else {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+        showToast('Dark Theme Active 🌙');
+      }
+      lucide.createIcons();
+    }
+
+    // LIGHTBOX CONTROLS
+    function openLightbox(url, title) {
+      document.getElementById('lightbox-img').src = url;
+      document.getElementById('lightbox-title').innerText = title || 'Photo Proof';
+      document.getElementById('lightbox').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.add('hidden');
+    }
+
+    // FILTER ORDERS IN DASHBOARD
+    function filterOrders(type) {
+      document.querySelectorAll('.filter-pill').forEach(p => {
+        p.classList.remove('active', 'bg-slate-900', 'text-white');
+        p.classList.add('bg-white', 'text-slate-700');
+      });
+      const activePill = document.getElementById(`filter-${type}`);
+      if (activePill) {
+        activePill.classList.remove('bg-white', 'text-slate-700');
+        activePill.classList.add('active', 'bg-slate-900', 'text-white');
+      }
+      showToast(`Filter applied: ${type.toUpperCase()}`);
+    }
+
+    function filterOrdersBySearch(query) {
+      const q = query.toLowerCase();
+      document.querySelectorAll('.order-card').forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.style.display = text.includes(q) ? 'block' : 'none';
+      });
+    }
+
+    // OPEN ORDER DETAIL VIEW
+    function openOrderDetail(id) {
+      navigate('order-detail');
+    }
+
+    // MODAL HELPERS
+    function openNewOrderModal() {
+      document.getElementById('modal-new-order').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // HANDLE CREATE NEW ORDER
+    async function handleCreateOrderSubmit(e) {
+      e.preventDefault();
+      const po = document.getElementById('ord-po-num').value;
+      const buyer = document.getElementById('ord-buyer').value;
+      const product = document.getElementById('ord-product').value;
+      const qty = document.getElementById('ord-qty').value;
+      const cluster = document.getElementById('ord-cluster').value;
+
+      showToast(`🎉 Order ${po} created! Live tracking slug & floor token active.`);
+      closeModal('modal-new-order');
+      navigate('dashboard');
+    }
+
+    // 30-SECOND PHOTO UPLOAD EMULATION
+    function handleFloorPhotoSelect(e) {
+      if (!e.target.files || e.target.files.length === 0) return;
+
+      const progressBox = document.getElementById('upload-progress-box');
+      const progressBar = document.getElementById('upload-progress-bar');
+      const percentText = document.getElementById('upload-percent-text');
+
+      progressBox.classList.remove('hidden');
+      let progress = 10;
+
+      const interval = setInterval(() => {
+        progress += 25;
+        if (progress > 100) {
+          clearInterval(interval);
+          progressBox.classList.add('hidden');
+          showToast('✅ Photo compressed to 240KB and synced to tracking link in 3 seconds!');
+          
+          const grid = document.getElementById('current-stage-photos-grid');
+          const newCard = document.createElement('div');
+          newCard.className = 'relative group rounded-2xl overflow-hidden aspect-video bg-black border-2 border-emerald-500 animate-pulse';
+          newCard.innerHTML = `
+            <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover">
+            <span class="absolute bottom-1 left-1 bg-emerald-600 text-[9px] text-white px-2 py-0.5 rounded font-mono font-bold">New Upload</span>
+          `;
+          grid.prepend(newCard);
+          lucide.createIcons();
+        } else {
+          progressBar.style.width = `${progress}%`;
+          percentText.innerText = `${progress}%`;
+        }
+      }, 150);
+    }
+
+    function simulateVoiceInput() {
+      const textarea = document.getElementById('stage-note-input');
+      textarea.value = "Mud-resist Dabu printing verified on all 850 dresses. Sun drying yard active.";
+      showToast('🎙️ Voice note converted to text!');
+    }
+
+    function markStageComplete(orderId, stageNum) {
+      showToast('🎉 Stage 3 marked complete! Order progress updated to 66%.');
+      navigate('dashboard');
+    }
+
+    // WHATSAPP SHARE LINKS
+    function shareActiveOrderWhatsApp() {
+      shareOrderOnWhatsApp('PO-UK-8492', 'Toast & Co. London', 'rj-pouk8492-9a4f82bc10de');
+    }
+
+    function shareOrderOnWhatsApp(po, buyer, slug) {
+      const msg = `Dear ${buyer}, greetings from Zenith Global Exports! Here is your live production tracking link for ${po}: ${window.location.origin}/buyer-tracking-uk.html`;
+      const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+      window.open(url, '_blank');
+      showToast('WhatsApp sharing link generated!');
+    }
+
+    // #1 KILLER FEATURE: WHATSAPP PAYMENT DEMAND
+    function sendWhatsAppPaymentDemand() {
+      const msg = `Dear Toast & Co. Accounts Payable, greetings from Zenith Global Exports!
+
+Stage 3 (Hand Block Printing) for PO-UK-8492 has been inspected and completed.
+
+Please find Proforma Invoice #INV-2026-UK-0849-M2 for Milestone 2 (£5,600 GBP / 40%) along with cryptographic photo evidence at:
+${window.location.origin}/buyer-tracking-uk.html
+
+Bank Wire Coordinates:
+Bank: State Bank of India, Overseas Branch
+SWIFT/BIC: SBININBB141
+IBAN: IN64000201994827103
+Beneficiary: Zenith Global Exports Pvt Ltd
+
+Thank you,
+Rajesh Sharma (+91 98290 12345)`;
+
+      const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+      window.open(url, '_blank');
+      showToast('⚡ WhatsApp Payment Demand & Wire instructions copied!');
+    }
+
+    function markMilestonePaid(id) {
+      const hash = document.getElementById('view-milestone-hash');
+      if (hash) {
+        hash.innerText = 'Paid & Cleared on Nov 19 ✓ • Ref: #PDV-WIRE-SETTLED';
+      }
+      showToast('🎉 Milestone 2 (£5,600) marked as received in accounting ledger!');
+    }
+
+    function copyBuyerApprovalLink() {
+      const link = `${window.location.origin}/buyer-tracking-uk.html`;
+      navigator.clipboard.writeText(link);
+      showToast('✓ Buyer Tracking link copied to clipboard!');
+    }
+
+    function copyStaffMagicLink() {
+      const link = `${window.location.origin}/api/public/magic-upload/magic-uk-8492-token`;
+      navigator.clipboard.writeText(link);
+      showToast('📲 Staff Zero-Login Upload link copied!');
+    }
+
+    function simulateFloorStaffUpload() {
+      showToast('🤖 Simulating floor supervisor Mukesh uploading photo via WhatsApp...');
+      setTimeout(() => {
+        showToast('✅ Mukesh uploaded "Indigo vat immersion photo" from shop floor!');
+      }, 1200);
+    }
+
+    // SETTINGS SAVE
+    function handleSettingsSave(e) {
+      e.preventDefault();
+      const company = document.getElementById('setting-company-name').value;
+      const cluster = document.getElementById('setting-cluster').value;
+
+      document.getElementById('sidebar-company-name').innerText = company;
+      document.getElementById('hero-company-heading').innerText = company;
+      document.getElementById('cert-exporter-company').innerText = company;
+      
+      showToast('✓ Company profile & wire coordinates updated successfully!');
+    }
+
+    // OTP LOGIC
+    function requestPhoneOTP() {
+      document.getElementById('otp-phone-step').classList.add('hidden');
+      document.getElementById('otp-boxes-step').classList.remove('hidden');
+      showToast('OTP sent to WhatsApp: +91 98290 12345');
+    }
+
+    function verifyPhoneOTP() {
+      showToast('Login verified! Welcome Rajesh Sharma.');
+      navigate('dashboard');
+    }
+  </script>
+</body>
+</html>
