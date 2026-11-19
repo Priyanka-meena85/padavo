@@ -11,38 +11,6 @@
   ],
   "routes": [
     {
-      "src": "/favicon.ico",
-      "dest": "/public/favicon.ico"
-    },
-    {
-      "src": "/favicon.png",
-      "dest": "/public/favicon.png"
-    },
-    {
-      "src": "/favicon.svg",
-      "dest": "/public/favicon.svg"
-    },
-    {
-      "src": "/logo.png",
-      "dest": "/public/logo.png"
-    },
-    {
-      "src": "/logo.jpg",
-      "dest": "/public/logo.jpg"
-    },
-    {
-      "src": "/padavo-logo.png",
-      "dest": "/public/padavo-logo.png"
-    },
-    {
-      "src": "/manifest.json",
-      "dest": "/public/manifest.json"
-    },
-    {
-      "src": "/sw.js",
-      "dest": "/public/sw.js"
-    },
-    {
       "src": "/(.*)",
       "dest": "/server.js"
     }
