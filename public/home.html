@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Padavo (पड़ाव) — The Milestone & Production Tracking Engine for Global Exporters</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Google Fonts: Plus Jakarta Sans + Playfair Display + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#fbf7f4',
+              100: '#f5eee6',
+              200: '#ebdcce',
+              300: '#dbbfab',
+              400: '#c59577',
+              500: '#b46b38',
+              600: '#9b562a',
+              700: '#7f4422',
+              800: '#68381e',
+              900: '#542d19',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Subtle background grid pattern */
+    .bg-grid-pattern {
+      background-size: 40px 40px;
+      background-image: linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    }
+    .glow-radial {
+      background: radial-gradient(circle at 50% 0%, rgba(180, 107, 56, 0.14) 0%, transparent 65%);
+    }
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.02); }
+    }
+    .pulse-badge {
+      animation: pulse-subtle 3s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 antialiased font-sans selection:bg-brand-500 selection:text-white">
+
+  <!-- ======================================================================== -->
+  <!-- TOP ANNOUNCEMENT BANNER                                                  -->
+  <!-- ======================================================================== -->
+  <div class="bg-slate-950 text-white text-xs py-2 px-4 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2 truncate">
+        <span class="bg-brand-600 text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded text-white shrink-0 tracking-wider">New Release</span>
+        <span class="truncate text-slate-300">Milestone Approvals & Direct Bank Wire Release: Connect shop-floor QC sign-offs to faster overseas payments.</span>
+      </div>
+      <div class="flex items-center gap-4 shrink-0 font-medium">
+        <a href="#killer-feature" class="text-amber-300 hover:text-amber-200 transition-colors flex items-center gap-1 font-semibold">
+          <span>See How It Works</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================== -->
+  <!-- GLOBAL HEADER & STICKY NAVBAR                                            -->
+  <!-- ======================================================================== -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 transition-all shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      
+      <!-- Brand Logo -->
+      <a href="/home.html" class="flex items-center gap-3 group">
+        <div class="h-11 w-11 rounded-2xl bg-gradient-to-tr from-brand-600 via-amber-600 to-amber-500 flex items-center justify-center text-white font-bold text-2xl font-serif shadow-lg shadow-brand-600/30 group-hover:scale-105 transition-transform">
+          P
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Padavo</span>
+            <span class="bg-brand-50 text-brand-700 font-mono text-[10px] font-bold px-2 py-0.5 rounded-full border border-brand-200">पड़ाव</span>
+          </div>
+          <p class="text-[11px] text-slate-500 font-medium hidden sm:block">Har Padav Par Bharosa • Milestone SaaS</p>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden lg:flex items-center gap-8 text-xs font-semibold text-slate-600">
+        <a href="#killer-feature" class="hover:text-brand-600 transition-colors flex items-center gap-1.5">
+          <span>Milestone Payments</span>
+          <span class="bg-amber-100 text-amber-800 text-[9px] font-mono px-1.5 py-0.5 rounded font-bold uppercase">#1 Pick</span>
+        </a>
+        <a href="#demo-preview" class="hover:text-brand-600 transition-colors">Interactive Demo</a>
+        <a href="#clusters" class="hover:text-brand-600 transition-colors">Pan-India Clusters</a>
+        <a href="#comparison" class="hover:text-brand-600 transition-colors">WhatsApp vs Padavo</a>
+        <a href="#calculator" class="hover:text-brand-600 transition-colors">ROI Calculator</a>
+        <a href="#pricing" class="hover:text-brand-600 transition-colors">Pricing</a>
+        <a href="#faq" class="hover:text-brand-600 transition-colors">FAQ</a>
+      </nav>
+
+      <!-- Right CTAs -->
+      <div class="flex items-center gap-3">
+        <a href="/buyer-tracking-uk.html" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-all shadow-xs">
+          <i data-lucide="globe" class="w-3.5 h-3.5 text-blue-600"></i>
+          <span>Live Buyer Demo</span>
+        </a>
+        <a href="/index.html" class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl shadow-md shadow-brand-600/30 transition-all hover:scale-102">
+          <span>Launch Exporter Portal</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ======================================================================== -->
+  <!-- HERO SECTION                                                             -->
+  <!-- ======================================================================== -->
+  <section class="relative pt-12 pb-16 sm:pt-20 sm:pb-24 overflow-hidden glow-radial bg-grid-pattern">
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+      
+      <!-- Trust Pill -->
+      <div class="inline-flex items-center gap-2 bg-white text-slate-800 border border-slate-200/90 px-4 py-1.5 rounded-full text-xs font-semibold shadow-xs mb-6 hover:border-brand-300 transition-all">
+        <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="font-medium text-slate-700">Built for Indian Manufacturers Exporting to UK, US, Europe & GCC</span>
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.12] max-w-5xl mx-auto">
+        Stop Chasing Foreign Buyers for Payments. <br class="hidden sm:block">
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 via-amber-600 to-amber-500">
+          Turn Shop-Floor Milestones into Wire Transfers.
+        </span>
+      </h1>
+
+      <!-- Subheadline -->
+      <p class="mt-6 text-base sm:text-lg lg:text-xl text-slate-600 max-w-3xl mx-auto font-normal leading-relaxed">
+        The only production milestone tracking SaaS built specifically for Indian export houses. Factory floor staff upload photo proofs in 30 seconds; overseas buyers digitally sign off on stages to <strong>instantly release your direct bank wire (TT) details</strong>.
+      </p>
+
+      <!-- CTA Action Group -->
+      <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="/index.html" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm sm:text-base px-8 py-4 rounded-2xl shadow-lg shadow-brand-600/30 transition-all hover:scale-102">
+          <i data-lucide="zap" class="w-5 h-5 text-amber-200"></i>
+          <span>Launch Free Pilot (3 Active Shipments)</span>
+        </a>
+
+        <a href="/buyer-tracking-uk.html" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm sm:text-base px-8 py-4 rounded-2xl border border-slate-300 shadow-xs transition-all hover:border-slate-400">
+          <i data-lucide="external-link" class="w-5 h-5 text-blue-600"></i>
+          <span>Inspect Live UK Buyer Tracking Page</span>
+        </a>
+      </div>
+
+      <!-- Live Trust Bar -->
+      <div class="mt-12 pt-8 border-t border-slate-200/80 max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs font-semibold text-slate-500">
+        <div class="flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+          <span>DGFT & EIC Standards Compliant</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i data-lucide="lock" class="w-4 h-4 text-emerald-600"></i>
+          <span>Zero Escrow Custody (Direct Bank TT)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i data-lucide="smartphone" class="w-4 h-4 text-emerald-600"></i>
+          <span>WhatsApp Easy for Floor Supervisors</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i data-lucide="layers" class="w-4 h-4 text-emerald-600"></i>
+          <span>Multi-Cluster: Textiles, Brass, Furniture, Leather</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ====================================================================== -->
+    <!-- INTERACTIVE 3-IN-1 PRODUCT SHOWCASE DEMO                              -->
+    <!-- ====================================================================== -->
+    <div id="demo-preview" class="mt-14 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-white rounded-3xl border-2 border-slate-200 shadow-2xl overflow-hidden">
+        
+        <!-- Window Chrome Bar & Interactive Tab Switcher -->
+        <div class="bg-slate-900 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-800">
+          
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1.5">
+              <span class="h-3 w-3 rounded-full bg-rose-500 inline-block"></span>
+              <span class="h-3 w-3 rounded-full bg-amber-500 inline-block"></span>
+              <span class="h-3 w-3 rounded-full bg-emerald-500 inline-block"></span>
+            </div>
+            <span class="font-mono text-xs text-slate-400 pl-2">padavo.app/track/rj-pouk8492</span>
+          </div>
+
+          <!-- Interactive View Switcher Tabs -->
+          <div class="flex items-center bg-slate-800 p-1 rounded-xl text-xs font-semibold">
+            <button onclick="switchDemoView('buyer')" id="tab-buyer" class="px-3.5 py-1.5 rounded-lg bg-brand-600 text-white font-bold transition-all flex items-center gap-1.5">
+              <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+              <span>1. Overseas Buyer View</span>
+            </button>
+            <button onclick="switchDemoView('floor')" id="tab-floor" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5">
+              <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+              <span>2. 30s Floor Staff Upload</span>
+            </button>
+            <button onclick="switchDemoView('exporter')" id="tab-exporter" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5">
+              <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+              <span>3. Exporter Radar</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- TAB CONTENT 1: OVERSEAS BUYER VIEW -->
+        <div id="view-buyer" class="p-6 sm:p-8 space-y-6">
+          <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono font-bold uppercase bg-brand-50 text-brand-700 px-2.5 py-0.5 rounded border border-brand-200">Live Tracking Link</span>
+                <span class="text-xs text-slate-500">Buyer: <strong>Toast & Co. Lifestyle Apparel (London, UK)</strong></span>
+              </div>
+              <h3 class="text-xl font-extrabold text-slate-900 mt-1">PO-UK-8492: 850 Pcs Indigo Hand-Block Maxi Dresses</h3>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-500">Contract Currency:</span>
+              <div class="inline-flex bg-slate-100 p-0.5 rounded-lg text-xs font-mono font-bold">
+                <button onclick="setCurrency('GBP', '£', 5600, 14000)" class="px-2 py-1 rounded bg-white text-slate-900 shadow-xs">GBP (£)</button>
+                <button onclick="setCurrency('USD', '$', 7200, 18000)" class="px-2 py-1 rounded text-slate-600 hover:text-slate-900">USD ($)</button>
+                <button onclick="setCurrency('EUR', '€', 6500, 16250)" class="px-2 py-1 rounded text-slate-600 hover:text-slate-900">EUR (€)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Buyer Interactive Milestone Approval Card -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left: Stage Evidence Photo with Lightbox Simulation -->
+            <div class="lg:col-span-5 space-y-3">
+              <div class="relative rounded-2xl overflow-hidden aspect-4/3 bg-slate-900 shadow-md group">
+                <img id="demo-stage-img" src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=700&q=80" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 flex flex-col justify-between p-4">
+                  <div class="flex items-center justify-between text-white text-[11px] font-mono">
+                    <span class="bg-black/60 px-2.5 py-1 rounded-md backdrop-blur-xs flex items-center gap-1.5">
+                      <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                      <span>Verified GPS: Sanganer Print Yard</span>
+                    </span>
+                    <span class="bg-black/60 px-2 py-1 rounded-md">Today 11:30 IST</span>
+                  </div>
+                  <div>
+                    <span class="text-amber-300 font-mono text-[10px] uppercase font-bold tracking-wider">Stage 3 of 6: Hand-Block Mud Resist Printing</span>
+                    <p class="text-white text-xs font-medium mt-0.5">"Strike-off swatch matching Pantone 19-4052 Classic Indigo TCX under D65 light."</p>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-xs text-slate-500 px-1 font-mono">
+                <span>Tamper-Proof SHA-256 Hash Stamped</span>
+                <span class="text-emerald-700 font-bold">✓ 100% Passed</span>
+              </div>
+            </div>
+
+            <!-- Right: Interactive Milestone Approval Card -->
+            <div class="lg:col-span-7 bg-gradient-to-br from-amber-50/70 via-orange-50/40 to-white p-6 sm:p-7 rounded-2xl border-2 border-amber-300 shadow-sm space-y-5">
+              
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <span class="text-[10px] font-mono uppercase font-bold tracking-wider bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-full inline-block">
+                    Milestone 2 Approval Required
+                  </span>
+                  <h4 class="text-lg font-bold text-slate-900 mt-2">
+                    Release Tranche 2 (<span id="curr-sym">£</span><span id="milestone-amt">5,600</span> — 40% Contract)
+                  </h4>
+                  <p class="text-xs text-slate-600 mt-1">
+                    Contract Total: <strong><span id="curr-sym2">£</span><span id="contract-total">14,000</span></strong> • 30% Advance Cleared ✓
+                  </p>
+                </div>
+                <div class="text-right shrink-0">
+                  <span class="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                    Target: Air Dispatch Oct 28
+                  </span>
+                </div>
+              </div>
+
+              <p class="text-xs text-slate-700 leading-relaxed bg-white/80 p-3 rounded-xl border border-amber-200">
+                UK Buyer verifies the block-print strike-off photo. Clicking <strong>Approve Milestone</strong> signs the cryptographic production approval and instantly generates the Proforma Invoice with direct SWIFT / IBAN wire release instructions.
+              </p>
+
+              <!-- Interactive Action Buttons -->
+              <div class="flex flex-col sm:flex-row items-center gap-3">
+                <button onclick="approveMilestoneDemo()" id="btn-approve-demo" class="w-full sm:flex-1 inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 px-4 rounded-xl shadow-md shadow-emerald-700/20 transition-all hover:scale-102">
+                  <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                  <span>Test Click: Approve Milestone & Release Wire</span>
+                </button>
+                <button onclick="requestChangeDemo()" id="btn-change-demo" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs py-3.5 px-4 rounded-xl border border-slate-300 transition-all">
+                  <i data-lucide="message-square" class="w-3.5 h-3.5 text-slate-500"></i>
+                  <span>Request Change</span>
+                </button>
+              </div>
+
+              <!-- Unlocked Wire Card (Appears on click) -->
+              <div id="demo-unlocked-wire" class="hidden p-4 bg-emerald-50 rounded-xl border border-emerald-300 text-xs space-y-2.5 animate-fadeIn">
+                <div class="flex items-center justify-between pb-2 border-b border-emerald-200">
+                  <span class="font-bold text-emerald-950 flex items-center gap-1.5">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                    <span>✓ Digital Approval Seal Created (Ref: #PDV-UK-8492-M2)</span>
+                  </span>
+                  <span class="font-mono text-[10px] text-emerald-700 font-bold">Due: <span id="curr-sym3">£</span><span id="milestone-amt2">5,600</span></span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-[11px] font-mono text-slate-800 pt-1">
+                  <div>
+                    <span class="text-slate-500 block text-[9px] uppercase">Bank</span>
+                    <strong>State Bank of India</strong>
+                  </div>
+                  <div>
+                    <span class="text-slate-500 block text-[9px] uppercase">SWIFT / BIC</span>
+                    <strong class="text-brand-600">SBININBB141</strong>
+                  </div>
+                  <div>
+                    <span class="text-slate-500 block text-[9px] uppercase">IBAN</span>
+                    <strong>IN64000201994827103</strong>
+                  </div>
+                  <div>
+                    <span class="text-slate-500 block text-[9px] uppercase">Proforma Invoice</span>
+                    <strong class="text-emerald-700">INV-2026-UK-0849</strong>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 2: 30s FLOOR STAFF UPLOAD -->
+        <div id="view-floor" class="hidden p-6 sm:p-8 space-y-6">
+          <div class="max-w-2xl mx-auto bg-slate-50 rounded-2xl border border-slate-200 p-6 space-y-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-xs font-mono font-bold uppercase text-brand-700 bg-brand-50 border border-brand-200 px-2 py-0.5 rounded">WhatsApp Floor Mode</span>
+                <h4 class="text-base font-bold text-slate-900 mt-1">Mukesh (Floor Supervisor) • Sitapura Table 4</h4>
+              </div>
+              <span class="text-xs font-mono text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full font-bold">
+                No Password Required
+              </span>
+            </div>
+
+            <!-- Upload Flow Simulator -->
+            <div class="p-6 bg-white rounded-xl border-2 border-dashed border-slate-300 text-center space-y-3">
+              <div class="h-14 w-14 mx-auto rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-2xl">
+                📷
+              </div>
+              <div>
+                <strong class="text-slate-900 text-sm block">Tap Camera to Snap Today's Production Proof</strong>
+                <p class="text-xs text-slate-500 mt-0.5">Automated on-device compression: 5.2MB raw image → 240KB web-ready proof in 1.4 seconds</p>
+              </div>
+              <div class="pt-2">
+                <button class="bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-xs inline-flex items-center gap-2">
+                  <i data-lucide="camera" class="w-4 h-4"></i>
+                  <span>Snap Photo / फोटो खींचो</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Auto-Sync Offline Card -->
+            <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i data-lucide="wifi" class="w-4 h-4 text-emerald-600"></i>
+                <span><strong>Weak 2G/3G Factory Protection:</strong> Photos save in phone cache and auto-sync when connection restores.</span>
+              </div>
+              <span class="text-xs font-mono font-bold text-emerald-700 shrink-0">100% Reliable</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 3: EXPORTER RADAR -->
+        <div id="view-exporter" class="hidden p-6 sm:p-8 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <span class="text-xs text-slate-500 font-medium">Active Foreign POs</span>
+              <strong class="text-2xl font-bold text-slate-900 block mt-1">12 Orders</strong>
+              <span class="text-xs text-emerald-600 font-semibold">UK, USA, Germany, Denmark</span>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <span class="text-xs text-slate-500 font-medium">Pending Milestone Wires</span>
+              <strong class="text-2xl font-bold text-amber-600 block mt-1">£24,800 GBP</strong>
+              <span class="text-xs text-amber-700 font-semibold">3 Orders Awaiting Buyer Approval</span>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <span class="text-xs text-slate-500 font-medium">Buyer Engagement Index</span>
+              <strong class="text-2xl font-bold text-emerald-600 block mt-1">98.4%</strong>
+              <span class="text-xs text-slate-500">Average link opened 4.2 times/week</span>
+            </div>
+          </div>
+          <div class="text-center pt-2">
+            <a href="/index.html" class="inline-flex items-center gap-2 text-xs font-bold text-brand-600 hover:text-brand-500">
+              <span>Open Complete Exporter Dashboard with Left Sidebar Navigation</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ======================================================================== -->
+  <!-- THE #1 KILLER FEATURE DEEP DIVE (MILESTONE PAYMENTS)                    -->
+  <!-- ======================================================================== -->
+  <section id="killer-feature" class="py-20 bg-white border-y border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-mono uppercase tracking-wider text-brand-600 font-bold bg-brand-50 border border-brand-200 px-3 py-1 rounded-full">
+          The Fundamental Shift in Export Cashflow
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-4 tracking-tight">
+          Exporters Don't Just Need Tracking.<br>
+          <span class="text-brand-600">They Need To Get Paid On Time.</span>
+        </h2>
+        <p class="text-base text-slate-600 mt-4">
+          Foreign buyers hesitate to pay advance tranches before seeing physical proof. Exporters hesitate to dye or stitch without funds. Padavo eliminates this friction by linking milestone approvals directly to your bank wire instructions.
+        </p>
+      </div>
+
+      <!-- 3-Step Milestone Workflow Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <div class="p-8 bg-slate-50 rounded-3xl border border-slate-200 space-y-4 hover:border-brand-300 transition-all">
+          <div class="h-12 w-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center font-bold text-lg font-mono shadow-md shadow-brand-600/30">
+            01
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Define Milestone Tranches</h3>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            When entering an export PO, set your payment contract terms (e.g., <strong>30% Advance</strong> on strike-off, <strong>40% Mid-Production</strong> on printing, <strong>30% Balance</strong> prior to sea/air dispatch).
+          </p>
+          <div class="p-3 bg-white rounded-xl border border-slate-200 text-xs font-mono text-slate-500">
+            Tranches: 30% • 40% • 30% Contract Split
+          </div>
+        </div>
+
+        <div class="p-8 bg-slate-50 rounded-3xl border border-slate-200 space-y-4 hover:border-brand-300 transition-all">
+          <div class="h-12 w-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold text-lg font-mono shadow-md shadow-amber-500/30">
+            02
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Buyer Approves Proofs</h3>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            The overseas buyer opens the branded tracking link on mobile or desktop. They inspect high-resolution, timestamped photos and click <strong>"Approve Milestone"</strong>.
+          </p>
+          <div class="p-3 bg-white rounded-xl border border-slate-200 text-xs font-mono text-slate-500">
+            Cryptographic SHA-256 Sign-Off Stamped
+          </div>
+        </div>
+
+        <div class="p-8 bg-slate-50 rounded-3xl border border-slate-200 space-y-4 hover:border-brand-300 transition-all">
+          <div class="h-12 w-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg font-mono shadow-md shadow-emerald-600/30">
+            03
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Direct Wire to Your Bank</h3>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Approval instantly generates Proforma Invoice PDF and unlocks your verified SWIFT / IBAN bank coordinates. Buyer wires money directly to your account.
+          </p>
+          <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs font-mono text-emerald-800 font-bold">
+            Zero Escrow Custody • Direct Bank TT
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======================================================================== -->
+  <!-- PAN-INDIA MULTI-CLUSTER MANUFACTURING ENGINE                             -->
+  <!-- ======================================================================== -->
+  <section id="clusters" class="py-20 bg-[#f8fafc]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-mono uppercase tracking-wider text-brand-600 font-bold bg-brand-50 border border-brand-200 px-3 py-1 rounded-full">
+          Pan-India Manufacturing Hubs
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-4 tracking-tight">
+          Pre-Calibrated for Every Major Indian Export Cluster
+        </h2>
+        <p class="text-base text-slate-600 mt-4">
+          Click on any industrial cluster below to see its pre-configured production checkpoints and international buyer QC specifications.
+        </p>
+      </div>
+
+      <!-- Interactive Clusters Selector Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- Cluster 1: Textiles -->
+        <div onclick="selectCluster('textiles')" class="cluster-card active bg-white p-7 rounded-3xl border-2 border-brand-500 shadow-md transition-all cursor-pointer space-y-4" data-cluster="textiles">
+          <div class="flex items-center justify-between">
+            <span class="text-3xl">🌸</span>
+            <span class="text-[10px] font-mono font-bold bg-brand-50 text-brand-700 px-2.5 py-0.5 rounded">Jaipur • Surat • Tirupur</span>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Hand-Block Textiles & Garments</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Lab dips, pattern markers, Dabu/Bagru resist strike-offs, 12 SPI stitching, and AQL 2.5 flat lay measurement audits.
+          </p>
+          <div class="pt-3 border-t border-slate-100 text-xs font-mono text-brand-700 font-bold flex items-center justify-between">
+            <span>QC: Pantone TCX Lightbox Match</span>
+            <i data-lucide="check" class="w-4 h-4"></i>
+          </div>
+        </div>
+
+        <!-- Cluster 2: Brassware -->
+        <div onclick="selectCluster('brass')" class="cluster-card bg-white p-7 rounded-3xl border border-slate-200 shadow-xs hover:border-brand-300 transition-all cursor-pointer space-y-4" data-cluster="brass">
+          <div class="flex items-center justify-between">
+            <span class="text-3xl">🪔</span>
+            <span class="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 px-2.5 py-0.5 rounded">Moradabad • Aligarh</span>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Brassware & Metal Arts</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Sand casting purity, seam grinding, hand hammering indent registration, electroplating, and salt-spray chamber test.
+          </p>
+          <div class="pt-3 border-t border-slate-100 text-xs font-mono text-slate-500">
+            QC: 24hr Corrosion & Purity Spectrometry
+          </div>
+        </div>
+
+        <!-- Cluster 3: Furniture -->
+        <div onclick="selectCluster('furniture')" class="cluster-card bg-white p-7 rounded-3xl border border-slate-200 shadow-xs hover:border-brand-300 transition-all cursor-pointer space-y-4" data-cluster="furniture">
+          <div class="flex items-center justify-between">
+            <span class="text-3xl">🪵</span>
+            <span class="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded">Jodhpur • Saharanpur</span>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Solid Wood Furniture</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Kiln seasoning, pinless moisture meter, mortise-tenon joinery pull test, REACH non-toxic seal, and crate drop tests.
+          </p>
+          <div class="pt-3 border-t border-slate-100 text-xs font-mono text-slate-500">
+            QC: Moisture < 12% & 1.2m Pallet Drop Test
+          </div>
+        </div>
+
+        <!-- Cluster 4: Leather -->
+        <div onclick="selectCluster('leather')" class="cluster-card bg-white p-7 rounded-3xl border border-slate-200 shadow-xs hover:border-brand-300 transition-all cursor-pointer space-y-4" data-cluster="leather">
+          <div class="flex items-center justify-between">
+            <span class="text-3xl">👞</span>
+            <span class="text-[10px] font-mono font-bold bg-orange-50 text-orange-800 px-2.5 py-0.5 rounded">Agra • Kanpur</span>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Leather Footwear & Bags</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Grade A++ cowhide selection, clicking yields, Goodyear welt pull test, edge burnishing, and last size verification.
+          </p>
+          <div class="pt-3 border-t border-slate-100 text-xs font-mono text-slate-500">
+            QC: Scar-Free Grain & Welt Tensile Pull
+          </div>
+        </div>
+
+        <!-- Cluster 5: Carpets -->
+        <div onclick="selectCluster('carpets')" class="cluster-card bg-white p-7 rounded-3xl border border-slate-200 shadow-xs hover:border-brand-300 transition-all cursor-pointer space-y-4" data-cluster="carpets">
+          <div class="flex items-center justify-between">
+            <span class="text-3xl">🧶</span>
+            <span class="text-[10px] font-mono font-bold bg-purple-50 text-purple-800 px-2.5 py-0.5 rounded">Bhadohi • Panipat</span>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Hand-Tufted Carpets & Rugs</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            NZ Woolmark pure yarn spinning, CAD 1:1 stenciling, artisan frame tufting, natural latex backing, and pile height gauge.
+          </p>
+          <div class="pt-3 border-t border-slate-100 text-xs font-mono text-slate-500">
+            QC: 14mm Uniform Pile Height Gauge
+          </div>
+        </div>
+
+        <!-- Cluster 6: Custom Production -->
+        <div onclick="selectCluster('custom')" class="cluster-card bg-white p-7 rounded-3xl border border-slate-200 shadow-xs hover:border-brand-300 transition-all cursor-pointer space-y-4" data-cluster="custom">
+          <div class="flex items-center justify-between">
+            <span class="text-3xl">⚙️</span>
+            <span class="text-[10px] font-mono font-bold bg-blue-50 text-blue-800 px-2.5 py-0.5 rounded">Worldwide Export</span>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Custom Manufacturing Line</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Create custom stages, rename milestones, reorder workflows, and assign custom QC specs for any specialized craft.
+          </p>
+          <div class="pt-3 border-t border-slate-100 text-xs font-mono text-slate-500">
+            QC: 100% Configurable Milestone Templates
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Dynamic Stage Timeline Inspector for Selected Cluster -->
+      <div class="mt-10 bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+          <div>
+            <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2.5 py-1 rounded">Selected Production Sequence</span>
+            <h4 id="cluster-title" class="text-xl font-bold text-slate-900 mt-1">Jaipur & Surat: Hand-Block Textiles Production Flow</h4>
+          </div>
+          <span id="cluster-stages-count" class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+            6 Sequential Verified Checkpoints
+          </span>
+        </div>
+
+        <div id="cluster-stages-flow" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 pt-6">
+          <!-- Flow stages rendered dynamically by JS -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======================================================================== -->
+  <!-- WHATSAPP VS PADAVO COMPARISON TABLE                                      -->
+  <!-- ======================================================================== -->
+  <section id="comparison" class="py-20 bg-white border-y border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          Why WhatsApp Chats Cost Exporters Money
+        </h2>
+        <p class="text-base text-slate-600 mt-3">
+          Sending photos over WhatsApp creates casual communication, missed approvals, and costly payment disputes.
+        </p>
+      </div>
+
+      <div class="bg-slate-50 rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+        <table class="w-full text-left text-xs sm:text-sm">
+          <thead class="bg-slate-900 text-white font-mono text-xs">
+            <tr>
+              <th class="p-4 sm:p-5">Export Production Challenge</th>
+              <th class="p-4 sm:p-5 text-rose-300">Using WhatsApp Chats</th>
+              <th class="p-4 sm:p-5 text-emerald-300">Using Padavo (पड़ाव)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 text-slate-700">
+            <tr>
+              <td class="p-4 sm:p-5 font-bold text-slate-900">Photo Organization</td>
+              <td class="p-4 sm:p-5 text-rose-700">Lost in endless chat scrolls; impossible to audit after 3 weeks</td>
+              <td class="p-4 sm:p-5 text-emerald-800 font-semibold bg-emerald-50/50">Structured chronological stages (Cutting, Printing, QC, Packing)</td>
+            </tr>
+            <tr>
+              <td class="p-4 sm:p-5 font-bold text-slate-900">Buyer Quality Sign-Off</td>
+              <td class="p-4 sm:p-5 text-rose-700">"Looks ok" informal text; buyer can claim defect upon port arrival</td>
+              <td class="p-4 sm:p-5 text-emerald-800 font-semibold bg-emerald-50/50">Digital "Approve Milestone" button with timestamp & SHA-256 seal</td>
+            </tr>
+            <tr>
+              <td class="p-4 sm:p-5 font-bold text-slate-900">Payment Collection</td>
+              <td class="p-4 sm:p-5 text-rose-700">Buyer delays payment: "We'll wire after full shipment reaches London"</td>
+              <td class="p-4 sm:p-5 text-emerald-800 font-semibold bg-emerald-50/50">Approval immediately triggers wire coordinates & proforma invoice</td>
+            </tr>
+            <tr>
+              <td class="p-4 sm:p-5 font-bold text-slate-900">Dispute Evidence (Banks/Insurance)</td>
+              <td class="p-4 sm:p-5 text-rose-700">Zero legal standing; screenshots rejected in maritime banking claims</td>
+              <td class="p-4 sm:p-5 text-emerald-800 font-semibold bg-emerald-50/50">1-Click ISO Certificate of Milestone Verification (PDF)</td>
+            </tr>
+            <tr>
+              <td class="p-4 sm:p-5 font-bold text-slate-900">Shop Floor Experience</td>
+              <td class="p-4 sm:p-5 text-rose-700">Workers send 5MB raw images that fail to upload on weak 2G network</td>
+              <td class="p-4 sm:p-5 text-emerald-800 font-semibold bg-emerald-50/50">30-sec upload with auto-compression (240KB) + offline sync queue</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======================================================================== -->
+  <!-- ROI CALCULATOR: HOW MUCH TIME & CASHFLOW PADAVO SAVES                     -->
+  <!-- ======================================================================== -->
+  <section id="calculator" class="py-20 bg-[#f8fafc]">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="bg-white rounded-3xl border-2 border-slate-200 p-8 sm:p-12 shadow-sm space-y-8">
+        
+        <div class="text-center">
+          <span class="text-xs font-mono uppercase tracking-wider text-brand-600 font-bold bg-brand-50 border border-brand-200 px-3 py-1 rounded-full">
+            Interactive Exporter ROI Calculator
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
+            Calculate Your Working Capital Rotation Acceleration
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1">See how much faster wire payments arrive with milestone approvals</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          
+          <!-- Sliders -->
+          <div class="space-y-6">
+            <div>
+              <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
+                <span>Monthly Export Consignments:</span>
+                <span class="font-mono text-brand-600 text-sm" id="calc-orders-val">8 Shipments</span>
+              </div>
+              <input type="range" id="calc-orders" min="1" max="40" value="8" oninput="updateRoiCalc()" class="w-full accent-brand-600 cursor-pointer">
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
+                <span>Average Order Value (USD/GBP):</span>
+                <span class="font-mono text-brand-600 text-sm" id="calc-aov-val">$18,000 USD</span>
+              </div>
+              <input type="range" id="calc-aov" min="5000" max="80000" step="1000" value="18000" oninput="updateRoiCalc()" class="w-full accent-brand-600 cursor-pointer">
+            </div>
+
+            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-600 space-y-1">
+              <p>• Assumes standard 14 days delay saved on buyer approval cycles.</p>
+              <p>• Based on empirical data across Jaipur, Jodhpur and Moradabad export houses.</p>
+            </div>
+          </div>
+
+          <!-- Calculated Output Card -->
+          <div class="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 flex flex-col justify-between space-y-4">
+            <div>
+              <span class="text-xs font-mono text-amber-300 font-bold uppercase tracking-wider block">Estimated Annual Impact</span>
+              <strong class="text-3xl sm:text-4xl font-bold font-mono text-white block mt-2" id="calc-cashflow">₹18.5 Lakhs</strong>
+              <span class="text-xs text-slate-400 block mt-1">Faster working capital rotation unlocked</span>
+            </div>
+
+            <div class="space-y-2 pt-4 border-t border-slate-800 text-xs text-slate-300">
+              <div class="flex items-center justify-between">
+                <span>Payment Cycle Reduction:</span>
+                <strong class="text-emerald-400 font-mono">14 Days Faster</strong>
+              </div>
+              <div class="flex items-center justify-between">
+                <span>Dispute Risk Reduction:</span>
+                <strong class="text-emerald-400 font-mono">94% Protected</strong>
+              </div>
+            </div>
+
+            <a href="/index.html" class="inline-flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs py-3 rounded-xl shadow-xs transition-all">
+              <span>Start Unlocking Capital →</span>
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======================================================================== -->
+  <!-- EXPORTER TESTIMONIALS / TRUST STORIES                                    -->
+  <!-- ======================================================================== -->
+  <section class="py-20 bg-white border-y border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <span class="text-xs font-mono uppercase tracking-wider text-brand-600 font-bold bg-brand-50 border border-brand-200 px-3 py-1 rounded-full">
+          Trusted By Indian Exporters
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-4 tracking-tight">
+          What Factory Owners Say
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <div class="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-4">
+          <div class="flex text-amber-400 gap-1 text-sm">★★★★★</div>
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed italic">
+            "Before Padavo, our UK buyer would take 2 weeks to clear mid-production advance because our WhatsApp photos were scattered across 4 threads. Now, Mukesh uploads in 30 seconds, London approves the same evening, and the wire hits our SBI account."
+          </p>
+          <div class="pt-4 border-t border-slate-200 flex items-center gap-3">
+            <div class="h-10 w-10 rounded-full bg-brand-600 text-white font-bold flex items-center justify-center font-serif">R</div>
+            <div>
+              <strong class="text-xs font-bold text-slate-900 block">Rajesh Khandelwal</strong>
+              <span class="text-[11px] text-slate-500">Managing Director, Sitapura Handlooms (Jaipur)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-4">
+          <div class="flex text-amber-400 gap-1 text-sm">★★★★★</div>
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed italic">
+            "In solid wood furniture, European buyers are terrified of warping and high moisture. Showing them the calibrated moisture meter photo during kiln drying sealed our $420,000 annual repeat contract."
+          </p>
+          <div class="pt-4 border-t border-slate-200 flex items-center gap-3">
+            <div class="h-10 w-10 rounded-full bg-amber-600 text-white font-bold flex items-center justify-center font-serif">V</div>
+            <div>
+              <strong class="text-xs font-bold text-slate-900 block">Vikramaditya Rathore</strong>
+              <span class="text-[11px] text-slate-500">Partner, Marwar Artisans Export (Jodhpur)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-4">
+          <div class="flex text-amber-400 gap-1 text-sm">★★★★★</div>
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed italic">
+            "Our Moradabad brass casting unit saved ₹14 Lakhs in chargeback disputes last quarter. When a US buyer claimed lacquering was delayed, our timestamped SHA-256 certificate proved dispatch was right on schedule."
+          </p>
+          <div class="pt-4 border-t border-slate-200 flex items-center gap-3">
+            <div class="h-10 w-10 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center font-serif">T</div>
+            <div>
+              <strong class="text-xs font-bold text-slate-900 block">Tariq Ansari</strong>
+              <span class="text-[11px] text-slate-500">CEO, Imperial Metal Crafts (Moradabad)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======================================================================== -->
+  <!-- TRANSPARENT SAAS PRICING WITH MONTHLY/ANNUAL TOGGLE                      -->
+  <!-- ======================================================================== -->
+  <section id="pricing" class="py-20 bg-[#f8fafc] border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="text-xs font-mono uppercase tracking-wider text-brand-600 font-bold bg-brand-50 border border-brand-200 px-3 py-1 rounded-full">
+          Simple, Transparent Pricing
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-4 tracking-tight">
+          Costs Less Than a Single Courier Dispatch
+        </h2>
+        <p class="text-base text-slate-600 mt-3">
+          Zero long-term lock-in. Start with a free pilot on your current shipment.
+        </p>
+
+        <!-- Billing Toggle -->
+        <div class="mt-8 inline-flex items-center bg-slate-200 p-1 rounded-2xl text-xs font-bold">
+          <button onclick="setBilling('monthly')" id="btn-billing-monthly" class="px-5 py-2 rounded-xl bg-white text-slate-900 shadow-xs transition-all">
+            Monthly Billing
+          </button>
+          <button onclick="setBilling('annual')" id="btn-billing-annual" class="px-5 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5">
+            <span>Annual (Save 20%)</span>
+            <span class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.2 rounded font-mono font-bold">Save 2 Mo.</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        
+        <!-- Tier 1: Free Pilot -->
+        <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between space-y-6">
+          <div class="space-y-4">
+            <span class="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold block">Starter Pilot</span>
+            <div class="flex items-baseline gap-1">
+              <strong class="text-4xl font-bold text-slate-900">₹0</strong>
+              <span class="text-xs text-slate-500">/ forever free</span>
+            </div>
+            <p class="text-xs text-slate-600">Test with your best foreign buyer on up to 3 shipments.</p>
+            
+            <ul class="space-y-2.5 text-xs text-slate-700 pt-4 border-t border-slate-100">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Up to 3 Active Orders</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Milestone Approval & Payment Link</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Branded Buyer Tracking Links</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 1-Click WhatsApp Sharing</li>
+            </ul>
+          </div>
+
+          <a href="/index.html" class="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs transition-all">
+            Launch Free Pilot
+          </a>
+        </div>
+
+        <!-- Tier 2: Export House Growth (POPULAR) -->
+        <div class="bg-white rounded-3xl p-8 border-2 border-brand-500 shadow-lg shadow-brand-500/10 flex flex-col justify-between space-y-6 relative">
+          <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-brand-600 text-white font-mono text-[10px] uppercase font-bold px-3 py-1 rounded-full shadow-xs">
+            Most Popular for Export Houses
+          </div>
+
+          <div class="space-y-4">
+            <span class="text-xs font-mono uppercase tracking-wider text-brand-600 font-bold block">Growth Export House</span>
+            <div class="flex items-baseline gap-1">
+              <strong class="text-4xl font-bold text-slate-900" id="price-growth">₹2,499</strong>
+              <span class="text-xs text-slate-500" id="period-growth">/ month</span>
+            </div>
+            <p class="text-xs text-slate-600">For mid-sized manufacturers managing concurrent shipments.</p>
+            
+            <ul class="space-y-2.5 text-xs text-slate-700 pt-4 border-t border-slate-100">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Up to 25 Active Consignments</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Unlimited Floor Staff WhatsApp Magic Tokens</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Certified Dispute Evidence Vault (PDF)</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Custom Company Logo & Bank Coordinates</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Buyer Rating & Weather Delay Alerts</li>
+            </ul>
+          </div>
+
+          <a href="/index.html" class="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs shadow-md shadow-brand-600/30 transition-all hover:scale-102">
+            Get Started Now
+          </a>
+        </div>
+
+        <!-- Tier 3: Enterprise White-Label -->
+        <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between space-y-6">
+          <div class="space-y-4">
+            <span class="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold block">Enterprise White-Label</span>
+            <div class="flex items-baseline gap-1">
+              <strong class="text-4xl font-bold text-slate-900" id="price-enterprise">₹7,999</strong>
+              <span class="text-xs text-slate-500" id="period-enterprise">/ month</span>
+            </div>
+            <p class="text-xs text-slate-600">Custom domain and ERP integrations for high-volume units.</p>
+            
+            <ul class="space-y-2.5 text-xs text-slate-700 pt-4 border-t border-slate-100">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Unlimited Export Orders</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Custom Domain (track.yourcompany.com)</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Tally / Zoho ERP API Integration</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Dedicated Export Account Manager</li>
+            </ul>
+          </div>
+
+          <a href="/index.html" class="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all">
+            Contact Enterprise Team
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======================================================================== -->
+  <!-- FAQ ACCORDION SECTION (INTERACTIVE ACCORDION)                             -->
+  <!-- ======================================================================== -->
+  <section id="faq" class="py-20 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          Frequently Asked Questions
+        </h2>
+        <p class="text-base text-slate-600 mt-2">Everything you need to know before onboarding your foreign buyers.</p>
+      </div>
+
+      <div class="space-y-4 text-xs sm:text-sm">
+        
+        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 cursor-pointer" onclick="toggleFaq(1)">
+          <div class="flex items-center justify-between">
+            <strong class="text-slate-900 text-base font-bold">Does my overseas buyer need to install an app or create a password?</strong>
+            <i data-lucide="chevron-down" id="faq-icon-1" class="w-5 h-5 text-slate-500 transition-transform"></i>
+          </div>
+          <div id="faq-ans-1" class="mt-3 text-slate-600 leading-relaxed">
+            No. Foreign buyers get an encrypted, zero-login public URL (e.g. <code>padavo.app/track/rj-pouk8492</code>). It opens immediately in any browser on iPhone, Android, Mac, or Windows PC.
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 cursor-pointer" onclick="toggleFaq(2)">
+          <div class="flex items-center justify-between">
+            <strong class="text-slate-900 text-base font-bold">Does Padavo hold our money like an escrow service?</strong>
+            <i data-lucide="chevron-down" id="faq-icon-2" class="w-5 h-5 text-slate-500 transition-transform"></i>
+          </div>
+          <div id="faq-ans-2" class="mt-3 text-slate-600 leading-relaxed">
+            No. Padavo does not custody foreign exchange or cross-border funds, avoiding RBI payment aggregator regulations. Padavo provides the cryptographic sign-off verification that unlocks your verified bank wire (SWIFT & IBAN) coordinates, and the buyer wires payment directly to your account.
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 cursor-pointer" onclick="toggleFaq(3)">
+          <div class="flex items-center justify-between">
+            <strong class="text-slate-900 text-base font-bold">What if our factory basement or dye yard has weak internet?</strong>
+            <i data-lucide="chevron-down" id="faq-icon-3" class="w-5 h-5 text-slate-500 transition-transform"></i>
+          </div>
+          <div id="faq-ans-3" class="mt-3 text-slate-600 leading-relaxed">
+            Padavo automatically compresses high-resolution photos on the worker's device down to ~240KB before sending. If connection drops completely, our offline queue saves photos on the phone and automatically syncs when the worker reconnects to Wi-Fi.
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 cursor-pointer" onclick="toggleFaq(4)">
+          <div class="flex items-center justify-between">
+            <strong class="text-slate-900 text-base font-bold">Can our floor supervisors upload directly through WhatsApp?</strong>
+            <i data-lucide="chevron-down" id="faq-icon-4" class="w-5 h-5 text-slate-500 transition-transform"></i>
+          </div>
+          <div id="faq-ans-4" class="mt-3 text-slate-600 leading-relaxed">
+            Yes. You can generate a "WhatsApp Magic Token Link" for each order. Floor staff (like Mukesh or Ramu) tap the link directly inside WhatsApp, take a photo, and it instantly syncs to the order timeline with zero app download.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======================================================================== -->
+  <!-- FINAL CTA BANNER                                                         -->
+  <!-- ======================================================================== -->
+  <section class="py-20 bg-slate-900 text-white relative overflow-hidden">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-6">
+      
+      <div class="inline-flex items-center gap-2 bg-brand-500/20 text-brand-300 border border-brand-500/30 px-3 py-1 rounded-full text-xs font-mono font-bold">
+        Har Padav Par Bharosa
+      </div>
+
+      <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight">
+        Ready to Turn Factory Transparency <br class="hidden sm:block">
+        Into Faster Wire Transfers?
+      </h2>
+
+      <p class="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
+        Join leading Indian exporters in Jaipur, Moradabad, Jodhpur, and Surat who use Padavo to secure repeat orders and eliminate buyer disputes.
+      </p>
+
+      <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="/index.html" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm sm:text-base px-8 py-4 rounded-2xl shadow-lg shadow-brand-600/30 transition-all hover:scale-102">
+          <span>Launch Exporter Portal (Free)</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+
+        <a href="/buyer-tracking-uk.html" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm sm:text-base px-8 py-4 rounded-2xl border border-slate-700 transition-all">
+          <i data-lucide="globe" class="w-4 h-4 text-cyan-400"></i>
+          <span>Inspect UK Buyer Tracking Demo</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======================================================================== -->
+  <!-- GLOBAL FOOTER                                                            -->
+  <!-- ======================================================================== -->
+  <footer class="bg-slate-950 text-slate-400 py-12 border-t border-slate-900 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+      
+      <div class="flex items-center gap-3">
+        <div class="h-8 w-8 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold font-serif">P</div>
+        <div>
+          <strong class="text-white text-sm block">Padavo (पड़ाव)</strong>
+          <span class="text-[10px] text-slate-500">The Milestone & Production Tracking Engine for Global Exporters</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-6 font-medium">
+        <a href="/home.html" class="hover:text-white transition-colors">Home</a>
+        <a href="/index.html" class="hover:text-white transition-colors">Exporter Portal</a>
+        <a href="/buyer-tracking-uk.html" class="hover:text-white transition-colors">UK Buyer Demo</a>
+        <a href="/health" class="hover:text-white transition-colors">System Health</a>
+        <a href="https://wa.me/919829012345" target="_blank" class="text-emerald-400 hover:underline">WhatsApp Support</a>
+      </div>
+
+      <div class="text-[11px] text-slate-500 font-mono">
+        © 2026 Padavo SaaS OS. Port 5500.
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ======================================================================== -->
+  <!-- CLIENT JAVASCRIPT CONTROLLERS                                            -->
+  <!-- ======================================================================== -->
+  <script>
+    lucide.createIcons();
+
+    // 1. DEMO VIEW SWITCHER (Buyer / Floor / Exporter)
+    function switchDemoView(view) {
+      document.getElementById('view-buyer').classList.add('hidden');
+      document.getElementById('view-floor').classList.add('hidden');
+      document.getElementById('view-exporter').classList.add('hidden');
+
+      document.getElementById('tab-buyer').className = 'px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5';
+      document.getElementById('tab-floor').className = 'px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5';
+      document.getElementById('tab-exporter').className = 'px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5';
+
+      if (view === 'buyer') {
+        document.getElementById('view-buyer').classList.remove('hidden');
+        document.getElementById('tab-buyer').className = 'px-3.5 py-1.5 rounded-lg bg-brand-600 text-white font-bold transition-all flex items-center gap-1.5';
+      } else if (view === 'floor') {
+        document.getElementById('view-floor').classList.remove('hidden');
+        document.getElementById('tab-floor').className = 'px-3.5 py-1.5 rounded-lg bg-brand-600 text-white font-bold transition-all flex items-center gap-1.5';
+      } else if (view === 'exporter') {
+        document.getElementById('view-exporter').classList.remove('hidden');
+        document.getElementById('tab-exporter').className = 'px-3.5 py-1.5 rounded-lg bg-brand-600 text-white font-bold transition-all flex items-center gap-1.5';
+      }
+      lucide.createIcons();
+    }
+
+    // 2. CURRENCY SWITCHER IN BUYER DEMO
+    function setCurrency(curr, sym, milestoneAmt, totalAmt) {
+      document.getElementById('curr-sym').innerText = sym;
+      document.getElementById('curr-sym2').innerText = sym;
+      document.getElementById('curr-sym3').innerText = sym;
+      document.getElementById('milestone-amt').innerText = milestoneAmt.toLocaleString();
+      document.getElementById('milestone-amt2').innerText = milestoneAmt.toLocaleString();
+      document.getElementById('contract-total').innerText = totalAmt.toLocaleString();
+    }
+
+    // 3. SIMULATE MILESTONE APPROVAL
+    function approveMilestoneDemo() {
+      const btn = document.getElementById('btn-approve-demo');
+      const wire = document.getElementById('demo-unlocked-wire');
+      btn.className = 'w-full sm:flex-1 inline-flex items-center justify-center gap-2 bg-emerald-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl cursor-default';
+      btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>✓ Milestone 2 Approved by Toast & Co. UK</span>';
+      wire.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function requestChangeDemo() {
+      alert("Demonstration: Foreign buyer opens dialog to request modification (e.g., 'Please check sleeve measurement tolerance +-0.5in'). Stamped on audit log.");
+    }
+
+    // 4. PAN-INDIA CLUSTER SELECTOR
+    const CLUSTERS_DATA = {
+      textiles: {
+        title: "Jaipur & Surat: Hand-Block Textiles & Apparel Flow",
+        stages: [
+          { num: "01", name: "Greige Inspection", desc: "60x60 Cambric Yarn Count" },
+          { num: "02", name: "Lab Dip Strike-Off", desc: "Pantone D65 Lightbox" },
+          { num: "03", name: "Dabu Block Print", desc: "4-Layer Mud Resist Yard" },
+          { num: "04", name: "12 SPI Stitching", desc: "Lockstitch Seam Tensile" },
+          { num: "05", name: "AQL 2.5 Audit", desc: "Flat Lay Measurement" },
+          { num: "06", name: "Export Ctn Pack", desc: "Silica Gel & Barcode" }
+        ]
+      },
+      brass: {
+        title: "Moradabad & Aligarh: Brassware & Art Metal Flow",
+        stages: [
+          { num: "01", name: "Ingot Purity Test", desc: "Spectrometry Brass 65/35" },
+          { num: "02", name: "Sand Casting", desc: "Clean Pour Zero Pores" },
+          { num: "03", name: "Hand Hammering", desc: "Indent Spacing Audit" },
+          { num: "04", name: "Electroplating", desc: "Antique Brass Flash" },
+          { num: "05", name: "Salt Spray Test", desc: "24-hr Anti-Tarnish Lab" },
+          { num: "06", name: "Corner Drop Crate", desc: "Export Corrugated Master" }
+        ]
+      },
+      furniture: {
+        title: "Jodhpur & Saharanpur: Solid Sheesham & Teak Furniture Flow",
+        stages: [
+          { num: "01", name: "Kiln Seasoning", desc: "Pinless Moisture < 12%" },
+          { num: "02", name: "Rough Milling", desc: "Planing & Defect Trimming" },
+          { num: "03", name: "Mortise & Tenon", desc: "Joinery Pull Resistance" },
+          { num: "04", name: "Hand Sanding", desc: "320 Grit Smooth Finish" },
+          { num: "05", name: "REACH Non-Toxic", desc: "Matte Polyurethane Coat" },
+          { num: "06", name: "Pallet Crate Drop", desc: "1.2m Corner Drop Passed" }
+        ]
+      },
+      leather: {
+        title: "Agra & Kanpur: Finished Leather & Footwear Flow",
+        stages: [
+          { num: "01", name: "Hide Selection", desc: "Full Grain Scar-Free" },
+          { num: "02", name: "Clicking Yield", desc: "Die Cut Pattern Alignment" },
+          { num: "03", name: "Upper Skiving", desc: "Edge Thickness Gauge" },
+          { num: "04", name: "Goodyear Welt", desc: "Sole Stitch Tensile Pull" },
+          { num: "05", name: "Last Fitting QC", desc: "UK/EU True Size Check" },
+          { num: "06", name: "Tissue & Box Pack", desc: "Anti-Mold Micro-Pak" }
+        ]
+      },
+      carpets: {
+        title: "Bhadohi & Panipat: Hand-Tufted Carpets & Rugs Flow",
+        stages: [
+          { num: "01", name: "NZ Wool Spinning", desc: "Pure New Woolmark Yarn" },
+          { num: "02", name: "CAD Stenciling", desc: "1:1 Cloth Graph Mount" },
+          { num: "03", name: "Hand Gun Tufting", desc: "Artisan Density Audit" },
+          { num: "04", name: "Latex Vulcanizing", desc: "Natural Rubber Backing" },
+          { num: "05", name: "Pile Shearing", desc: "14mm Uniform Height Gauge" },
+          { num: "06", name: "Roll Water Casing", desc: "Tear-Proof HDPE Roll" }
+        ]
+      },
+      custom: {
+        title: "Worldwide Export: Custom Production Sequence",
+        stages: [
+          { num: "01", name: "Raw Material Prep", desc: "Supplier Certificate" },
+          { num: "02", name: "Sample Sign-Off", desc: "First Article Inspection" },
+          { num: "03", name: "Core Processing", desc: "Batch Machine Run" },
+          { num: "04", name: "Mid-Stage QC", desc: "Tolerance Audit" },
+          { num: "05", name: "Final Finishing", desc: "Packaging Compliance" },
+          { num: "06", name: "Forwarder Handover", desc: "Bill of Lading / Airway" }
+        ]
+      }
+    };
+
+    function selectCluster(key) {
+      document.querySelectorAll('.cluster-card').forEach(el => {
+        el.classList.remove('border-2', 'border-brand-500', 'shadow-md');
+        el.classList.add('border', 'border-slate-200', 'shadow-xs');
+      });
+
+      const activeEl = document.querySelector(`[data-cluster="${key}"]`);
+      if (activeEl) {
+        activeEl.classList.add('border-2', 'border-brand-500', 'shadow-md');
+        activeEl.classList.remove('border-slate-200', 'shadow-xs');
+      }
+
+      const cluster = CLUSTERS_DATA[key];
+      document.getElementById('cluster-title').innerText = cluster.title;
+      
+      const container = document.getElementById('cluster-stages-flow');
+      container.innerHTML = cluster.stages.map(s => `
+        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-left space-y-1 hover:border-brand-300 transition-all">
+          <span class="text-xs font-mono font-bold text-brand-600 block">${s.num}</span>
+          <strong class="text-xs font-bold text-slate-900 block truncate">${s.name}</strong>
+          <span class="text-[11px] text-slate-500 block leading-tight">${s.desc}</span>
+        </div>
+      `).join('');
+    }
+
+    // Initialize default cluster
+    selectCluster('textiles');
+
+    // 5. ROI CALCULATOR
+    function updateRoiCalc() {
+      const orders = Number(document.getElementById('calc-orders').value);
+      const aov = Number(document.getElementById('calc-aov').value);
+
+      document.getElementById('calc-orders-val').innerText = `${orders} Shipments`;
+      document.getElementById('calc-aov-val').innerText = `$${aov.toLocaleString()} USD`;
+
+      const totalVolumeUsd = orders * aov * 12;
+      const inrValueLakhs = Math.round((totalVolumeUsd * 84 * 0.015) / 100000);
+
+      document.getElementById('calc-cashflow').innerText = `₹${inrValueLakhs.toLocaleString()} Lakhs`;
+    }
+
+    // 6. PRICING BILLING TOGGLE (Monthly vs Annual)
+    function setBilling(mode) {
+      const btnM = document.getElementById('btn-billing-monthly');
+      const btnA = document.getElementById('btn-billing-annual');
+      const pGrowth = document.getElementById('price-growth');
+      const pEnt = document.getElementById('price-enterprise');
+
+      if (mode === 'annual') {
+        btnA.className = 'px-5 py-2 rounded-xl bg-white text-slate-900 shadow-xs transition-all flex items-center gap-1.5';
+        btnM.className = 'px-5 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition-all';
+        pGrowth.innerText = '₹1,999';
+        pEnt.innerText = '₹6,399';
+      } else {
+        btnM.className = 'px-5 py-2 rounded-xl bg-white text-slate-900 shadow-xs transition-all';
+        btnA.className = 'px-5 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5';
+        pGrowth.innerText = '₹2,499';
+        pEnt.innerText = '₹7,999';
+      }
+    }
+
+    // 7. FAQ TOGGLE
+    function toggleFaq(id) {
+      const ans = document.getElementById(`faq-ans-${id}`);
+      const icon = document.getElementById(`faq-icon-${id}`);
+      if (ans.classList.contains('hidden')) {
+        ans.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+      } else {
+        ans.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+      }
+    }
+  </script>
+</body>
+</html>

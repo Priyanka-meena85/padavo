@@ -20,7 +20,7 @@ const crypto = require('node:crypto');
 const { DatabaseSync } = require('node:sqlite');
 
 // Environment & Configuration
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 5500;
 const NODE_ENV = process.env.NODE_ENV || 'production';
 const DB_PATH = path.join(__dirname, 'database.sqlite');
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
@@ -1390,7 +1390,14 @@ async function handleRequest(req, res) {
       return serveStaticFile(req, res, path.join(UPLOADS_DIR, fileName));
     }
 
-    let requestedFile = pathname === '/' ? 'index.html' : pathname.slice(1);
+    let requestedFile = 'home.html';
+    if (pathname === '/' || pathname === '/home' || pathname === '/landing') {
+      requestedFile = 'home.html';
+    } else if (pathname === '/app' || pathname === '/dashboard' || pathname === '/portal') {
+      requestedFile = 'index.html';
+    } else {
+      requestedFile = pathname.slice(1);
+    }
     const targetFilePath = path.join(PUBLIC_DIR, requestedFile);
     return serveStaticFile(req, res, targetFilePath);
 
@@ -1421,18 +1428,15 @@ function bindServer(port) {
   return s;
 }
 
-const primaryPort = Number(process.env.PORT || 3001);
+const primaryPort = Number(process.env.PORT || 5500);
 bindServer(primaryPort);
-
-// Also bind port 3000 as secondary mirror so users can access either localhost:3000 or localhost:3001!
-if (primaryPort !== 3000) {
-  bindServer(3000);
-}
 
 console.log(`=======================================================`);
 console.log(`PADAVO PRODUCTION SAAS ENGINE IS RUNNING! 🚀`);
 console.log(`Brand: Padavo — Har Padav Par Bharosa`);
-console.log(`Local Access: http://localhost:${primaryPort} and http://localhost:3000`);
-console.log(`Health Check: http://localhost:${primaryPort}/health`);
+console.log(`Primary Local Access: http://localhost:${primaryPort}`);
+console.log(`Landing Page: http://localhost:${primaryPort}/home.html (or http://localhost:${primaryPort}/)`);
+console.log(`Exporter Portal: http://localhost:${primaryPort}/index.html (or http://localhost:${primaryPort}/app)`);
 console.log(`Public UK Buyer Tracking: http://localhost:${primaryPort}/buyer-tracking-uk.html`);
+console.log(`Health Check: http://localhost:${primaryPort}/health`);
 console.log(`=======================================================`);
