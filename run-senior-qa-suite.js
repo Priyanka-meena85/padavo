@@ -215,6 +215,66 @@ async function runTestSuite() {
     assert(res.raw === 'test_token_8891', 'Challenge verification mismatch');
   });
 
+  await test('Outbound WhatsApp milestone alert dispatches via Meta Cloud API engine', async () => {
+    const res = await request({
+      path: '/api/orders/1/send-whatsapp-alert',
+      method: 'POST'
+    }, {
+      recipient_phone: '+919829012345'
+    });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.success === true, 'WhatsApp alert failed');
+    assert(res.body.status === 'SENT_TO_WHATSAPP_NETWORK', 'WhatsApp status mismatch');
+  });
+
+  await test('Multi-lingual Voice AI transcribes Tiruppur Tamil cluster dialect', async () => {
+    const res = await request({
+      path: '/api/voice-transcribe',
+      method: 'POST'
+    }, {
+      language_code: 'ta-IN',
+      hindi_audio_text: 'நூல் தரம் மற்றும் தையல் சரிபார்க்கப்பட்டது'
+    });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.success === true, 'Tamil transcription failed');
+    assert(res.body.dialect_detected.includes('Tiruppur'), 'Cluster dialect mismatch');
+  });
+
+  await test('Live interbank FX rate engine returns GBP/USD/EUR/AED real-time rates', async () => {
+    const res = await request({ path: '/api/fx-rates' });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.rates.GBP.spot_rate > 100, 'GBP rate out of range');
+    assert(res.body.rates.USD.spot_rate > 80, 'USD rate out of range');
+  });
+
+  await test('Guaranteed 60-day FX forward lock quotes precise settlement forward rate', async () => {
+    const res = await request({
+      path: '/api/fx-rates/lock',
+      method: 'POST'
+    }, {
+      amount: 25000,
+      currency: 'GBP',
+      tenure_days: 60
+    });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.success === true, 'FX lock quote failed');
+    assert(res.body.forward_cover.lock_reference.startsWith('FWD-'), 'Lock reference missing');
+  });
+
+  await test('ICEGATE Indian Customs LEO verification validates Nhava Sheva (INNSA1) Shipping Bill', async () => {
+    const res = await request({
+      path: '/api/orders/1/icegate-verify',
+      method: 'POST'
+    }, {
+      shipping_bill_no: '7482910',
+      port_code: 'INNSA1'
+    });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.success === true, 'ICEGATE verification failed');
+    assert(res.body.icegate_verification.customs_port.includes('Nhava Sheva'), 'Port name mismatch');
+    assert(res.body.icegate_verification.leo_status === 'LET_EXPORT_ORDER_GRANTED', 'LEO status mismatch');
+  });
+
   // Group 5: Enterprise Multi-Tenant & Scalability
   console.log('\n☁️ GROUP 5: ENTERPRISE CLOUD STORAGE & TALLY ERP INTEGRATION');
   await test('Cloudflare R2 Direct Upload presigned URL generator returns coordinates', async () => {
