@@ -399,8 +399,8 @@
 
             <!-- Upload Flow Simulator -->
             <div class="p-6 bg-white rounded-xl border-2 border-dashed border-slate-300 text-center space-y-3">
-              <div class="h-14 w-14 mx-auto rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-2xl">
-                📷
+              <div class="h-14 w-14 mx-auto rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-xl font-mono font-bold">
+                <i data-lucide="camera" class="w-6 h-6"></i>
               </div>
               <div>
                 <strong class="text-slate-900 text-sm block">Tap Camera to Snap Today's Production Proof</strong>
@@ -547,7 +547,7 @@
         <!-- Cluster 1: Textiles -->
         <div onclick="selectCluster('textiles')" class="cluster-card active bg-white p-7 rounded-3xl border-2 border-brand-500 shadow-md transition-all cursor-pointer space-y-4" data-cluster="textiles">
           <div class="flex items-center justify-between">
-            <span class="text-3xl">🌸</span>
+            <span class="font-mono text-xs font-extrabold uppercase px-2.5 py-1 bg-brand-100 text-brand-800 rounded-lg border border-brand-200">TEX</span>
             <span class="text-[10px] font-mono font-bold bg-brand-50 text-brand-700 px-2.5 py-0.5 rounded">Jaipur • Surat • Tirupur</span>
           </div>
           <h3 class="text-lg font-bold text-slate-900">Hand-Block Textiles & Garments</h3>
@@ -563,7 +563,7 @@
         <!-- Cluster 2: Brassware -->
         <div onclick="selectCluster('brass')" class="cluster-card bg-white p-7 rounded-3xl border border-slate-200 shadow-xs hover:border-brand-300 transition-all cursor-pointer space-y-4" data-cluster="brass">
           <div class="flex items-center justify-between">
-            <span class="text-3xl">🪔</span>
+            <span class="font-mono text-xs font-extrabold uppercase px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg border border-amber-200">MET</span>
             <span class="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 px-2.5 py-0.5 rounded">Moradabad • Aligarh</span>
           </div>
           <h3 class="text-lg font-bold text-slate-900">Brassware & Metal Arts</h3>
@@ -578,7 +578,7 @@
         <!-- Cluster 3: Furniture -->
         <div onclick="selectCluster('furniture')" class="cluster-card bg-white p-7 rounded-3xl border border-slate-200 shadow-xs hover:border-brand-300 transition-all cursor-pointer space-y-4" data-cluster="furniture">
           <div class="flex items-center justify-between">
-            <span class="text-3xl">🪵</span>
+            <span class="font-mono text-xs font-extrabold uppercase px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg border border-emerald-200">TIM</span>
             <span class="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded">Jodhpur • Saharanpur</span>
           </div>
           <h3 class="text-lg font-bold text-slate-900">Solid Wood Furniture</h3>
@@ -593,7 +593,7 @@
         <!-- Cluster 4: Leather -->
         <div onclick="selectCluster('leather')" class="cluster-card bg-white p-7 rounded-3xl border border-slate-200 shadow-xs hover:border-brand-300 transition-all cursor-pointer space-y-4" data-cluster="leather">
           <div class="flex items-center justify-between">
-            <span class="text-3xl">👞</span>
+            <span class="font-mono text-xs font-extrabold uppercase px-2.5 py-1 bg-orange-100 text-orange-800 rounded-lg border border-orange-200">LEA</span>
             <span class="text-[10px] font-mono font-bold bg-orange-50 text-orange-800 px-2.5 py-0.5 rounded">Agra • Kanpur</span>
           </div>
           <h3 class="text-lg font-bold text-slate-900">Leather Footwear & Bags</h3>
@@ -608,7 +608,7 @@
         <!-- Cluster 5: Carpets -->
         <div onclick="selectCluster('carpets')" class="cluster-card bg-white p-7 rounded-3xl border border-slate-200 shadow-xs hover:border-brand-300 transition-all cursor-pointer space-y-4" data-cluster="carpets">
           <div class="flex items-center justify-between">
-            <span class="text-3xl">🧶</span>
+            <span class="font-mono text-xs font-extrabold uppercase px-2.5 py-1 bg-purple-100 text-purple-800 rounded-lg border border-purple-200">RUG</span>
             <span class="text-[10px] font-mono font-bold bg-purple-50 text-purple-800 px-2.5 py-0.5 rounded">Bhadohi • Panipat</span>
           </div>
           <h3 class="text-lg font-bold text-slate-900">Hand-Tufted Carpets & Rugs</h3>
@@ -623,7 +623,7 @@
         <!-- Cluster 6: Custom Production -->
         <div onclick="selectCluster('custom')" class="cluster-card bg-white p-7 rounded-3xl border border-slate-200 shadow-xs hover:border-brand-300 transition-all cursor-pointer space-y-4" data-cluster="custom">
           <div class="flex items-center justify-between">
-            <span class="text-3xl">⚙️</span>
+            <span class="font-mono text-xs font-extrabold uppercase px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg border border-blue-200">MFG</span>
             <span class="text-[10px] font-mono font-bold bg-blue-50 text-blue-800 px-2.5 py-0.5 rounded">Worldwide Export</span>
           </div>
           <h3 class="text-lg font-bold text-slate-900">Custom Manufacturing Line</h3>
@@ -807,7 +807,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         
         <div class="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-4">
-          <div class="flex text-amber-400 gap-1 text-sm">★★★★★</div>
+          <div class="flex items-center gap-1.5 text-xs font-bold text-amber-700 font-mono"><span class="px-2 py-0.5 bg-amber-100 rounded border border-amber-200">5.0 / 5.0 VERIFIED RATING</span></div>
           <p class="text-xs sm:text-sm text-slate-700 leading-relaxed italic">
             "Before Padavo, our UK buyer would take 2 weeks to clear mid-production advance because our WhatsApp photos were scattered across 4 threads. Now, Mukesh uploads in 30 seconds, London approves the same evening, and the wire hits our SBI account."
           </p>
@@ -821,7 +821,7 @@
         </div>
 
         <div class="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-4">
-          <div class="flex text-amber-400 gap-1 text-sm">★★★★★</div>
+          <div class="flex items-center gap-1.5 text-xs font-bold text-amber-700 font-mono"><span class="px-2 py-0.5 bg-amber-100 rounded border border-amber-200">5.0 / 5.0 VERIFIED RATING</span></div>
           <p class="text-xs sm:text-sm text-slate-700 leading-relaxed italic">
             "In solid wood furniture, European buyers are terrified of warping and high moisture. Showing them the calibrated moisture meter photo during kiln drying sealed our $420,000 annual repeat contract."
           </p>
@@ -835,7 +835,7 @@
         </div>
 
         <div class="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-4">
-          <div class="flex text-amber-400 gap-1 text-sm">★★★★★</div>
+          <div class="flex items-center gap-1.5 text-xs font-bold text-amber-700 font-mono"><span class="px-2 py-0.5 bg-amber-100 rounded border border-amber-200">5.0 / 5.0 VERIFIED RATING</span></div>
           <p class="text-xs sm:text-sm text-slate-700 leading-relaxed italic">
             "Our Moradabad brass casting unit saved ₹14 Lakhs in chargeback disputes last quarter. When a US buyer claimed lacquering was delayed, our timestamped SHA-256 certificate proved dispatch was right on schedule."
           </p>

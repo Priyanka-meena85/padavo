@@ -45,6 +45,7 @@ const lcEngine = require('./lc-engine');
 const whatsAppCameraEngine = require('./whatsapp-camera-engine');
 const telemetryEngine = require('./telemetry-engine');
 const section65bEngine = require('./section65b-engine');
+const bankingEngine = require('./banking-engine');
 
 // Environment & Configuration
 const PORT = process.env.PORT || 5500;
@@ -1154,6 +1155,7 @@ async function handleRequest(req, res) {
         whatsapp_camera_lens: 'active',
         apm_telemetry: 'active',
         section_65b_legal: 'active',
+        open_banking_ad_cat1: 'active',
         job_queue: jobQueue.getMetrics(),
         memory: {
           rssMb: Math.round(memoryUsage.rss / (1024 * 1024)),
@@ -2503,6 +2505,38 @@ async function handleRequest(req, res) {
       const order = db.prepare('SELECT o.*, e.company_name, e.iec_number FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492', company_name: 'Zenith Global Exports Ltd', buyer_name: 'Toast & Co. London', buyer_country: 'United Kingdom', iec_number: '0518920194' };
       const cert = section65bEngine.generateCertificate(order);
       return sendJson(res, 200, cert);
+    }
+
+    // POST /api/banking/swift-inbound — Inbound SWIFT MT103 Parsing & Settlement
+    if (method === 'POST' && pathname === '/api/banking/swift-inbound') {
+      const body = await parseJsonBody(req);
+      const parsedSwift = bankingEngine.parseSwiftMt103(body.raw_swift || body.swift_payload);
+      return sendJson(res, 200, parsedSwift);
+    }
+
+    // POST /api/banking/simulate-wire-credit — Simulate Direct Telegraphic Transfer
+    const bankSimMatch = pathname.match(/^\/api\/banking\/simulate-wire-credit(?:\/(\d+))?$/);
+    if (method === 'POST' && (bankSimMatch || pathname === '/api/banking/simulate-wire-credit')) {
+      const orderId = Number(bankSimMatch && bankSimMatch[1] ? bankSimMatch[1] : 1);
+      const order = db.prepare('SELECT o.*, e.company_name FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492', currency: 'GBP' };
+      const milestone = db.prepare('SELECT * FROM order_milestones WHERE order_id = ? ORDER BY id ASC LIMIT 1').get(orderId) || { id: 1, amount: 5600 };
+      const credit = bankingEngine.simulateInwardWireCredit(order, milestone);
+      return sendJson(res, 200, {
+        success: true,
+        settlement: {
+          rtgs_utr: credit.bank_utr_number,
+          inward_remittance_certificate: credit.rbi_irm_reference,
+          ...credit
+        }
+      });
+    }
+
+    // GET /api/banking/statement/:orderId — Bank Reconciliation & UTR Ledger
+    const bankStmtMatch = pathname.match(/^\/api\/banking\/statement\/(\d+)$/);
+    if (method === 'GET' && bankStmtMatch) {
+      const orderId = Number(bankStmtMatch[1]);
+      const stmt = bankingEngine.getStatement(orderId);
+      return sendJson(res, 200, { success: true, statement: stmt });
     }
 
     // --------------------------------------------------------------------------

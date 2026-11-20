@@ -93,11 +93,11 @@
         <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
           <i data-lucide="globe" class="w-3.5 h-3.5 text-slate-500 ml-1"></i>
           <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-transparent text-slate-700 text-xs font-semibold focus:outline-none cursor-pointer pr-1">
-            <option value="en">🇬🇧 English</option>
-            <option value="de">🇩🇪 Deutsch</option>
-            <option value="fr">🇫🇷 Français</option>
-            <option value="es">🇪🇸 Español</option>
-            <option value="ar">🇦🇪 العربية</option>
+            <option value="en">EN - English</option>
+            <option value="de">DE - Deutsch</option>
+            <option value="fr">FR - Français</option>
+            <option value="es">ES - Español</option>
+            <option value="ar">AR - Arabic</option>
           </select>
         </div>
 
@@ -500,8 +500,8 @@
         <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
             <div class="flex items-center gap-3">
-              <div class="h-10 w-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                🚢
+              <div class="h-10 w-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold font-mono text-xs">
+                SEA
               </div>
               <div>
                 <h3 class="font-bold text-slate-900 text-base">Live Maritime & Freight Tracking</h3>
@@ -1087,7 +1087,7 @@
         });
         const data = await res.json();
         if (data.success) {
-          alert(`✅ Supplier Invitation Dispatched!\n\n${name} has been invited to connect their exports to your Toast & Co. dashboard.`);
+          alert(`[SUCCESS] Supplier Invitation Dispatched!\n\n${name} has been invited to connect their exports to your Toast & Co. dashboard.`);
           closeSupplierInviteModal();
           document.getElementById('invite-supplier-name').value = '';
           document.getElementById('invite-supplier-contact').value = '';
@@ -1125,7 +1125,7 @@
                   <strong class="text-slate-900 text-xs block font-mono">${escapeHtml(doc.doc_type)}</strong>
                   <span class="text-[11px] text-slate-500 block truncate max-w-xs">${escapeHtml(doc.file_name)} • ${escapeHtml(doc.file_size)}</span>
                   <span class="inline-block mt-0.5 text-[9px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.2 rounded border border-emerald-200">
-                    ✓ Verified by ${escapeHtml(doc.uploaded_by || 'Exporter')}
+                    Verified by ${escapeHtml(doc.uploaded_by || 'Exporter')}
                   </span>
                 </div>
               </div>
@@ -1160,15 +1160,15 @@
     }
 
     function downloadProformaInvoice() {
-      alert("📥 DOWNLOADING PROFORMA INVOICE\n\nFile: INV-2026-UK-0849-M2.pdf\nAmount: £5,600 GBP\nBeneficiary: Royal Jaipur Handloom Heritage Pvt Ltd\nBank: State Bank of India (Overseas Branch)\nValid for HMRC UK Customs & Bank Wire Transfer.");
+      alert("DOWNLOADING PROFORMA INVOICE\n\nFile: INV-2026-UK-0849-M2.pdf\nAmount: £5,600 GBP\nBeneficiary: Royal Jaipur Handloom Heritage Pvt Ltd\nBank: State Bank of India (Overseas Branch)\nValid for HMRC UK Customs & Bank Wire Transfer.");
     }
 
     function downloadMediaPack() {
-      alert('📦 Downloading Toast & Co. Marketing Media Kit (ZIP)\n\nHigh-resolution color-corrected photos of artisan hand-block printing in Jaipur ready for social media & marketing.');
+      alert('Downloading Toast & Co. Marketing Media Kit (ZIP)\n\nHigh-resolution color-corrected photos of artisan hand-block printing in Jaipur ready for social media & marketing.');
     }
 
     function submitRating(stars) {
-      alert(`⭐️ Thank you Toast & Co. team!\n\nYou submitted ${stars}.0 stars. The Sitapura production manager has been informed on WhatsApp.`);
+      alert(`[RATING SUBMITTED] Thank you Toast & Co. team!\n\nYou submitted ${stars}.0 stars. The Sitapura production manager has been informed on WhatsApp.`);
     }
   </script>
 </body>

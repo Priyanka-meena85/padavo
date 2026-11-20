@@ -1,0 +1,9 @@
+node_modules/
+*.sqlite-wal
+*.sqlite-shm
+uploads/assembled-*
+uploads/padavo-*
+uploads/chunk-*
+uploads/wcam-*
+.DS_Store
+Thumbs.db

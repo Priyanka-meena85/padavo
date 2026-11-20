@@ -822,6 +822,38 @@ IEA*1*000000001~`;
     assert(res.body.sha256_audit_seal.startsWith('SEC65B-HASH-'), 'Missing SHA256 audit seal');
   });
 
+  await test('AD Category-1 Open Banking parses inbound SWIFT MT103 telegraphic wire and issues RBI IRM', async () => {
+    const rawMt103 = `:20:SWIFT-UK-849201\n:32A:261120GBP5600,\n:50K:Toast & Co London\n:59:Zenith Exports\n:70:PO-UK-8492 M2 Proof Clearance`;
+    const res = await request({
+      path: '/api/banking/swift-inbound',
+      method: 'POST'
+    }, { raw_swift: rawMt103 });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.success === true, 'Expected parsed MT103 success');
+    assert(res.body.transaction.sender_reference === 'SWIFT-UK-849201', 'Sender ref mismatch');
+    assert(res.body.transaction.remitted_currency === 'GBP', 'Currency mismatch');
+    assert(res.body.transaction.foreign_amount === 5600, 'Amount mismatch');
+    assert(res.body.transaction.rbi_edpms_status === 'EDPMS_EXPORT_SETTLEMENT_CLEARED', 'EDPMS status mismatch');
+  });
+
+  await test('Simulate Inward Wire Credit matches milestone tranche and issues RTGS UTR', async () => {
+    const res = await request({
+      path: '/api/banking/simulate-wire-credit/1',
+      method: 'POST'
+    });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.success === true, 'Expected simulation success');
+    assert(res.body.settlement.rtgs_utr.startsWith('CMS'), 'Invalid RTGS UTR');
+    assert(res.body.settlement.inward_remittance_certificate.startsWith('IRM-RBI-'), 'Invalid IRM certificate');
+  });
+
+  await test('AD Cat-1 Bank Statement returns reconciled ledger for export order', async () => {
+    const res = await request({ path: '/api/banking/statement/1' });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.success === true, 'Expected success');
+    assert(res.body.statement.ad_bank.includes('AD-Cat 1'), 'AD Bank name mismatch');
+  });
+
   console.log('\n===============================================================');
   console.log(`📊 TEST EXECUTION COMPLETE:`);
   console.log(`   Total Tests: ${passCount + failCount}`);
