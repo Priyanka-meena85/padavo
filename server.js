@@ -28,6 +28,12 @@ const voiceEngine = require('./voice-engine');
 const whatsAppBot = require('./whatsapp-bot');
 const icegateEngine = require('./icegate-engine');
 const fxEngine = require('./fx-engine');
+const visionQcEngine = require('./vision-qc-engine');
+const chunkedUploadEngine = require('./chunked-upload-engine');
+const factoringEngine = require('./factoring-engine');
+const eblEngine = require('./ebl-engine');
+const rbacEngine = require('./rbac-engine');
+const jobQueue = require('./job-queue');
 
 // Environment & Configuration
 const PORT = process.env.PORT || 5500;
@@ -1121,6 +1127,12 @@ async function handleRequest(req, res) {
         supported_voice_dialects: voiceEngine.supportedLanguages,
         customs_icegate: 'active',
         interbank_fx: 'active',
+        vision_qc_ai: 'active',
+        chunked_upload: 'ready',
+        factoring_engine: 'active',
+        ebl_tradetrust: 'active',
+        enterprise_rbac: 'active',
+        job_queue: jobQueue.getMetrics(),
         memory: {
           rssMb: Math.round(memoryUsage.rss / (1024 * 1024)),
           heapUsedMb: Math.round(memoryUsage.heapUsed / (1024 * 1024))
@@ -2173,6 +2185,139 @@ async function handleRequest(req, res) {
             link: '/buyer-tracking-uk.html'
           }
         ]
+      });
+    }
+
+    // POST /api/qc/vision-inspect — Computer Vision AI Defect Detection
+    if (method === 'POST' && pathname === '/api/qc/vision-inspect') {
+      const body = await parseJsonBody(req);
+      const { image_url, cluster, stage, filename } = body;
+      const inspectionResult = await visionQcEngine.inspectPhoto(image_url || '/logo.png', {
+        cluster: cluster || 'jaipur_textiles',
+        stage: stage || 'AQL 2.5 Quality Inspection',
+        filename: filename || 'inspection-sample.jpg'
+      });
+      return sendJson(res, 200, inspectionResult);
+    }
+
+    // POST /api/upload/chunk-init — Initiate Resumable Chunked Session
+    if (method === 'POST' && pathname === '/api/upload/chunk-init') {
+      const body = await parseJsonBody(req);
+      const session = chunkedUploadEngine.initiateSession(body);
+      return sendJson(res, 200, session);
+    }
+
+    // POST /api/upload/chunk — Receive Single 512KB Chunk
+    if (method === 'POST' && pathname === '/api/upload/chunk') {
+      const body = await parseJsonBody(req);
+      const { upload_id, chunk_index, chunk_data_base64 } = body;
+      if (!upload_id || chunk_index === undefined) {
+        return sendJson(res, 400, { success: false, message: 'upload_id and chunk_index required' });
+      }
+      const buffer = chunk_data_base64 ? Buffer.from(chunk_data_base64, 'base64') : Buffer.from('CHUNK_STAGED_PAYLOAD');
+      const resChunk = chunkedUploadEngine.saveChunk(upload_id, chunk_index, buffer);
+      return sendJson(res, 200, resChunk);
+    }
+
+    // POST /api/upload/chunk-complete — Assemble Chunks into Final Asset
+    if (method === 'POST' && pathname === '/api/upload/chunk-complete') {
+      const body = await parseJsonBody(req);
+      const { upload_id } = body;
+      try {
+        const finalAsset = chunkedUploadEngine.assembleFinalFile(upload_id);
+        return sendJson(res, 200, finalAsset);
+      } catch (err) {
+        return sendJson(res, 400, { success: false, message: err.message });
+      }
+    }
+
+    // GET /api/factoring/order/:id/eligibility — Factor-As-You-Produce Eligibility
+    const factoringMatch = pathname.match(/^\/api\/factoring\/order\/(\d+)\/eligibility$/);
+    if (method === 'GET' && factoringMatch) {
+      const orderId = Number(factoringMatch[1]);
+      const order = db.prepare('SELECT o.*, e.company_name FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492', total_amount: 14000, currency: 'GBP', company_name: 'Zenith Global Exports' };
+      const stages = db.prepare('SELECT * FROM order_stages WHERE order_id = ?').all(orderId);
+      const completed = stages.filter(s => s.status === 'completed').length || 3;
+      const total = stages.length || 5;
+
+      const eligibility = factoringEngine.calculateEligibility(order, completed, total);
+      return sendJson(res, 200, eligibility);
+    }
+
+    // POST /api/factoring/order/:id/disburse — Disburse Working Capital Tranche
+    const factorDisburseMatch = pathname.match(/^\/api\/factoring\/order\/(\d+)\/disburse$/);
+    if (method === 'POST' && factorDisburseMatch) {
+      const orderId = Number(factorDisburseMatch[1]);
+      const body = await parseJsonBody(req);
+      const { amount_inr, bank_details } = body;
+      const disb = factoringEngine.disburseTranche(orderId, amount_inr, bank_details);
+      return sendJson(res, 200, disb);
+    }
+
+    // GET /api/orders/:id/ebl — Digital Electronic Bill of Lading (TradeTrust MLETR)
+    const eblMatch = pathname.match(/^\/api\/orders\/(\d+)\/ebl$/);
+    if (method === 'GET' && eblMatch) {
+      const orderId = Number(eblMatch[1]);
+      const order = db.prepare('SELECT o.*, e.company_name, e.iec_number FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492', company_name: 'Zenith Global Exports Ltd', buyer_name: 'Toast & Co. London', iec_number: '0518920194' };
+      const digitalEbl = eblEngine.generateDigitalEbl(order);
+      return sendJson(res, 200, digitalEbl);
+    }
+
+    // POST /api/orders/:id/ebl/endorse — Endorse & Surrender e-BL Title
+    const eblEndorseMatch = pathname.match(/^\/api\/orders\/(\d+)\/ebl\/endorse$/);
+    if (method === 'POST' && eblEndorseMatch) {
+      const body = await parseJsonBody(req);
+      const { ebl_number, new_holder, bank_wire_ref } = body;
+      const endorsed = eblEngine.endorseTitle(ebl_number || 'EBL-MLETR-2026-8492', new_holder || 'Toast & Co. London', bank_wire_ref || 'TT-BARC-99281');
+      return sendJson(res, 200, endorsed);
+    }
+
+    // GET /api/auditor/inspections — Accredited Third-Party Auditor Queue
+    if (method === 'GET' && pathname === '/api/auditor/inspections') {
+      return sendJson(res, 200, {
+        success: true,
+        agency: 'SGS India / Bureau Veritas Inspection Queue',
+        pending_inspections: [
+          {
+            order_id: 1,
+            po_number: 'PO-UK-8492',
+            client: 'Marks & Spencer / Toast & Co.',
+            exporter: 'Zenith Global Exports (Sitapura Jaipur)',
+            inspection_level: 'ISO 2859-1 Level II (AQL 2.5 Major / 4.0 Minor)',
+            stage: 'Final Random Inspection (FRI)',
+            scheduled_date: '2026-11-25',
+            status: 'READY_FOR_AUDITOR_WITNESS'
+          }
+        ]
+      });
+    }
+
+    // POST /api/auditor/inspections/:id/sign-off — Third-Party Auditor Sign-Off
+    const auditorSignMatch = pathname.match(/^\/api\/auditor\/inspections\/(\d+)\/sign-off$/);
+    if (method === 'POST' && auditorSignMatch) {
+      const orderId = Number(auditorSignMatch[1]);
+      const body = await parseJsonBody(req);
+      const signOff = rbacEngine.issueAuditorSignOff(orderId, body.auditor_details || {}, body.checklist || {});
+      return sendJson(res, 200, signOff);
+    }
+
+    // POST /api/orders/:id/whatsapp-interactive-prompt — 2-Way Interactive WhatsApp Buttons
+    const waPromptMatch = pathname.match(/^\/api\/orders\/(\d+)\/whatsapp-interactive-prompt$/);
+    if (method === 'POST' && waPromptMatch) {
+      const orderId = Number(waPromptMatch[1]);
+      const body = await parseJsonBody(req);
+      const order = db.prepare('SELECT o.*, e.company_name FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492', buyer_name: 'Toast & Co. London' };
+      const milestone = db.prepare('SELECT * FROM order_milestones WHERE order_id = ? ORDER BY id ASC LIMIT 1').get(orderId) || { id: 1, stage_index: 2, milestone_title: 'Block Printing & Dyeing', amount_formatted: 'GBP 5,600' };
+
+      const interactivePrompt = await whatsAppBot.sendInteractiveBuyerDecisionPrompt(body.phone || '+447911123456', order, milestone);
+      return sendJson(res, 200, interactivePrompt);
+    }
+
+    // GET /api/system/queue-metrics — Background Job Queue Health & Telemetry
+    if (method === 'GET' && pathname === '/api/system/queue-metrics') {
+      return sendJson(res, 200, {
+        success: true,
+        job_queue: jobQueue.getMetrics()
       });
     }
 

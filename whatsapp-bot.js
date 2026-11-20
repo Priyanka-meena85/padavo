@@ -64,6 +64,15 @@ class WhatsAppBotEngine {
     } else if (messageType === 'audio') {
       extractedData.audio_url = message.audio?.id || `audio-${Date.now()}`;
       extractedData.caption = 'Voice note inspection recording';
+    } else if (messageType === 'interactive') {
+      const interactive = message.interactive;
+      if (interactive?.type === 'button_reply') {
+        extractedData.button_id = interactive.button_reply.id;
+        extractedData.button_title = interactive.button_reply.title;
+        extractedData.caption = `Action selected: ${interactive.button_reply.title}`;
+        extractedData.is_buyer_decision = true;
+        extractedData.decision_value = interactive.button_reply.id.includes('APPROVE') ? 'approved' : 'rejected';
+      }
     } else if (messageType === 'text') {
       extractedData.caption = message.text?.body || '';
     }
@@ -134,6 +143,34 @@ class WhatsAppBotEngine {
       message_id: `WA-MSG-${Date.now()}`,
       tracking_url: trackingUrl,
       status: 'SENT_TO_WHATSAPP_NETWORK'
+    };
+  }
+
+  /**
+   * Dispatches interactive Meta Flow decision buttons to overseas buyers
+   */
+  async sendInteractiveBuyerDecisionPrompt(recipientPhone, order, milestone) {
+    const trackingUrl = `http://localhost:5500/buyer-tracking-uk.html?slug=${order.public_tracking_slug || 'rj-pouk8492'}`;
+
+    return {
+      success: true,
+      mode: this.isLive ? 'live_meta_cloud' : 'interactive_flow_simulator',
+      recipient: recipientPhone,
+      interactive_payload: {
+        type: 'button',
+        header: { type: 'text', text: `Stage Inspection: ${order.po_number || 'PO-UK-8492'}` },
+        body: { text: `Hello ${order.buyer_name || 'Buyer'}, Lot #${milestone?.stage_index || 1} (${milestone?.milestone_title || 'Quality Stage'}) has passed AQL 2.5 factory QC inspection. Review 4K proofs and tap below to release milestone TT wire transfer.` },
+        footer: { text: 'Padavo Zero-Custody Verification' },
+        action: {
+          buttons: [
+            { type: 'reply', reply: { id: `BTN_APPROVE_${milestone?.id || 1}`, title: '✅ Approve & Sign' } },
+            { type: 'reply', reply: { id: `BTN_RECUT_${milestone?.id || 1}`, title: '⚠️ Request Recut' } },
+            { type: 'reply', reply: { id: `BTN_VIEW_${milestone?.id || 1}`, title: '🔍 Inspect Proofs' } }
+          ]
+        }
+      },
+      tracking_url: trackingUrl,
+      status: 'INTERACTIVE_BUTTONS_DISPATCHED'
     };
   }
 }

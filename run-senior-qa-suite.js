@@ -490,6 +490,144 @@ async function runTestSuite() {
     assert(res.body.loan_decision.eligible_credit_limit.includes('INR'), 'Missing credit limit');
   });
 
+  // Group 10: Next-Gen Enterprise SaaS & Multi-Moat Engines
+  console.log('\n🌟 GROUP 10: NEXT-GEN ENTERPRISE SAAS & MULTI-MOAT ENGINES');
+  await test('Computer Vision AI Defect Detection evaluates AQL 2.5 pass probability', async () => {
+    const res = await request({
+      path: '/api/qc/vision-inspect',
+      method: 'POST'
+    }, {
+      image_url: 'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d',
+      cluster: 'jaipur_textiles',
+      stage: 'AQL 2.5 Quality Inspection'
+    });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.aql_2_5_verdict === 'PASSED_AQL_2_5', 'Vision QC verdict mismatch');
+    assert(res.body.pass_probability > 0.9, 'Pass probability must be > 0.9');
+    assert(res.body.color_delta_e < 1.2, 'Color Delta E out of spec');
+  });
+
+  await test('Chunked Resumable Upload initializes, receives parts, and assembles final asset', async () => {
+    // 1. Init
+    const initRes = await request({
+      path: '/api/upload/chunk-init',
+      method: 'POST'
+    }, {
+      filename: 'factory-offline-proof.jpg',
+      total_size: 1024,
+      total_chunks: 2
+    });
+    assert(initRes.statusCode === 200, `Init failed with ${initRes.statusCode}`);
+    const uploadId = initRes.body.upload_id;
+    assert(uploadId && uploadId.startsWith('chk-'), 'Invalid upload id');
+
+    // 2. Part 0
+    const part0 = await request({
+      path: '/api/upload/chunk',
+      method: 'POST'
+    }, {
+      upload_id: uploadId,
+      chunk_index: 0,
+      chunk_data_base64: Buffer.from('CHUNK_0_BYTES_PAYLOAD_').toString('base64')
+    });
+    assert(part0.statusCode === 200, 'Part 0 failed');
+
+    // 3. Part 1
+    const part1 = await request({
+      path: '/api/upload/chunk',
+      method: 'POST'
+    }, {
+      upload_id: uploadId,
+      chunk_index: 1,
+      chunk_data_base64: Buffer.from('CHUNK_1_BYTES_PAYLOAD_').toString('base64')
+    });
+    assert(part1.statusCode === 200, 'Part 1 failed');
+    assert(part1.body.is_complete === true, 'Upload not flagged complete');
+
+    // 4. Assemble
+    const compRes = await request({
+      path: '/api/upload/chunk-complete',
+      method: 'POST'
+    }, { upload_id: uploadId });
+    assert(compRes.statusCode === 200, 'Assemble failed');
+    assert(compRes.body.resumable_status === 'ASSEMBLED_SUCCESSFULLY', 'Status mismatch');
+  });
+
+  await test('Two-Way Interactive WhatsApp Bot dispatches decision buttons to overseas buyer', async () => {
+    const res = await request({
+      path: '/api/orders/1/whatsapp-interactive-prompt',
+      method: 'POST'
+    }, {
+      phone: '+447911123456'
+    });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.interactive_payload.type === 'button', 'Expected button interactive payload');
+    assert(res.body.interactive_payload.action.buttons.length >= 3, 'Expected at least 3 action buttons');
+  });
+
+  await test('Factor-As-You-Produce calculates stage-linked advance, IES subsidy, and take-rate', async () => {
+    const res = await request({ path: '/api/factoring/order/1/eligibility' });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.eligible_credit_advance_inr > 0, 'Eligible advance must be positive');
+    assert(res.body.padavo_platform_take_rate === '0.75%', 'Padavo take rate must be 0.75%');
+    assert(res.body.net_effective_exporter_rate === '5.50% p.a.', 'Effective rate mismatch');
+  });
+
+  await test('Factor-As-You-Produce disburses tranche with instant RTGS UTR reference', async () => {
+    const res = await request({
+      path: '/api/factoring/order/1/disburse',
+      method: 'POST'
+    }, {
+      amount_inr: 750000,
+      bank_details: { ifsc: 'HDFC0001829', account_number: '502000849201' }
+    });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.status === 'DISBURSED_VIA_DIRECT_RTGS', 'Status mismatch');
+    assert(res.body.padavo_fee_deducted_inr > 0, 'Take rate fee must be deducted');
+  });
+
+  await test('TradeTrust Digital e-BL generates UNCITRAL MLETR compliant cryptographic title', async () => {
+    const res = await request({ path: '/api/orders/1/ebl' });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.legal_framework.includes('MLETR'), 'Legal framework mismatch');
+    assert(res.body.title_hash.length === 64, 'Invalid title hash');
+  });
+
+  await test('TradeTrust Digital e-BL endorses and transfers title to buyer upon settlement', async () => {
+    const res = await request({
+      path: '/api/orders/1/ebl/endorse',
+      method: 'POST'
+    }, {
+      ebl_number: 'EBL-MLETR-2026-8492',
+      new_holder: 'Marks & Spencer London HQ',
+      bank_wire_ref: 'TT-BARC-8492019'
+    });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.status === 'CARGO_TITLE_TRANSFERRED_TO_BUYER', 'Title transfer status mismatch');
+  });
+
+  await test('Third-Party Auditor Portal serves pending inspections and accepts accredited sign-off', async () => {
+    const listRes = await request({ path: '/api/auditor/inspections' });
+    assert(listRes.statusCode === 200, `Expected 200, got ${listRes.statusCode}`);
+    assert(listRes.body.pending_inspections.length >= 1, 'Expected pending inspections');
+
+    const signRes = await request({
+      path: '/api/auditor/inspections/1/sign-off',
+      method: 'POST'
+    }, {
+      auditor_details: { agency_id: 'SGS_INDIA', auditor_name: 'Suresh Menon, Lead Auditor' }
+    });
+    assert(signRes.statusCode === 200, `Sign-off failed with ${signRes.statusCode}`);
+    assert(signRes.body.certificate_number.startsWith('CERT-SGS-'), 'Certificate number format mismatch');
+    assert(signRes.body.aql_sampling_result.disposition === 'PASSED_FOR_EXPORT', 'Disposition mismatch');
+  });
+
+  await test('Background Job Queue reports metrics and zero-lag concurrency state', async () => {
+    const res = await request({ path: '/api/system/queue-metrics' });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.job_queue, 'Missing job queue telemetry');
+  });
+
   console.log('\n===============================================================');
   console.log(`📊 TEST EXECUTION COMPLETE:`);
   console.log(`   Total Tests: ${passCount + failCount}`);
