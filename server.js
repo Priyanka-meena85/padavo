@@ -172,6 +172,10 @@ function initDatabase() {
 const db = initDatabase();
 
 try {
+  db.exec("ALTER TABLE exporters ADD COLUMN role TEXT DEFAULT 'owner'");
+} catch (e) {}
+
+try {
   db.exec(`
   CREATE TABLE IF NOT EXISTS exporters (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -902,7 +906,7 @@ function getAuthExporter(req) {
   const token = authHeader.substring(7);
 
   const session = db.prepare(`
-    SELECT s.*, e.id as exporter_id, e.email, e.company_name, e.company_initials, e.city_cluster, e.iec_number, e.phone, e.whatsapp, e.subscription_tier, e.orders_quota, e.orders_used
+    SELECT s.*, e.id as exporter_id, e.email, e.company_name, e.company_initials, e.city_cluster, e.iec_number, e.phone, e.whatsapp, e.subscription_tier, e.orders_quota, e.orders_used, e.role
     FROM sessions s
     JOIN exporters e ON s.exporter_id = e.id
     WHERE s.token = ? AND s.expires_at > datetime('now')
@@ -2707,7 +2711,7 @@ async function handleRequest(req, res) {
     // POST /api/auth/register
     if (method === 'POST' && pathname === '/api/auth/register') {
       const body = await parseJsonBody(req);
-      const { email, password, company_name, city_cluster, iec_number, phone, whatsapp } = body;
+      const { email, password, company_name, city_cluster, iec_number, phone, whatsapp, role } = body;
 
       if (!email || !password || !company_name) {
         return sendJson(res, 400, { success: false, message: 'Email, password, and company name are required' });
@@ -2722,8 +2726,8 @@ async function handleRequest(req, res) {
       const passwordHash = hashPassword(password);
 
       const result = db.prepare(`
-        INSERT INTO exporters (email, password_hash, company_name, company_initials, iec_number, city_cluster, phone, whatsapp, subscription_tier, orders_quota, orders_used)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'starter', 15, 0)
+        INSERT INTO exporters (email, password_hash, company_name, company_initials, iec_number, city_cluster, phone, whatsapp, subscription_tier, orders_quota, orders_used, role)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'starter', 15, 0, ?)
       `).run(
         email.toLowerCase().trim(),
         passwordHash,
@@ -2732,7 +2736,8 @@ async function handleRequest(req, res) {
         iec_number || '',
         city_cluster || 'Jaipur (Textiles)',
         phone || '',
-        whatsapp || phone || ''
+        whatsapp || phone || '',
+        role || 'owner'
       );
 
       const exporterId = Number(result.lastInsertRowid);
@@ -2743,12 +2748,12 @@ async function handleRequest(req, res) {
         INSERT INTO sessions (token, exporter_id, expires_at) VALUES (?, ?, ?)
       `).run(sessionToken, exporterId, expiresAt);
 
-      logAudit(null, exporterId, 'REGISTER', `New exporter registered: ${company_name}`, clientIp);
+      logAudit(null, exporterId, 'REGISTER', `New exporter registered: ${company_name} (Role: ${role || 'owner'})`, clientIp);
 
       return sendJson(res, 201, {
         success: true,
         token: sessionToken,
-        exporter: { id: exporterId, email, company_name, company_initials: initials, city_cluster, subscription_tier: 'starter', orders_quota: 15, orders_used: 0 }
+        exporter: { id: exporterId, email, company_name, company_initials: initials, city_cluster, subscription_tier: 'starter', orders_quota: 15, orders_used: 0, role: role || 'owner' }
       });
     }
 
@@ -2801,7 +2806,8 @@ async function handleRequest(req, res) {
           whatsapp: exporter.whatsapp,
           subscription_tier: exporter.subscription_tier || 'starter',
           orders_quota: exporter.orders_quota || 25,
-          orders_used: exporter.orders_used || 0
+          orders_used: exporter.orders_used || 0,
+          role: exporter.role || 'owner'
         }
       });
     }
