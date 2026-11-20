@@ -2815,6 +2815,58 @@ async function handleRequest(req, res) {
       return sendJson(res, 200, { success: true, exporter: session });
     }
 
+    // POST /api/auth/google — Direct Google / Gmail OAuth Bridge
+    if (method === 'POST' && pathname === '/api/auth/google') {
+      const body = await parseJsonBody(req);
+      const { email, name, google_id } = body;
+
+      if (!email || !email.includes('@')) {
+        return sendJson(res, 400, { success: false, message: 'Valid Google email is required' });
+      }
+
+      const cleanEmail = email.toLowerCase().trim();
+      let exporter = db.prepare('SELECT * FROM exporters WHERE email = ?').get(cleanEmail);
+
+      if (!exporter) {
+        // Auto-register new user via Google OAuth
+        const initials = (name || cleanEmail)
+          .split(/\s+/)
+          .map(w => w[0] || '')
+          .join('')
+          .substring(0, 3)
+          .toUpperCase() || 'EXP';
+
+        const oauthPasswordHash = 'oauth_google_' + crypto.randomBytes(16).toString('hex');
+        const result = db.prepare(`
+          INSERT INTO exporters (email, password_hash, company_name, company_initials, iec_number, city_cluster, phone, whatsapp, subscription_tier, orders_quota, orders_used)
+          VALUES (?, ?, ?, ?, '', 'Pan-India Multi-Cluster Hub', '', '', 'starter', 15, 0)
+        `).run(cleanEmail, oauthPasswordHash, name || 'Global Indian Exports', initials);
+
+        exporter = db.prepare('SELECT * FROM exporters WHERE id = ?').get(Number(result.lastInsertRowid));
+        logAudit(null, exporter.id, 'REGISTER_GOOGLE', `New exporter auto-registered via Google OAuth: ${cleanEmail}`, clientIp);
+      }
+
+      const sessionToken = generateSecureToken(32);
+      const expiresAt = new Date(Date.now() + 30 * 86400000).toISOString();
+      db.prepare('INSERT INTO sessions (token, exporter_id, expires_at) VALUES (?, ?, ?)').run(sessionToken, exporter.id, expiresAt);
+      logAudit(null, exporter.id, 'AUTH_GOOGLE_LOGIN', `Exporter ${cleanEmail} authenticated via Google`, clientIp);
+
+      return sendJson(res, 200, {
+        success: true,
+        token: sessionToken,
+        exporter: {
+          id: exporter.id,
+          email: exporter.email,
+          company_name: exporter.company_name,
+          company_initials: exporter.company_initials,
+          city_cluster: exporter.city_cluster,
+          subscription_tier: exporter.subscription_tier || 'starter',
+          orders_quota: exporter.orders_quota || 15,
+          orders_used: exporter.orders_used || 0
+        }
+      });
+    }
+
     // POST /api/auth/logout
     if (method === 'POST' && pathname === '/api/auth/logout') {
       const authHeader = req.headers['authorization'];
