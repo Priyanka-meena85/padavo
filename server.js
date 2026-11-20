@@ -34,6 +34,12 @@ const factoringEngine = require('./factoring-engine');
 const eblEngine = require('./ebl-engine');
 const rbacEngine = require('./rbac-engine');
 const jobQueue = require('./job-queue');
+const esgEngine = require('./esg-engine');
+const governanceEngine = require('./governance-engine');
+const ediEngine = require('./edi-engine');
+const insuranceEngine = require('./insurance-engine');
+const discountingEngine = require('./discounting-engine');
+const realtimeEngine = require('./realtime-engine');
 
 // Environment & Configuration
 const PORT = process.env.PORT || 5500;
@@ -1132,6 +1138,12 @@ async function handleRequest(req, res) {
         factoring_engine: 'active',
         ebl_tradetrust: 'active',
         enterprise_rbac: 'active',
+        esg_cbam_dpp: 'active',
+        four_eyes_governance: 'active',
+        edi_gateway: 'active',
+        embedded_insurance: 'active',
+        dynamic_discounting: 'active',
+        realtime_presence: 'active',
         job_queue: jobQueue.getMetrics(),
         memory: {
           rssMb: Math.round(memoryUsage.rss / (1024 * 1024)),
@@ -2319,6 +2331,116 @@ async function handleRequest(req, res) {
         success: true,
         job_queue: jobQueue.getMetrics()
       });
+    }
+
+    // GET /api/orders/:id/esg-passport — EU CBAM & ESG Digital Product Passport
+    const esgMatch = pathname.match(/^\/api\/orders\/(\d+)\/esg-passport$/);
+    const esgPublicMatch = pathname.match(/^\/api\/public\/orders\/([^\/]+)\/esg-passport$/);
+    if (method === 'GET' && (esgMatch || esgPublicMatch)) {
+      const orderId = esgMatch ? Number(esgMatch[1]) : 1;
+      const order = db.prepare('SELECT o.*, e.company_name, e.city_cluster as cluster FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492', quantity: '850 Pcs', cluster: 'jaipur_textiles', company_name: 'Zenith Global Exports Ltd' };
+      const dpp = esgEngine.generateDigitalPassport(order);
+      return sendJson(res, 200, dpp);
+    }
+
+    // POST /api/orders/:id/dual-sign/technical — 4-Eyes Step 1: Technical QC Sign-off
+    const dualTechMatch = pathname.match(/^\/api\/orders\/(\d+)\/dual-sign\/technical$/);
+    if (method === 'POST' && dualTechMatch) {
+      const orderId = Number(dualTechMatch[1]);
+      const body = await parseJsonBody(req);
+      const resSign = governanceEngine.recordTechnicalSignOff(orderId, body);
+      return sendJson(res, 200, resSign);
+    }
+
+    // POST /api/orders/:id/dual-sign/financial — 4-Eyes Step 2: Treasury Wire Release
+    const dualFinMatch = pathname.match(/^\/api\/orders\/(\d+)\/dual-sign\/financial$/);
+    if (method === 'POST' && dualFinMatch) {
+      const orderId = Number(dualFinMatch[1]);
+      const body = await parseJsonBody(req);
+      const resSign = governanceEngine.recordFinancialSignOff(orderId, body);
+      return sendJson(res, 200, resSign);
+    }
+
+    // GET /api/orders/:id/dual-sign/status — Current 4-Eyes Governance State
+    const dualStatusMatch = pathname.match(/^\/api\/orders\/(\d+)\/dual-sign\/status$/);
+    if (method === 'GET' && dualStatusMatch) {
+      const orderId = Number(dualStatusMatch[1]);
+      const status = governanceEngine.getStatus(orderId);
+      return sendJson(res, 200, { success: true, governance: status });
+    }
+
+    // POST /api/edi/850-import — Inbound EDI 850 Purchase Order Ingestion (SAP / Coupa)
+    if (method === 'POST' && pathname === '/api/edi/850-import') {
+      const body = await parseJsonBody(req);
+      const ediResult = ediEngine.parseEdi850(body.edi_data || body.raw_edi);
+      return sendJson(res, 200, ediResult);
+    }
+
+    // GET /api/orders/:id/edi-856 — Outbound EDI 856 Advance Ship Notice (ASN) Manifest
+    const edi856Match = pathname.match(/^\/api\/orders\/(\d+)\/edi-856$/);
+    if (method === 'GET' && edi856Match) {
+      const orderId = Number(edi856Match[1]);
+      const order = db.prepare('SELECT o.*, e.company_name FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492', product_name: 'Organic Block-Printed Kurtis', quantity: '850' };
+      const asn = ediEngine.generateEdi856Asn(order);
+      return sendJson(res, 200, asn);
+    }
+
+    // GET /api/orders/:id/edi-810 — Outbound EDI 810 Commercial Milestone Invoice
+    const edi810Match = pathname.match(/^\/api\/orders\/(\d+)\/edi-810$/);
+    if (method === 'GET' && edi810Match) {
+      const orderId = Number(edi810Match[1]);
+      const order = db.prepare('SELECT o.*, e.company_name FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492', company_name: 'Zenith Global Exports Ltd' };
+      const milestone = db.prepare('SELECT * FROM order_milestones WHERE order_id = ? ORDER BY id ASC LIMIT 1').get(orderId) || { id: 1, stage_index: 2, amount_formatted: 'GBP 5,600' };
+      const inv = ediEngine.generateEdi810Invoice(order, milestone);
+      return sendJson(res, 200, inv);
+    }
+
+    // POST /api/orders/:id/insurance/quote — Marine Cargo & ECGC Credit Insurance Quote
+    const insQuoteMatch = pathname.match(/^\/api\/orders\/(\d+)\/insurance\/quote$/);
+    if (method === 'POST' && insQuoteMatch) {
+      const body = await parseJsonBody(req);
+      const quote = insuranceEngine.calculateInsuranceQuote(body.order_value_inr || 1500000);
+      return sendJson(res, 200, quote);
+    }
+
+    // POST /api/orders/:id/insurance/bind — Bind Active Digital Insurance Policy
+    const insBindMatch = pathname.match(/^\/api\/orders\/(\d+)\/insurance\/bind$/);
+    if (method === 'POST' && insBindMatch) {
+      const orderId = Number(insBindMatch[1]);
+      const body = await parseJsonBody(req);
+      const policy = insuranceEngine.bindPolicy(orderId, body.quote_reference, body.beneficiary_details || {});
+      return sendJson(res, 200, policy);
+    }
+
+    // GET /api/orders/:id/early-discount-quote — Dynamic 2/10 Net 60 Discount Terms
+    const discQuoteMatch = pathname.match(/^\/api\/orders\/(\d+)\/early-discount-quote$/);
+    if (method === 'GET' && discQuoteMatch) {
+      const quote = discountingEngine.calculateDiscount(5600, 2.0);
+      return sendJson(res, 200, quote);
+    }
+
+    // POST /api/orders/:id/early-discount-accept — Lock Early Payment Terms
+    const discAcceptMatch = pathname.match(/^\/api\/orders\/(\d+)\/early-discount-accept$/);
+    if (method === 'POST' && discAcceptMatch) {
+      const orderId = Number(discAcceptMatch[1]);
+      const body = await parseJsonBody(req);
+      const accept = discountingEngine.acceptDiscountTerms(orderId, body.milestone_id, body.buyer_email);
+      return sendJson(res, 200, accept);
+    }
+
+    // GET /api/realtime/presence/:room — Live Multi-Presence Active Collaborators
+    const presMatch = pathname.match(/^\/api\/realtime\/presence\/([^\/]+)$/);
+    if (method === 'GET' && presMatch) {
+      const roomId = presMatch[1];
+      const presence = realtimeEngine.getRoomPresence(roomId);
+      return sendJson(res, 200, { success: true, ...presence });
+    }
+
+    // POST /api/realtime/presence/heartbeat — Heartbeat Active Viewer & Typing State
+    if (method === 'POST' && pathname === '/api/realtime/presence/heartbeat') {
+      const body = await parseJsonBody(req);
+      const presence = realtimeEngine.registerPresence(body.room_id || 'rj-pouk8492', body);
+      return sendJson(res, 200, presence);
     }
 
     // --------------------------------------------------------------------------

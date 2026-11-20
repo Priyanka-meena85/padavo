@@ -628,6 +628,133 @@ async function runTestSuite() {
     assert(res.body.job_queue, 'Missing job queue telemetry');
   });
 
+  // Group 11: Global Enterprise Regulatory, Governance & Procurement Moats
+  console.log('\n🌐 GROUP 11: GLOBAL ENTERPRISE REGULATORY, GOVERNANCE & PROCUREMENT MOATS');
+  await test('EU CBAM & ESG Digital Product Passport calculates carbon footprint and chemical safety', async () => {
+    const res = await request({ path: '/api/orders/1/esg-passport' });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.eu_customs_status === 'CBAM_CARBON_DECLARATION_CLEARED', 'CBAM declaration mismatch');
+    assert(res.body.passport_details.carbon_accounting.carbon_footprint_per_unit_kg_co2e > 0, 'Carbon footprint must be positive');
+    assert(res.body.dpp_integrity_hash.length === 64, 'Missing DPP sha256 hash');
+  });
+
+  await test('4-Eyes Principle Dual-Control requires technical sign-off followed by treasury wire release', async () => {
+    // Step 1: Technical Sign-off
+    const techRes = await request({
+      path: '/api/orders/1/dual-sign/technical',
+      method: 'POST'
+    }, {
+      name: 'David Richardson (Lead QA Director)',
+      decision: 'APPROVED',
+      notes: 'Lab-dip and seam tensile tests passed AQL 2.5 spec.'
+    });
+    assert(techRes.statusCode === 200, `Tech sign-off failed with ${techRes.statusCode}`);
+    assert(techRes.body.step === '1_OF_2_COMPLETED', 'Step mismatch');
+    assert(techRes.body.status === 'TECHNICAL_APPROVED_AWAITING_FINANCIAL_RELEASE', 'Status mismatch');
+
+    // Step 2: Financial Treasury Wire Release
+    const finRes = await request({
+      path: '/api/orders/1/dual-sign/financial',
+      method: 'POST'
+    }, {
+      name: 'Emma Watson (Treasury Controller)',
+      amount: 5600
+    });
+    assert(finRes.statusCode === 200, `Financial sign-off failed with ${finRes.statusCode}`);
+    assert(finRes.body.composite_governance_seal.startsWith('SEAL-4EYES-'), 'Composite seal missing');
+    assert(finRes.body.wire_release_cleared === true, 'Wire release not cleared');
+  });
+
+  await test('EDI 850 Purchase Order Ingestion translates SAP S/4HANA ANSI X12 payload', async () => {
+    const sampleEdi850 = `ISA*00*          *00*          *ZZ*BUYERSAP       *ZZ*PADAVO         *261120*1000*U*00401*000000001*0*T*:~
+GS*PO*BUYERSAP*PADAVO*20261120*1000*1*X*004010~
+ST*850*0001~
+BEG*00*NE*PO-SAP-9941**20261120~
+CUR*BY*GBP~
+N1*BY*Marks and Spencer London Lifestyle~
+PO1*1*1200*EA*24.00**VC*KURTI-INDIGO-01~
+SE*7*0001~
+GE*1*1~
+IEA*1*000000001~`;
+
+    const res = await request({
+      path: '/api/edi/850-import',
+      method: 'POST'
+    }, { edi_data: sampleEdi850 });
+
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.po_number === 'PO-SAP-9941', `PO mismatch: got ${res.body.po_number}`);
+    assert(res.body.buyer_name.includes('Marks and Spencer'), 'Buyer name mismatch');
+  });
+
+  await test('Outbound EDI 856 Advance Ship Notice (ASN) generates SSCC-18 pallet hierarchy', async () => {
+    const res = await request({ path: '/api/orders/1/edi-856' });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.asn_number.startsWith('ASN-'), 'ASN number format mismatch');
+    assert(res.body.sscc_pallet_barcode.length >= 18, 'SSCC-18 barcode too short');
+    assert(res.body.edi_payload.includes('ST*856'), 'Missing EDI ST*856 tag');
+  });
+
+  await test('Embedded Marine Cargo & ECGC Insurance calculates quote and binds digital policy', async () => {
+    // Quote
+    const quoteRes = await request({
+      path: '/api/orders/1/insurance/quote',
+      method: 'POST'
+    }, { order_value_inr: 2000000 });
+    assert(quoteRes.statusCode === 200, `Expected 200, got ${quoteRes.statusCode}`);
+    assert(quoteRes.body.total_premium_inr > 0, 'Total premium must be positive');
+    assert(quoteRes.body.padavo_broker_commission_inr > 0, 'Broker take-rate must be positive');
+
+    // Bind
+    const bindRes = await request({
+      path: '/api/orders/1/insurance/bind',
+      method: 'POST'
+    }, {
+      quote_reference: quoteRes.body.quote_reference,
+      beneficiary_details: { company_name: 'Zenith Global Exports Ltd' }
+    });
+    assert(bindRes.statusCode === 200, `Bind failed with ${bindRes.statusCode}`);
+    assert(bindRes.body.policy_number.startsWith('POL-MTR-'), 'Policy number format mismatch');
+    assert(bindRes.body.status === 'POLICY_ACTIVE_AND_SEALED', 'Status mismatch');
+  });
+
+  await test('Dynamic Early Payment Discounting quotes 2% cash discount and locks 48h settlement', async () => {
+    const quoteRes = await request({ path: '/api/orders/1/early-discount-quote' });
+    assert(quoteRes.statusCode === 200, `Expected 200, got ${quoteRes.statusCode}`);
+    assert(quoteRes.body.buyer_cash_savings_gbp > 0, 'Buyer savings must be positive');
+    assert(quoteRes.body.annualized_buyer_treasury_roi.includes('% APR'), 'Missing annualized ROI yield');
+
+    const acceptRes = await request({
+      path: '/api/orders/1/early-discount-accept',
+      method: 'POST'
+    }, {
+      milestone_id: 1,
+      buyer_email: 'treasury@marksandspencer.com'
+    });
+    assert(acceptRes.statusCode === 200, `Accept failed with ${acceptRes.statusCode}`);
+    assert(acceptRes.body.status === 'EARLY_DISCOUNT_TERMS_LOCKED', 'Status mismatch');
+  });
+
+  await test('Bidirectional Real-Time Presence registers active viewer and reports collaborators', async () => {
+    const heartbeatRes = await request({
+      path: '/api/realtime/presence/heartbeat',
+      method: 'POST'
+    }, {
+      room_id: 'rj-pouk8492',
+      user_id: 'usr-buyer-889',
+      user_name: 'Sarah Jenkins (M&S London)',
+      role: 'FOREIGN_BUYER',
+      stage_viewing: 'Stage 3: Block Printing',
+      is_typing: true
+    });
+    assert(heartbeatRes.statusCode === 200, `Heartbeat failed with ${heartbeatRes.statusCode}`);
+    assert(heartbeatRes.body.active_participants_count >= 1, 'Expected active participant count');
+
+    const roomRes = await request({ path: '/api/realtime/presence/rj-pouk8492' });
+    assert(roomRes.statusCode === 200, `Room presence failed with ${roomRes.statusCode}`);
+    assert(roomRes.body.participants.length >= 1, 'Participants list empty');
+  });
+
   console.log('\n===============================================================');
   console.log(`📊 TEST EXECUTION COMPLETE:`);
   console.log(`   Total Tests: ${passCount + failCount}`);
