@@ -888,7 +888,8 @@ const MIME_TYPES = {
   '.webp': 'image/webp',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
-  '.pdf': 'application/pdf'
+  '.pdf': 'application/pdf',
+  '.md': 'text/markdown; charset=utf-8'
 };
 
 function serveStaticFile(req, res, targetPath) {
@@ -1012,6 +1013,21 @@ async function handleRequest(req, res) {
       const lucideStream = fs.createReadStream(lucidePath);
       lucideStream.on('error', () => { if (!res.headersSent) res.writeHead(204); res.end(); });
       return lucideStream.pipe(res);
+    }
+  }
+
+  // Fast-path Download Handler for Architecture Blueprint (.md Markdown)
+  if (method === 'GET' && (pathname === '/PADAVO_SOFTWARE_ARCHITECTURE.md' || pathname === '/download-architecture-md' || pathname === '/architecture.md')) {
+    const mdPath = path.join(PUBLIC_DIR, 'PADAVO_SOFTWARE_ARCHITECTURE.md');
+    if (fs.existsSync(mdPath)) {
+      res.writeHead(200, {
+        'Content-Type': 'text/markdown; charset=utf-8',
+        'Content-Disposition': 'attachment; filename="PADAVO_SOFTWARE_ARCHITECTURE.md"',
+        'Cache-Control': 'public, max-age=3600'
+      });
+      const stream = fs.createReadStream(mdPath);
+      stream.on('error', () => { if (!res.headersSent) res.writeHead(204); res.end(); });
+      return stream.pipe(res);
     }
   }
 
