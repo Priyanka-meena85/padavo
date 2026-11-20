@@ -568,7 +568,7 @@
           <div id="orders-cards-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             
             <!-- ORDER 1: UK BUYER (TEXTILE CLUSTER) -->
-            <div class="order-card bg-white dark:bg-slate-900 rounded-3xl border-2 border-brand-500/80 p-6 shadow-xs hover:shadow-md transition-all cursor-pointer relative" onclick="openOrderDetail(1)">
+            <div data-category="progress milestone" class="order-card bg-white dark:bg-slate-900 rounded-3xl border-2 border-brand-500/80 p-6 shadow-xs hover:shadow-md transition-all cursor-pointer relative" onclick="openOrderDetail(1)">
               
               <div class="flex items-start justify-between gap-3">
                 <div>
@@ -633,7 +633,7 @@
             </div>
 
             <!-- ORDER 2: US BUYER (GARMENTS) -->
-            <div class="order-card bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs hover:shadow-md transition-all cursor-pointer relative" onclick="openOrderDetail(1)">
+            <div data-category="progress delayed" class="order-card bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs hover:shadow-md transition-all cursor-pointer relative" onclick="openOrderDetail(1)">
               
               <div class="flex items-start justify-between gap-3">
                 <div>
@@ -692,7 +692,7 @@
             </div>
 
             <!-- ORDER 3: EU BUYER (FURNITURE CLUSTER) -->
-            <div class="order-card bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs hover:shadow-md transition-all cursor-pointer relative" onclick="openOrderDetail(1)">
+            <div data-category="progress" class="order-card bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs hover:shadow-md transition-all cursor-pointer relative" onclick="openOrderDetail(1)">
               
               <div class="flex items-start justify-between gap-3">
                 <div>
@@ -1034,7 +1034,7 @@
                   <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
                   <span>AQL 2.5 PASSED (0 Critical Defect)</span>
                 </span>
-                <button onclick="recordNewQcCheck(1)" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-2xs">
+                <button onclick="recordNewQcCheck(1)" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200 text-xs font-bold transition-all shadow-2xs">
                   + Log QC Parameter
                 </button>
               </div>
@@ -1213,7 +1213,7 @@
               <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Unalterable photographic proofs and buyer milestone approval certificates</p>
             </div>
 
-            <button onclick="window.print()" class="inline-flex items-center gap-2 bg-slate-900 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-xs hover:bg-slate-800 transition-all">
+            <button onclick="window.print()" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200 font-bold text-xs px-4 py-2.5 rounded-xl shadow-xs transition-all">
               <i data-lucide="printer" class="w-4 h-4"></i>
               <span>Print / Save Certificate PDF</span>
             </button>
@@ -1264,9 +1264,9 @@
             <!-- Milestones Sign-off Table -->
             <div class="mb-8">
               <h5 class="font-bold uppercase font-mono text-[11px] mb-3 text-brand-700">3. Milestone Sign-off Ledger</h5>
-              <div class="border border-slate-200 rounded-2xl overflow-hidden text-xs">
-                <table class="w-full text-left font-mono text-[11px]">
-                  <thead class="bg-slate-100 border-b border-slate-200 text-slate-700">
+              <div class="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-x-auto text-xs">
+                <table class="w-full min-w-[480px] text-left font-mono text-[11px]">
+                  <thead class="bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">
                     <tr>
                       <th class="p-3">Milestone Tranche</th>
                       <th class="p-3">Amount</th>
@@ -1414,7 +1414,7 @@
               <div class="p-2.5 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-[10px] font-mono text-slate-500">
                 CNAME Points to: <strong class="text-brand-600">cname.padavo.io</strong> • SSL Auto
               </div>
-              <button onclick="saveCustomDomain()" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all">
+              <button onclick="saveCustomDomain()" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200 text-xs font-bold rounded-xl transition-all">
                 Verify CNAME Record
               </button>
             </div>
@@ -1720,7 +1720,7 @@
   <!-- ======================================================================== -->
   <!-- MODAL: NEW ORDER CREATION WIZARD (PAN-INDIA MULTI-INDUSTRY)              -->
   <!-- ======================================================================== -->
-  <div id="modal-new-order" class="fixed inset-0 modal-backdrop-blur z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+  <div id="modal-new-order" class="fixed inset-0 modal-backdrop-blur z-50 hidden flex items-center justify-center p-4 overflow-y-auto" onclick="if(event.target===this)closeModal('modal-new-order')">
     <div class="max-w-xl w-full bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200/90 dark:border-slate-800/90 shadow-2xl max-h-[90vh] flex flex-col my-auto">
       
       <div class="p-6 sm:p-7 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
@@ -1842,6 +1842,16 @@
     }
 
     // INITIALIZATION
+    // GLOBAL ESCAPE KEY TO DISMISS MODALS
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal('modal-new-order');
+        closeWhatsAppSimModal();
+        closeTallyImportModal();
+        closeBillingModal();
+      }
+    });
+
     window.addEventListener('DOMContentLoaded', () => {
       safeCreateIcons();
       loadOrderQcChecklist(1);
@@ -1942,25 +1952,90 @@
     }
 
     // FILTER ORDERS IN DASHBOARD
+        // FILTER ORDERS IN DASHBOARD WITH VISUAL TOGGLE & EMPTY STATE
     function filterOrders(type) {
       document.querySelectorAll('.filter-pill').forEach(p => {
-        p.classList.remove('active', 'bg-slate-900', 'text-white');
-        p.classList.add('bg-white', 'text-slate-700');
+        p.classList.remove('active', 'bg-slate-900', 'text-white', 'dark:bg-white', 'dark:text-slate-900');
+        p.classList.add('bg-white', 'text-slate-700', 'dark:bg-slate-900', 'dark:text-slate-300');
       });
       const activePill = document.getElementById(`filter-${type}`);
       if (activePill) {
-        activePill.classList.remove('bg-white', 'text-slate-700');
-        activePill.classList.add('active', 'bg-slate-900', 'text-white');
+        activePill.classList.remove('bg-white', 'text-slate-700', 'dark:bg-slate-900', 'dark:text-slate-300');
+        activePill.classList.add('active', 'bg-slate-900', 'text-white', 'dark:bg-white', 'dark:text-slate-900');
       }
+
+      let visibleCount = 0;
+      document.querySelectorAll('.order-card').forEach(card => {
+        const cat = card.getAttribute('data-category') || '';
+        let show = false;
+        if (type === 'all') show = true;
+        else if (type === 'progress' && cat.includes('progress')) show = true;
+        else if (type === 'milestone' && cat.includes('milestone')) show = true;
+        else if (type === 'delayed' && cat.includes('delayed')) show = true;
+        else if (type === 'dispatched' && cat.includes('dispatched')) show = true;
+
+        card.style.display = show ? 'block' : 'none';
+        if (show) visibleCount++;
+      });
+
+      let emptyEl = document.getElementById('orders-empty-state');
+      if (visibleCount === 0) {
+        if (!emptyEl) {
+          emptyEl = document.createElement('div');
+          emptyEl.id = 'orders-empty-state';
+          emptyEl.className = 'col-span-full py-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8';
+          emptyEl.innerHTML = `
+            <div class="h-12 w-12 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center mb-3">
+              <i data-lucide="package-search" class="w-6 h-6"></i>
+            </div>
+            <h4 class="font-bold text-slate-800 dark:text-white text-sm">No export consignments found in this view</h4>
+            <p class="text-xs text-slate-500 mt-1">There are currently no orders under the ${type.toUpperCase()} filter.</p>
+            <button onclick="filterOrders('all')" class="mt-4 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-xs">View All Orders</button>
+          `;
+          document.getElementById('orders-cards-container').appendChild(emptyEl);
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        } else {
+          emptyEl.style.display = 'block';
+        }
+      } else if (emptyEl) {
+        emptyEl.style.display = 'none';
+      }
+
       showToast(`Filter applied: ${type.toUpperCase()}`);
     }
 
-    function filterOrdersBySearch(query) {
-      const q = query.toLowerCase();
+        function filterOrdersBySearch(query) {
+      const q = query.toLowerCase().trim();
+      let visibleCount = 0;
       document.querySelectorAll('.order-card').forEach(card => {
         const text = card.innerText.toLowerCase();
-        card.style.display = text.includes(q) ? 'block' : 'none';
+        const matches = text.includes(q);
+        card.style.display = matches ? 'block' : 'none';
+        if (matches) visibleCount++;
       });
+
+      let emptyEl = document.getElementById('orders-empty-state');
+      if (visibleCount === 0) {
+        if (!emptyEl) {
+          emptyEl = document.createElement('div');
+          emptyEl.id = 'orders-empty-state';
+          emptyEl.className = 'col-span-full py-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8';
+          emptyEl.innerHTML = `
+            <div class="h-12 w-12 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center mb-3">
+              <i data-lucide="search-x" class="w-6 h-6"></i>
+            </div>
+            <h4 class="font-bold text-slate-800 dark:text-white text-sm">No matching consignments found</h4>
+            <p class="text-xs text-slate-500 mt-1">No orders matched "${escapeHtml(q)}".</p>
+            <button onclick="document.getElementById('global-search-input').value=''; filterOrdersBySearch('');" class="mt-4 px-4 py-2 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-xl text-xs font-bold">Clear Search</button>
+          `;
+          document.getElementById('orders-cards-container').appendChild(emptyEl);
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        } else {
+          emptyEl.style.display = 'block';
+        }
+      } else if (emptyEl) {
+        emptyEl.style.display = 'none';
+      }
     }
 
     // OPEN ORDER DETAIL VIEW
@@ -2517,7 +2592,7 @@ Rajesh Sharma (+91 98290 12345)`;
   <!-- ======================================================================== -->
   <!-- MODAL: WHATSAPP CLOUD BOT INBOUND WEBHOOK SIMULATOR                      -->
   <!-- ======================================================================== -->
-  <div id="modal-whatsapp-sim" class="fixed inset-0 modal-backdrop-blur z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+  <div id="modal-whatsapp-sim" class="fixed inset-0 modal-backdrop-blur z-50 hidden flex items-center justify-center p-4 overflow-y-auto" onclick="if(event.target===this)closeWhatsAppSimModal()">
     <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200/90 dark:border-slate-800/90 max-h-[90vh] overflow-y-auto my-auto">
       
       <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
@@ -2571,7 +2646,7 @@ Rajesh Sharma (+91 98290 12345)`;
   <!-- ======================================================================== -->
   <!-- MODAL: TALLY & EXCEL BULK CONSIGNMENT IMPORT ENGINE                      -->
   <!-- ======================================================================== -->
-  <div id="modal-tally-import" class="fixed inset-0 modal-backdrop-blur z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+  <div id="modal-tally-import" class="fixed inset-0 modal-backdrop-blur z-50 hidden flex items-center justify-center p-4 overflow-y-auto" onclick="if(event.target===this)closeTallyImportModal()">
     <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200/90 dark:border-slate-800/90 max-h-[90vh] overflow-y-auto my-auto">
       
       <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
@@ -2624,7 +2699,7 @@ Rajesh Sharma (+91 98290 12345)`;
   <!-- ======================================================================== -->
   <!-- MODAL: SAAS SUBSCRIPTION & RECURRING BILLING ENGINE                       -->
   <!-- ======================================================================== -->
-  <div id="modal-billing-plans" class="fixed inset-0 modal-backdrop-blur z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+  <div id="modal-billing-plans" class="fixed inset-0 modal-backdrop-blur z-50 hidden flex items-center justify-center p-4 overflow-y-auto" onclick="if(event.target===this)closeBillingModal()">
     <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200/90 dark:border-slate-800/90 max-h-[90vh] overflow-y-auto my-auto">
       
       <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
@@ -2710,7 +2785,7 @@ Rajesh Sharma (+91 98290 12345)`;
           <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
           <span>GST Invoices with Input Tax Credit (ITC) automatically sent every billing cycle.</span>
         </div>
-        <button onclick="closeBillingModal()" class="px-4 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800">Close</button>
+        <button onclick="closeBillingModal()" class="px-4 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200 text-xs font-bold">Close</button>
       </div>
 
     </div>
