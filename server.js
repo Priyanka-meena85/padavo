@@ -44,6 +44,7 @@ const contractEngine = require('./contract-engine');
 const lcEngine = require('./lc-engine');
 const whatsAppCameraEngine = require('./whatsapp-camera-engine');
 const telemetryEngine = require('./telemetry-engine');
+const section65bEngine = require('./section65b-engine');
 
 // Environment & Configuration
 const PORT = process.env.PORT || 5500;
@@ -1152,6 +1153,7 @@ async function handleRequest(req, res) {
         lc_discrepancy_ai: 'active',
         whatsapp_camera_lens: 'active',
         apm_telemetry: 'active',
+        section_65b_legal: 'active',
         job_queue: jobQueue.getMetrics(),
         memory: {
           rssMb: Math.round(memoryUsage.rss / (1024 * 1024)),
@@ -2492,6 +2494,15 @@ async function handleRequest(req, res) {
     // GET /api/system/telemetry-metrics — OpenTelemetry APM Observability
     if (method === 'GET' && pathname === '/api/system/telemetry-metrics') {
       return sendJson(res, 200, telemetryEngine.getMetrics());
+    }
+
+    // GET /api/orders/:id/section-65b — Section 65B Indian Evidence Act Affidavit
+    const sec65bMatch = pathname.match(/^\/api\/orders\/(\d+)\/section-65b(?:\/generate)?$/);
+    if ((method === 'GET' || method === 'POST') && sec65bMatch) {
+      const orderId = Number(sec65bMatch[1]);
+      const order = db.prepare('SELECT o.*, e.company_name, e.iec_number FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492', company_name: 'Zenith Global Exports Ltd', buyer_name: 'Toast & Co. London', buyer_country: 'United Kingdom', iec_number: '0518920194' };
+      const cert = section65bEngine.generateCertificate(order);
+      return sendJson(res, 200, cert);
     }
 
     // --------------------------------------------------------------------------

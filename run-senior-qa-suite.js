@@ -814,6 +814,14 @@ IEA*1*000000001~`;
     assert(res.body.apm_metrics.uptime_seconds >= 0, 'Uptime must be non-negative');
   });
 
+  await test('Section 65B Indian Evidence Act Certificate generates court-admissible electronic affidavit', async () => {
+    const res = await request({ path: '/api/orders/1/section-65b' });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.certificate_number.startsWith('SEC65B-IN-'), 'Certificate number format mismatch');
+    assert(res.body.legal_admissibility_status === 'COURT_ADMISSIBLE_CERTIFICATE_READY', 'Status mismatch');
+    assert(res.body.sha256_audit_seal.startsWith('SEC65B-HASH-'), 'Missing SHA256 audit seal');
+  });
+
   console.log('\n===============================================================');
   console.log(`📊 TEST EXECUTION COMPLETE:`);
   console.log(`   Total Tests: ${passCount + failCount}`);
