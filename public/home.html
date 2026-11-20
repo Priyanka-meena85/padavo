@@ -98,6 +98,26 @@
     .shadow-ambient-xs { box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04); }
     .shadow-ambient-sm { box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04); }
     .shadow-ambient-md { box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04); }
+  
+    /* Modern Interactive Hero & Shutter Animations */
+    .hero-mesh-gradient {
+      background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(180, 107, 56, 0.16), rgba(255, 255, 255, 0));
+    }
+    .shutter-flash {
+      animation: flash-anim 0.4s ease-out;
+    }
+    @keyframes flash-anim {
+      0% { opacity: 0.9; }
+      100% { opacity: 0; }
+    }
+    .voice-bar {
+      animation: bounce-bar 0.8s infinite ease-in-out alternate;
+    }
+    @keyframes bounce-bar {
+      0% { height: 4px; }
+      100% { height: 18px; }
+    }
+  
   </style>
 </head>
 <body class="bg-[#f8fafc] text-slate-800 antialiased font-sans selection:bg-brand-500 selection:text-white">
@@ -182,7 +202,7 @@
   <!-- ======================================================================== -->
   <!-- HERO SECTION                                                             -->
   <!-- ======================================================================== -->
-  <section class="relative pt-10 pb-16 sm:pt-16 sm:pb-24 overflow-hidden glow-radial bg-grid-pattern">
+  <section class="relative pt-10 pb-16 sm:pt-16 sm:pb-24 overflow-hidden glow-radial hero-mesh-gradient bg-grid-pattern">
     
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
       
@@ -192,7 +212,7 @@
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
           <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
         </span>
-        <span class="font-medium text-slate-700">Powering 240+ Export Houses in Jaipur • Jodhpur • Moradabad • Surat • Karur</span>
+        <span id="hero-live-ticker" class="font-medium text-slate-700 transition-opacity duration-300">Powering 240+ Export Houses in Jaipur • Jodhpur • Moradabad • Surat • Karur</span>
         <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
       </div>
 
@@ -230,6 +250,67 @@
         <span class="text-slate-300">&bull;</span>
         <span>DGFT & FEMA Compliant</span>
       </p>
+
+            <!-- ================================================================ -->
+      <!-- INTERACTIVE HERO MILESTONE-TO-WIRE PIPELINE SIMULATOR            -->
+      <!-- ================================================================ -->
+      <div class="mt-12 max-w-4xl mx-auto bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/90 p-5 sm:p-7 shadow-xl shadow-slate-900/5 text-left relative overflow-hidden">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono uppercase font-bold tracking-wider text-brand-700 bg-brand-50 px-2.5 py-0.5 rounded-full border border-brand-200">Interactive Pipeline Simulator</span>
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+          </div>
+          <span class="text-[11px] font-mono text-slate-500">Click any step below to test workflow:</span>
+        </div>
+
+        <!-- 3 Step Interactive Selectors -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
+          <button type="button" onclick="setPipelineStep(1)" id="pipeline-btn-1" class="p-3.5 rounded-2xl border-2 border-brand-500 bg-brand-50/50 text-left transition-all btn-press">
+            <div class="flex items-center justify-between text-xs font-mono mb-1">
+              <span class="text-brand-700 font-bold">Step 1 • Floor Proof</span>
+              <i data-lucide="camera" class="w-4 h-4 text-brand-600"></i>
+            </div>
+            <strong class="text-xs font-bold text-slate-900 block">30s Photo Upload</strong>
+            <span class="text-[11px] text-slate-500 block mt-0.5">Shop floor staff snaps milestone photo on WhatsApp.</span>
+          </button>
+
+          <button type="button" onclick="setPipelineStep(2)" id="pipeline-btn-2" class="p-3.5 rounded-2xl border border-slate-200 hover:border-slate-300 bg-white text-left transition-all btn-press">
+            <div class="flex items-center justify-between text-xs font-mono mb-1">
+              <span class="text-amber-700 font-bold">Step 2 • Padavo Engine</span>
+              <i data-lucide="shield-check" class="w-4 h-4 text-amber-600"></i>
+            </div>
+            <strong class="text-xs font-bold text-slate-900 block">Tamper-Proof Seal</strong>
+            <span class="text-[11px] text-slate-500 block mt-0.5">SHA-256 seal & ISO 2859-1 AQL 2.5 checklist stamped.</span>
+          </button>
+
+          <button type="button" onclick="setPipelineStep(3)" id="pipeline-btn-3" class="p-3.5 rounded-2xl border border-slate-200 hover:border-slate-300 bg-white text-left transition-all btn-press">
+            <div class="flex items-center justify-between text-xs font-mono mb-1">
+              <span class="text-emerald-700 font-bold">Step 3 • Buyer & Bank</span>
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+            </div>
+            <strong class="text-xs font-bold text-slate-900 block">Wire Released</strong>
+            <span class="text-[11px] text-slate-500 block mt-0.5">Overseas buyer approves with 1 click; SWIFT wire unlocked.</span>
+          </button>
+        </div>
+
+        <!-- Dynamic Output Box -->
+        <div id="pipeline-output-box" class="mt-4 p-4 rounded-2xl bg-slate-900 text-white font-mono text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
+          <div class="flex items-center gap-3">
+            <div class="h-8 w-8 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0">
+              <i data-lucide="camera" id="pipeline-out-icon" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <span class="text-slate-400 text-[10px] block" id="pipeline-out-label">SIMULATING STEP 1: FACTORY FLOOR</span>
+              <strong class="text-white text-xs sm:text-sm block" id="pipeline-out-title">Sanganer Table 4: Photo compressed (5.2MB → 240KB in 0.8s)</strong>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold text-[11px] shrink-0" id="pipeline-out-status">
+            WhatsApp Hook Verified
+          </span>
+        </div>
+
+      </div>
 
       <!-- Enterprise Metrics Strip -->
       <div class="mt-10 max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
@@ -435,9 +516,13 @@
           </div>
         </div>
 
-        <!-- TAB CONTENT 2: 30s FLOOR STAFF UPLOAD -->
+                <!-- TAB CONTENT 2: 30s FLOOR STAFF UPLOAD -->
         <div id="view-floor" class="hidden p-6 sm:p-8 space-y-6">
-          <div class="max-w-2xl mx-auto bg-slate-50 rounded-2xl border border-slate-200 p-6 space-y-5">
+          <div class="max-w-2xl mx-auto bg-slate-50 rounded-2xl border border-slate-200 p-6 space-y-5 relative overflow-hidden">
+            
+            <!-- Simulated Camera Flash Overlay -->
+            <div id="camera-flash-overlay" class="absolute inset-0 bg-white z-20 pointer-events-none opacity-0"></div>
+
             <div class="flex items-center justify-between">
               <div>
                 <span class="text-xs font-mono font-bold uppercase text-brand-700 bg-brand-50 border border-brand-200 px-2 py-0.5 rounded">WhatsApp Floor Mode</span>
@@ -458,21 +543,75 @@
                 <p class="text-xs text-slate-500 mt-0.5">Automated on-device compression: 5.2MB raw image → 240KB web-ready proof in 1.4 seconds</p>
               </div>
               <div class="pt-2">
-                <button class="bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-xs inline-flex items-center gap-2">
+                <button type="button" onclick="simulateFloorCameraSnap()" id="btn-snap-floor" class="bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-xs inline-flex items-center gap-2 btn-press">
                   <i data-lucide="camera" class="w-4 h-4"></i>
                   <span>Snap Photo / फोटो खींचो</span>
                 </button>
               </div>
             </div>
 
+            <!-- Live Snapped Photo Result (Interactive) -->
+            <div id="snapped-photo-card" class="p-4 bg-white rounded-xl border border-slate-200 space-y-3 hidden">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-slate-900 flex items-center gap-1.5">
+                  <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+                  <span>Photo Uploaded to PO-UK-8492 Timeline</span>
+                </span>
+                <span class="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Compression: 240 KB (95% saved)</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <img src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=150&q=80" alt="Snapped Table Proof" class="h-16 w-16 rounded-xl object-cover border border-slate-200">
+                <div class="text-xs space-y-1">
+                  <strong class="text-slate-900 block font-mono">IMG_SITAPURA_STRIKE_OFF.JPG</strong>
+                  <span class="text-[11px] text-slate-500 block">Verified GPS: 26.7824° N, 75.8239° E • Sitapura Export Zone</span>
+                  <span class="inline-block text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">SHA-256 Stamped</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interactive Hindi Voice Note Player -->
+            <div class="p-4 bg-amber-50/70 rounded-xl border border-amber-200 space-y-2">
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="mic" class="w-4 h-4 text-amber-600"></i>
+                  <span class="font-bold text-amber-950">Floor Supervisor Hindi Voice Note</span>
+                </div>
+                <button type="button" onclick="toggleVoiceNote()" id="btn-voice-toggle" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-xs">
+                  <i data-lucide="play" class="w-3 h-3" id="voice-play-icon"></i>
+                  <span id="voice-play-text">Play Audio</span>
+                </button>
+              </div>
+
+              <!-- Animated Waveform Bars -->
+              <div class="flex items-center gap-1 h-6 px-1" id="voice-waveform">
+                <div class="w-1 bg-amber-300 rounded-full h-2"></div>
+                <div class="w-1 bg-amber-400 rounded-full h-3"></div>
+                <div class="w-1 bg-amber-500 rounded-full h-5"></div>
+                <div class="w-1 bg-amber-400 rounded-full h-4"></div>
+                <div class="w-1 bg-amber-500 rounded-full h-6"></div>
+                <div class="w-1 bg-amber-600 rounded-full h-3"></div>
+                <div class="w-1 bg-amber-400 rounded-full h-5"></div>
+                <div class="w-1 bg-amber-500 rounded-full h-2"></div>
+                <div class="w-1 bg-amber-300 rounded-full h-4"></div>
+              </div>
+
+              <p class="text-[11px] text-amber-900 leading-relaxed font-sans">
+                <strong>Audio Transcript:</strong> <em>"बाबूजी, आज 4 नंबर टेबल पर दाबू प्रिंटिंग का स्ट्राइक-ऑफ पूरा हो गया है। फैब्रिक को यार्ड में सुखाने डाल दिया है।"</em>
+              </p>
+              <p class="text-[10px] text-slate-500 font-mono">
+                AI Auto-Translation: "Sir, Dabu strike-off on Table 4 completed. Fabric moved to yard for sun drying."
+              </p>
+            </div>
+
             <!-- Auto-Sync Offline Card -->
-            <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900 flex items-center justify-between">
+            <div class="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900 flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <i data-lucide="wifi" class="w-4 h-4 text-emerald-600"></i>
                 <span><strong>Weak 2G/3G Factory Protection:</strong> Photos save in phone cache and auto-sync when connection restores.</span>
               </div>
               <span class="text-xs font-mono font-bold text-emerald-700 shrink-0">100% Reliable</span>
             </div>
+
           </div>
         </div>
 
@@ -1344,6 +1483,112 @@
     }
 
     // 7. FAQ TOGGLE
+    
+    // 8. HERO PIPELINE SIMULATOR CONTROLLER
+    const PIPELINE_STEPS = {
+      1: {
+        icon: 'camera',
+        label: 'STEP 1: FACTORY FLOOR CAPTURE',
+        title: 'Sanganer Table 4: Photo auto-compressed (5.2MB → 240KB in 0.8s)',
+        status: 'WhatsApp Hook Verified'
+      },
+      2: {
+        icon: 'shield-check',
+        label: 'STEP 2: CRYPTOGRAPHIC VERIFICATION',
+        title: 'Tamper-Proof SHA-256 Hash (#e3b0c442...98fc) & AQL 2.5 Audit Passed',
+        status: 'ISO 2859-1 Stamped'
+      },
+      3: {
+        icon: 'coins',
+        label: 'STEP 3: OVERSEAS WIRE UNLOCKED',
+        title: 'Toast & Co. (London) approved • £5,600 SWIFT Wire Unlocked to State Bank of India',
+        status: 'Bank TT Coordinates Live'
+      }
+    };
+
+    function setPipelineStep(step) {
+      [1, 2, 3].forEach(s => {
+        const btn = document.getElementById(`pipeline-btn-${s}`);
+        if (btn) {
+          if (s === step) {
+            btn.className = 'p-3.5 rounded-2xl border-2 border-brand-500 bg-brand-50/50 text-left transition-all btn-press shadow-xs';
+          } else {
+            btn.className = 'p-3.5 rounded-2xl border border-slate-200 hover:border-slate-300 bg-white text-left transition-all btn-press';
+          }
+        }
+      });
+
+      const data = PIPELINE_STEPS[step];
+      document.getElementById('pipeline-out-icon').setAttribute('data-lucide', data.icon);
+      document.getElementById('pipeline-out-label').innerText = data.label;
+      document.getElementById('pipeline-out-title').innerText = data.title;
+      document.getElementById('pipeline-out-status').innerText = data.status;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // 9. DYNAMIC HERO ACTIVITY TICKER
+    const TICKER_ITEMS = [
+      "Powering 240+ Export Houses in Jaipur • Jodhpur • Moradabad • Surat • Karur",
+      "Live: Royal Jaipur Handlooms unlocked £5,600 wire from Toast & Co. (UK) • 4 mins ago",
+      "Live: Moradabad Metalcrafts passed 24-hr Salt-Spray Lab Inspection",
+      "Live: Jodhpur Teak Crafts stamped Pallet Drop Test for Crate #PDV-4412",
+      "Live: Tiruppur Knits uploaded AQL 2.5 Measurement Sheet for 1,200 Pcs"
+    ];
+    let tickerIdx = 0;
+    setInterval(() => {
+      const el = document.getElementById('hero-live-ticker');
+      if (el) {
+        el.style.opacity = '0';
+        setTimeout(() => {
+          tickerIdx = (tickerIdx + 1) % TICKER_ITEMS.length;
+          el.innerText = TICKER_ITEMS[tickerIdx];
+          el.style.opacity = '1';
+        }, 300);
+      }
+    }, 4500);
+
+    // 10. SIMULATE FLOOR CAMERA SNAP
+    function simulateFloorCameraSnap() {
+      const flash = document.getElementById('camera-flash-overlay');
+      const btn = document.getElementById('btn-snap-floor');
+      const card = document.getElementById('snapped-photo-card');
+
+      flash.classList.add('shutter-flash');
+      setTimeout(() => flash.classList.remove('shutter-flash'), 400);
+
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>Compressing 5.2MB → 240KB...</span>';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Proof Uploaded!</span>';
+        card.classList.remove('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }, 1000);
+    }
+
+    // 11. VOICE NOTE AUDIO SIMULATION
+    let voicePlaying = false;
+    function toggleVoiceNote() {
+      voicePlaying = !voicePlaying;
+      const text = document.getElementById('voice-play-text');
+      const icon = document.getElementById('voice-play-icon');
+      const bars = document.querySelectorAll('#voice-waveform div');
+
+      if (voicePlaying) {
+        text.innerText = 'Pause Audio';
+        icon.setAttribute('data-lucide', 'pause');
+        bars.forEach(b => b.classList.add('voice-bar'));
+      } else {
+        text.innerText = 'Play Audio';
+        icon.setAttribute('data-lucide', 'play');
+        bars.forEach(b => b.classList.remove('voice-bar'));
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+  
+
     function toggleFaq(id) {
       const ans = document.getElementById(`faq-ans-${id}`);
       const icon = document.getElementById(`faq-icon-${id}`);
