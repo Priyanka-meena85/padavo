@@ -803,6 +803,14 @@
               <input type="range" id="calc-aov" min="5000" max="80000" step="1000" value="18000" oninput="updateRoiCalc()" class="w-full accent-brand-600 cursor-pointer">
             </div>
 
+                        <!-- Cluster ROI Presets -->
+            <div id="roi-presets" class="flex items-center gap-1.5 flex-wrap pt-1">
+              <span class="text-[11px] text-slate-500 font-medium">Quick Presets:</span>
+              <button type="button" onclick="setRoiPreset(6, 12000)" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 border border-slate-200 transition-all">Jaipur Textiles</button>
+              <button type="button" onclick="setRoiPreset(12, 24000)" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 border border-slate-200 transition-all">Moradabad Brass</button>
+              <button type="button" onclick="setRoiPreset(18, 35000)" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 border border-slate-200 transition-all">Jodhpur Furniture</button>
+            </div>
+
             <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-600 space-y-1">
               <p>• Assumes standard 14 days delay saved on buyer approval cycles.</p>
               <p>• Based on empirical data across Jaipur, Jodhpur and Moradabad export houses.</p>
@@ -1296,6 +1304,12 @@
     selectCluster('textiles');
 
     // 5. ROI CALCULATOR
+    function setRoiPreset(orders, aov) {
+      document.getElementById('calc-orders').value = orders;
+      document.getElementById('calc-aov').value = aov;
+      updateRoiCalc();
+    }
+
     function updateRoiCalc() {
       const orders = Number(document.getElementById('calc-orders').value);
       const aov = Number(document.getElementById('calc-aov').value);

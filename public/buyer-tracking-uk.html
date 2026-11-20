@@ -576,16 +576,23 @@
           <img src="/logo.png" onerror="this.onerror=null; this.src='/logo.jpg';" alt="Padavo" class="h-6 w-auto object-contain">
           <span>Powered by <strong>Padavo SaaS</strong> • Certified Export Milestone Platform</span>
         </div>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 flex-wrap">
           <button onclick="downloadMediaPack()" class="text-brand-600 hover:underline font-semibold flex items-center gap-1">
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
             <span>Download High-Res Photos (ZIP)</span>
           </button>
           <span>•</span>
-          <button onclick="submitRating(5)" class="text-amber-600 hover:underline font-semibold flex items-center gap-1">
-            <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i>
-            <span>Rate Quality</span>
-          </button>
+          <div class="flex items-center gap-1.5" id="interactive-star-rater">
+            <span class="text-slate-500 font-medium mr-0.5">Rate:</span>
+            <div class="flex items-center gap-0.5" id="stars-row">
+              <button onclick="setStarRating(1)" onmouseover="highlightStars(1)" onmouseout="resetStars()" class="p-0.5 text-amber-400 hover:scale-110 transition-transform" title="1 Star"><i data-lucide="star" class="w-4 h-4 fill-amber-400 star-icon" data-star="1"></i></button>
+              <button onclick="setStarRating(2)" onmouseover="highlightStars(2)" onmouseout="resetStars()" class="p-0.5 text-amber-400 hover:scale-110 transition-transform" title="2 Stars"><i data-lucide="star" class="w-4 h-4 fill-amber-400 star-icon" data-star="2"></i></button>
+              <button onclick="setStarRating(3)" onmouseover="highlightStars(3)" onmouseout="resetStars()" class="p-0.5 text-amber-400 hover:scale-110 transition-transform" title="3 Stars"><i data-lucide="star" class="w-4 h-4 fill-amber-400 star-icon" data-star="3"></i></button>
+              <button onclick="setStarRating(4)" onmouseover="highlightStars(4)" onmouseout="resetStars()" class="p-0.5 text-amber-400 hover:scale-110 transition-transform" title="4 Stars"><i data-lucide="star" class="w-4 h-4 fill-amber-400 star-icon" data-star="4"></i></button>
+              <button onclick="setStarRating(5)" onmouseover="highlightStars(5)" onmouseout="resetStars()" class="p-0.5 text-amber-400 hover:scale-110 transition-transform" title="5 Stars"><i data-lucide="star" class="w-4 h-4 fill-amber-400 star-icon" data-star="5"></i></button>
+            </div>
+            <span id="star-rating-feedback" class="text-amber-700 font-bold text-[11px] ml-1 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">5.0 / 5.0 Rated</span>
+          </div>
         </div>
       </footer>
 
@@ -1197,6 +1204,32 @@
 
     function downloadMediaPack() {
       alert('Downloading Toast & Co. Marketing Media Kit (ZIP)\n\nHigh-resolution color-corrected photos of artisan hand-block printing in Jaipur ready for social media & marketing.');
+    }
+
+    let currentRating = 5;
+    function highlightStars(count) {
+      document.querySelectorAll('#stars-row .star-icon').forEach(icon => {
+        const starNum = Number(icon.getAttribute('data-star'));
+        if (starNum <= count) {
+          icon.classList.add('fill-amber-400', 'text-amber-400');
+          icon.classList.remove('text-slate-300');
+        } else {
+          icon.classList.remove('fill-amber-400', 'text-amber-400');
+          icon.classList.add('text-slate-300');
+        }
+      });
+    }
+    function resetStars() {
+      highlightStars(currentRating);
+    }
+    function setStarRating(stars) {
+      currentRating = stars;
+      highlightStars(stars);
+      const feedback = document.getElementById('star-rating-feedback');
+      if (feedback) {
+        feedback.innerText = `${stars}.0 / 5.0 Rated`;
+      }
+      submitRating(stars);
     }
 
     function submitRating(stars) {

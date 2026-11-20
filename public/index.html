@@ -427,7 +427,8 @@
           <!-- Search Field -->
           <div class="relative w-full">
             <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
-            <input type="text" id="global-search-input" onkeyup="filterOrdersBySearch(this.value)" placeholder="Search Purchase Order, Buyer, Destination Port, or Product..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-brand-500 focus:bg-white transition-all shadow-2xs">
+            <input type="text" id="global-search-input" onkeyup="filterOrdersBySearch(this.value)" placeholder="Search Purchase Order, Buyer, Destination Port, or Product..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-16 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-brand-500 focus:bg-white transition-all shadow-2xs">
+            <div class="absolute right-3 top-2.5 hidden sm:flex items-center gap-1 text-[10px] font-mono text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 pointer-events-none"><span>Ctrl</span><span>K</span></div>
           </div>
         </div>
 
@@ -817,7 +818,7 @@
                   <button onclick="markMilestonePaid(8)" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-all shadow-xs btn-press">
                     Mark Wire Received
                   </button>
-                  <button onclick="copyBuyerApprovalLink()" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs hover:bg-slate-50 transition-all shadow-xs">
+                  <button onclick="copyBuyerApprovalLink(this)" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs hover:bg-slate-50 transition-all shadow-xs">
                     Copy Buyer Link
                   </button>
                 </div>
@@ -1171,7 +1172,7 @@
               </div>
 
               <div class="flex items-center gap-2">
-                <button onclick="copyStaffMagicLink()" class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-all shadow-xs">
+                <button onclick="copyStaffMagicLink(this)" class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-all shadow-xs">
                   <i data-lucide="copy" class="w-3.5 h-3.5"></i>
                   <span>Copy Magic Link</span>
                 </button>
@@ -1844,6 +1845,12 @@
     // INITIALIZATION
     // GLOBAL ESCAPE KEY TO DISMISS MODALS
     window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        const s = document.getElementById('global-search-input');
+        if (s) { s.focus(); s.select(); }
+        return;
+      }
       if (e.key === 'Escape') {
         closeModal('modal-new-order');
         closeWhatsAppSimModal();
@@ -2155,22 +2162,40 @@ Rajesh Sharma (+91 98290 12345)`;
       showToast('Milestone 2 (£5,600) marked as received in accounting ledger!');
     }
 
-    function copyBuyerApprovalLink() {
+        function copyBuyerApprovalLink(btn) {
       const link = `${window.location.origin}/buyer-tracking-uk.html`;
       navigator.clipboard.writeText(link);
       showToast('Buyer Tracking link copied to clipboard!');
+      if (btn) {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>Copied!</span>';
+        safeCreateIcons();
+        setTimeout(() => { btn.innerHTML = orig; safeCreateIcons(); }, 2000);
+      }
     }
 
-    function copyStaffMagicLink() {
+    function copyStaffMagicLink(btn) {
       const link = `${window.location.origin}/api/public/magic-upload/magic-uk-8492-token`;
       navigator.clipboard.writeText(link);
       showToast('Staff Zero-Login Upload link copied!');
+      if (btn) {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>Copied!</span>';
+        safeCreateIcons();
+        setTimeout(() => { btn.innerHTML = orig; safeCreateIcons(); }, 2000);
+      }
     }
 
-    function simulateFloorStaffUpload() {
+        function simulateFloorStaffUpload() {
       showToast('Simulating floor supervisor Mukesh uploading photo via WhatsApp...');
       setTimeout(() => {
         showToast('Mukesh uploaded "Indigo vat immersion photo" from shop floor!');
+        const pBar = document.querySelector('#view-order-detail .bg-gradient-to-r');
+        if (pBar) {
+          pBar.style.width = '66%';
+          const pct = document.querySelector('#view-order-detail .font-mono.text-brand-600');
+          if (pct) pct.innerText = '66% Completed (4/6 Stages)';
+        }
       }, 1200);
     }
 
