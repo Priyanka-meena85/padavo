@@ -139,6 +139,7 @@ async function runDeepDeploymentAudit() {
   // SECTION 2: END-TO-END AUTHENTICATION & EXPORTER LIFECYCLE
   // ============================================================================
   console.log('\n🔐 SECTION 2: AUTHENTICATION, MULTI-TENANCY & SESSION SECURITY');
+  await request({ path: '/api/test/reset-rate-limit', method: 'POST' });
 
   let sessionToken = '';
   const uniqueEmail = `deploy-audit-${Date.now()}@rajputanacrafts.com`;

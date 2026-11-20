@@ -905,12 +905,20 @@ IEA*1*000000001~`;
   });
 
   await test('Background Job Queue offloads asynchronous processing and serves status endpoint', async () => {
-    const resEnqueue = jobQueue.enqueue('ASYNC_PDF_REPORT', { order_id: 1, type: 'DISPUTE_AFFIDAVIT' });
+    const postRes = await request({
+      path: '/api/jobs',
+      method: 'POST'
+    }, {
+      type: 'ASYNC_PDF_REPORT',
+      payload: { order_id: 1, type: 'DISPUTE_AFFIDAVIT' }
+    });
+    assert(postRes.statusCode === 201, `Enqueue failed with ${postRes.statusCode}`);
+    const resEnqueue = postRes.body;
     assert(resEnqueue.success === true, 'Enqueue failed');
-    assert(resEnqueue.job_id.startsWith('job-'), 'Invalid job id');
+    assert(resEnqueue.job_id && resEnqueue.job_id.startsWith('job-'), 'Invalid job id');
 
-    // Wait 70ms for asynchronous execution
-    await new Promise(r => setTimeout(r, 70));
+    // Wait 80ms for asynchronous worker execution
+    await new Promise(r => setTimeout(r, 80));
     const resStatus = await request({ path: `/api/jobs/${resEnqueue.job_id}` });
     assert(resStatus.statusCode === 200, `Job status failed with ${resStatus.statusCode}`);
     assert(resStatus.body.job.status === 'COMPLETED', `Expected COMPLETED, got ${resStatus.body.job.status}`);

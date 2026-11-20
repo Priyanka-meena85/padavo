@@ -68,6 +68,28 @@
     .pulse-badge {
       animation: pulse-subtle 3s infinite ease-in-out;
     }
+
+    /* Linear/Stripe Focus, Elevation & Micro-interactions */
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid #b46b38;
+      outline-offset: 2px;
+    }
+    .btn-press {
+      transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.12s ease, opacity 0.12s ease;
+    }
+    .btn-press:active {
+      transform: scale(0.985);
+    }
+    .card-lift {
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+    }
+    .card-lift:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.03);
+    }
+    .shadow-ambient-xs { box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04); }
+    .shadow-ambient-sm { box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04); }
+    .shadow-ambient-md { box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04); }
   </style>
 </head>
 <body class="bg-[#f8fafc] text-slate-800 antialiased font-sans selection:bg-brand-500 selection:text-white">
@@ -166,19 +188,25 @@
 
       <!-- CTA Action Group -->
       <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-        <a href="/index.html" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-brand-600 via-brand-700 to-amber-700 hover:from-brand-500 hover:to-amber-600 text-white font-bold text-sm sm:text-base px-8 py-4 rounded-2xl shadow-xl shadow-brand-600/25 transition-all transform hover:-translate-y-0.5">
+        <a href="/index.html" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-brand-600 via-brand-700 to-amber-700 hover:from-brand-500 hover:to-amber-600 text-white font-bold text-sm sm:text-base px-8 py-4 rounded-2xl shadow-xl shadow-brand-600/25 transition-all transform hover:-translate-y-0.5 btn-press">
           <i data-lucide="zap" class="w-5 h-5 text-amber-200"></i>
           <span>Launch Free Pilot (3 Active Shipments)</span>
           <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
         </a>
 
-        <a href="/buyer-tracking-uk.html" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm sm:text-base px-8 py-4 rounded-2xl border border-slate-300 shadow-sm transition-all hover:border-slate-400 hover:shadow-md">
+        <a href="/buyer-tracking-uk.html" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm sm:text-base px-8 py-4 rounded-2xl border border-slate-300 shadow-sm transition-all hover:border-slate-400 hover:shadow-md btn-press">
           <i data-lucide="external-link" class="w-5 h-5 text-blue-600"></i>
           <span>Inspect Live UK Buyer Tracking Page</span>
         </a>
       </div>
 
-      <p class="mt-3 text-xs text-slate-400 font-medium">✓ No credit card required &bull; 3-minute setup &bull; DGFT & FEMA Compliant</p>
+      <p class="mt-3 text-xs text-slate-500 font-medium flex items-center justify-center gap-1.5 flex-wrap">
+        <span class="inline-flex items-center gap-1 text-emerald-600 font-semibold"><i data-lucide="check" class="w-3.5 h-3.5"></i> No credit card required</span>
+        <span class="text-slate-300">&bull;</span>
+        <span>3-minute setup</span>
+        <span class="text-slate-300">&bull;</span>
+        <span>DGFT & FEMA Compliant</span>
+      </p>
 
       <!-- Enterprise Metrics Strip -->
       <div class="mt-10 max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
@@ -308,7 +336,7 @@
               </div>
               <div class="flex items-center justify-between text-xs text-slate-500 px-1 font-mono">
                 <span>Tamper-Proof SHA-256 Hash Stamped</span>
-                <span class="text-emerald-700 font-bold">✓ 100% Passed</span>
+                <span class="text-emerald-700 font-bold">100% Passed</span>
               </div>
             </div>
 
@@ -324,7 +352,7 @@
                     Release Tranche 2 (<span id="curr-sym">£</span><span id="milestone-amt">5,600</span> — 40% Contract)
                   </h4>
                   <p class="text-xs text-slate-600 mt-1">
-                    Contract Total: <strong><span id="curr-sym2">£</span><span id="contract-total">14,000</span></strong> • 30% Advance Cleared ✓
+                    Contract Total: <strong><span id="curr-sym2">£</span><span id="contract-total">14,000</span></strong> • 30% Advance Cleared
                   </p>
                 </div>
                 <div class="text-right shrink-0">
@@ -355,7 +383,7 @@
                 <div class="flex items-center justify-between pb-2 border-b border-emerald-200">
                   <span class="font-bold text-emerald-950 flex items-center gap-1.5">
                     <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
-                    <span>✓ Digital Approval Seal Created (Ref: #PDV-UK-8492-M2)</span>
+                    <span>Digital Approval Seal Created (Ref: #PDV-UK-8492-M2)</span>
                   </span>
                   <span class="font-mono text-[10px] text-emerald-700 font-bold">Due: <span id="curr-sym3">£</span><span id="milestone-amt2">5,600</span></span>
                 </div>
@@ -1137,7 +1165,7 @@
       const btn = document.getElementById('btn-approve-demo');
       const wire = document.getElementById('demo-unlocked-wire');
       btn.className = 'w-full sm:flex-1 inline-flex items-center justify-center gap-2 bg-emerald-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl cursor-default';
-      btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>✓ Milestone 2 Approved by Toast & Co. UK</span>';
+      btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Milestone 2 Approved by Toast & Co. UK</span>';
       wire.classList.remove('hidden');
       safeCreateIcons();
     }

@@ -2619,6 +2619,20 @@ async function handleRequest(req, res) {
       return sendJson(res, 200, invoice);
     }
 
+    // POST /api/test/reset-rate-limit — Test harness reset
+    if (method === 'POST' && pathname === '/api/test/reset-rate-limit') {
+      failedLoginAttempts.clear();
+      rateLimitMap.clear();
+      return sendJson(res, 200, { success: true, message: 'Rate limits and lockouts reset' });
+    }
+
+    // POST /api/jobs — Enqueue Background Task
+    if (method === 'POST' && pathname === '/api/jobs') {
+      const body = await parseJsonBody(req);
+      const enq = jobQueue.enqueue(body.type || 'ASYNC_PDF_REPORT', body.payload || {});
+      return sendJson(res, 201, enq);
+    }
+
     // GET /api/jobs/:jobId — Background Job Status & Execution Result
     const jobStatusMatch = pathname.match(/^\/api\/jobs\/([a-zA-Z0-9_-]+)$/);
     if (method === 'GET' && jobStatusMatch) {

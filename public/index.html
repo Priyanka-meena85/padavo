@@ -63,6 +63,77 @@
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     .dark ::-webkit-scrollbar-thumb { background: #334155; }
 
+    /* Linear/Stripe Ambient Layered Elevation */
+    .shadow-ambient-xs { box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04); }
+    .shadow-ambient-sm { box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04); }
+    .shadow-ambient-md { box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04); }
+    .shadow-ambient-lg { box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.03); }
+
+    /* Global Micro-interactions & Focus Rings (Linear & Vercel standard) */
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 2px solid #b46b38;
+      outline-offset: 2px;
+    }
+    .btn-press {
+      transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.12s ease, opacity 0.12s ease;
+    }
+    .btn-press:active {
+      transform: scale(0.98);
+    }
+
+    /* Refined Input Focus States */
+    input:focus, select:focus, textarea:focus {
+      border-color: #b46b38 !important;
+      box-shadow: 0 0 0 3px rgba(180, 107, 56, 0.14) !important;
+      outline: none !important;
+    }
+
+    /* Card Lift on Hover */
+    .card-lift {
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+    }
+    .card-lift:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.09), 0 4px 8px -2px rgba(15, 23, 42, 0.03);
+    }
+    .dark .card-lift:hover {
+      box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.45);
+    }
+
+    /* Modal Backdrop Blur */
+    .modal-backdrop-blur {
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      background-color: rgba(2, 6, 23, 0.65);
+    }
+
+    /* Shimmer Loading Skeleton */
+    @keyframes shimmer-sweep {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .skeleton-shimmer {
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: shimmer-sweep 1.8s infinite;
+    }
+    .dark .skeleton-shimmer {
+      background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+      background-size: 200% 100%;
+      animation: shimmer-sweep 1.8s infinite;
+    }
+
+    /* Table Subtle Row Hover */
+    .row-hover-subtle {
+      transition: background-color 0.15s ease;
+    }
+    .row-hover-subtle:hover {
+      background-color: rgba(248, 250, 252, 0.85);
+    }
+    .dark .row-hover-subtle:hover {
+      background-color: rgba(30, 41, 59, 0.5);
+    }
+
     /* Timeline connecting thread */
     .timeline-thread::before {
       content: '';
@@ -724,7 +795,7 @@
                 </div>
                 <div class="flex items-center gap-3">
                   <span class="font-mono font-bold text-emerald-700 text-sm">£4,200 GBP</span>
-                  <span class="bg-emerald-50 text-emerald-800 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200">Paid & Cleared ✓</span>
+                  <span class="bg-emerald-50 text-emerald-800 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200">Paid & Cleared</span>
                 </div>
               </div>
 
@@ -743,8 +814,8 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-2.5">
                   <span class="font-mono font-bold text-slate-900 dark:text-white text-sm">£5,600 GBP</span>
-                  <button onclick="markMilestonePaid(8)" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-all shadow-xs">
-                    Mark Wire Received ✓
+                  <button onclick="markMilestonePaid(8)" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-all shadow-xs btn-press">
+                    Mark Wire Received
                   </button>
                   <button onclick="copyBuyerApprovalLink()" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs hover:bg-slate-50 transition-all shadow-xs">
                     Copy Buyer Link
@@ -1207,13 +1278,13 @@
                     <tr>
                       <td class="p-3">Milestone 1 (30% Advance)</td>
                       <td class="p-3 font-bold text-emerald-700">£4,200</td>
-                      <td class="p-3"><span class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded font-bold">Paid & Cleared ✓</span></td>
+                      <td class="p-3"><span class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded font-bold">Paid & Cleared</span></td>
                       <td class="p-3 text-slate-500">PDV-SIG-ADV-8492A</td>
                     </tr>
                     <tr>
                       <td class="p-3">Milestone 2 (40% Printing)</td>
                       <td class="p-3 font-bold text-amber-700">£5,600</td>
-                      <td class="p-3"><span class="bg-amber-50 text-amber-800 px-2 py-0.5 rounded font-bold">Approved by Buyer ✓</span></td>
+                      <td class="p-3"><span class="bg-amber-50 text-amber-800 px-2 py-0.5 rounded font-bold">Approved by Buyer</span></td>
                       <td class="p-3 text-slate-700 font-bold">PDV-SIG-657E83934735DF87</td>
                     </tr>
                     <tr>
@@ -1369,7 +1440,7 @@
                 </div>
                 <div class="flex justify-between p-2 bg-slate-50 dark:bg-slate-950 rounded-lg">
                   <span class="text-slate-500">Direct Presigned:</span>
-                  <strong class="text-slate-800 dark:text-slate-200">Active ✓</strong>
+                  <strong class="text-slate-800 dark:text-slate-200">Active</strong>
                 </div>
               </div>
               <button onclick="testR2PresignedUrl()" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-bold rounded-xl border border-blue-200 transition-all">
@@ -1649,20 +1720,20 @@
   <!-- ======================================================================== -->
   <!-- MODAL: NEW ORDER CREATION WIZARD (PAN-INDIA MULTI-INDUSTRY)              -->
   <!-- ======================================================================== -->
-  <div id="modal-new-order" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
-    <div class="max-w-xl w-full bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-2xl my-8">
+  <div id="modal-new-order" class="fixed inset-0 modal-backdrop-blur z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="max-w-xl w-full bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200/90 dark:border-slate-800/90 shadow-2xl max-h-[90vh] flex flex-col my-auto">
       
-      <div class="p-6 sm:p-7 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+      <div class="p-6 sm:p-7 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
         <div>
           <h3 class="font-bold text-slate-900 dark:text-white text-lg">Create New Export Order</h3>
           <p class="text-xs text-slate-500">Generates encrypted buyer tracking link & floor magic token</p>
         </div>
-        <button onclick="closeModal('modal-new-order')" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+        <button onclick="closeModal('modal-new-order')" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 btn-press">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <form onsubmit="handleCreateOrderSubmit(event)" class="p-6 sm:p-7 space-y-4 text-xs">
+      <form onsubmit="handleCreateOrderSubmit(event)" class="p-6 sm:p-7 space-y-4 text-xs overflow-y-auto flex-1">
         
         <div class="grid grid-cols-2 gap-3">
           <div>
@@ -1737,7 +1808,10 @@
           <h4 id="lightbox-title" class="font-bold text-base">Photo Evidence</h4>
           <span class="text-slate-400 text-xs">GPS & Workshop Timestamp Authenticated</span>
         </div>
-        <span class="bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-mono text-xs border border-emerald-500/30">Verified Proof ✓</span>
+        <span class="bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-mono text-xs border border-emerald-500/30 flex items-center gap-1.5">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i>
+          <span>Verified Proof</span>
+        </span>
       </div>
     </div>
   </div>
@@ -2443,8 +2517,8 @@ Rajesh Sharma (+91 98290 12345)`;
   <!-- ======================================================================== -->
   <!-- MODAL: WHATSAPP CLOUD BOT INBOUND WEBHOOK SIMULATOR                      -->
   <!-- ======================================================================== -->
-  <div id="modal-whatsapp-sim" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200 dark:border-slate-800">
+  <div id="modal-whatsapp-sim" class="fixed inset-0 modal-backdrop-blur z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200/90 dark:border-slate-800/90 max-h-[90vh] overflow-y-auto my-auto">
       
       <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
         <div class="flex items-center gap-2.5">
@@ -2497,8 +2571,8 @@ Rajesh Sharma (+91 98290 12345)`;
   <!-- ======================================================================== -->
   <!-- MODAL: TALLY & EXCEL BULK CONSIGNMENT IMPORT ENGINE                      -->
   <!-- ======================================================================== -->
-  <div id="modal-tally-import" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200 dark:border-slate-800">
+  <div id="modal-tally-import" class="fixed inset-0 modal-backdrop-blur z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200/90 dark:border-slate-800/90 max-h-[90vh] overflow-y-auto my-auto">
       
       <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
         <div class="flex items-center gap-2.5">
@@ -2550,8 +2624,8 @@ Rajesh Sharma (+91 98290 12345)`;
   <!-- ======================================================================== -->
   <!-- MODAL: SAAS SUBSCRIPTION & RECURRING BILLING ENGINE                       -->
   <!-- ======================================================================== -->
-  <div id="modal-billing-plans" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200 dark:border-slate-800 my-8">
+  <div id="modal-billing-plans" class="fixed inset-0 modal-backdrop-blur z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200/90 dark:border-slate-800/90 max-h-[90vh] overflow-y-auto my-auto">
       
       <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
         <div class="flex items-center gap-3">
