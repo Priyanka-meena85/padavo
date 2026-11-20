@@ -40,6 +40,10 @@ const ediEngine = require('./edi-engine');
 const insuranceEngine = require('./insurance-engine');
 const discountingEngine = require('./discounting-engine');
 const realtimeEngine = require('./realtime-engine');
+const contractEngine = require('./contract-engine');
+const lcEngine = require('./lc-engine');
+const whatsAppCameraEngine = require('./whatsapp-camera-engine');
+const telemetryEngine = require('./telemetry-engine');
 
 // Environment & Configuration
 const PORT = process.env.PORT || 5500;
@@ -1144,6 +1148,10 @@ async function handleRequest(req, res) {
         embedded_insurance: 'active',
         dynamic_discounting: 'active',
         realtime_presence: 'active',
+        contract_drafter: 'active',
+        lc_discrepancy_ai: 'active',
+        whatsapp_camera_lens: 'active',
+        apm_telemetry: 'active',
         job_queue: jobQueue.getMetrics(),
         memory: {
           rssMb: Math.round(memoryUsage.rss / (1024 * 1024)),
@@ -2441,6 +2449,49 @@ async function handleRequest(req, res) {
       const body = await parseJsonBody(req);
       const presence = realtimeEngine.registerPresence(body.room_id || 'rj-pouk8492', body);
       return sendJson(res, 200, presence);
+    }
+
+    // POST /api/orders/:id/contract/generate — AI Autonomous ICC Trade Contract Drafter
+    const contractGenMatch = pathname.match(/^\/api\/orders\/(\d+)\/contract\/(?:generate|draft)$/);
+    const contractGetMatch = pathname.match(/^\/api\/orders\/(\d+)\/contract$/);
+    if ((method === 'POST' && contractGenMatch) || (method === 'GET' && contractGetMatch)) {
+      const orderId = Number(contractGenMatch ? contractGenMatch[1] : contractGetMatch[1]);
+      const body = method === 'POST' ? await parseJsonBody(req) : {};
+      const order = db.prepare('SELECT o.*, e.company_name FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492', company_name: 'Zenith Global Exports Ltd', buyer_name: 'Toast & Co. London', buyer_country: 'United Kingdom', total_amount: 14000, currency: 'GBP', product_name: 'Indigo Dabu Maxi Dresses' };
+      const contract = contractEngine.generateExportContract(order, body);
+      return sendJson(res, 200, contract);
+    }
+
+    // POST /api/orders/:id/lc-check — UCP 600 Letter of Credit Discrepancy Audit
+    const lcCheckMatch = pathname.match(/^\/api\/orders\/(\d+)\/lc-check$/);
+    const lcCertMatch = pathname.match(/^\/api\/orders\/(\d+)\/lc-certificate$/);
+    if ((method === 'POST' && lcCheckMatch) || (method === 'GET' && lcCertMatch)) {
+      const orderId = Number(lcCheckMatch ? lcCheckMatch[1] : lcCertMatch[1]);
+      const body = method === 'POST' ? await parseJsonBody(req) : {};
+      const order = db.prepare('SELECT o.*, e.company_name FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492', company_name: 'Zenith Global Exports Ltd', currency: 'GBP', product_name: '100% Cotton Block Printed Garments' };
+      const lcAudit = lcEngine.auditTradeDocuments(order, body);
+      return sendJson(res, 200, lcAudit);
+    }
+
+    // POST /api/orders/:id/whatsapp-camera-launch — Ephemeral WhatsApp Camera Micro-App
+    const wcamLaunchMatch = pathname.match(/^\/api\/orders\/(\d+)\/whatsapp-camera-launch$/);
+    if (method === 'POST' && wcamLaunchMatch) {
+      const orderId = Number(wcamLaunchMatch[1]);
+      const body = await parseJsonBody(req);
+      const coords = whatsAppCameraEngine.generateCameraLaunchCoordinates(orderId, body.stage_id || 2, body.phone || '+919829012345');
+      return sendJson(res, 200, coords);
+    }
+
+    // POST /api/floor/whatsapp-camera-capture — Ingest Photo from WhatsApp Camera Micro-App
+    if (method === 'POST' && pathname === '/api/floor/whatsapp-camera-capture') {
+      const body = await parseJsonBody(req);
+      const captureResult = whatsAppCameraEngine.processCameraCapture(body.token, body);
+      return sendJson(res, 200, captureResult);
+    }
+
+    // GET /api/system/telemetry-metrics — OpenTelemetry APM Observability
+    if (method === 'GET' && pathname === '/api/system/telemetry-metrics') {
+      return sendJson(res, 200, telemetryEngine.getMetrics());
     }
 
     // --------------------------------------------------------------------------

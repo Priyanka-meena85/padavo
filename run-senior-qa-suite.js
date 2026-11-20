@@ -755,6 +755,65 @@ IEA*1*000000001~`;
     assert(roomRes.body.participants.length >= 1, 'Participants list empty');
   });
 
+  // Group 12: Ultimate Valuation Multipliers & Autonomous Trade Engines
+  console.log('\n🚀 GROUP 12: ULTIMATE VALUATION MULTIPLIERS & AUTONOMOUS TRADE ENGINES');
+  await test('AI Autonomous Trade Contract Drafter generates bilingual ICC Incoterms agreement', async () => {
+    const res = await request({
+      path: '/api/orders/1/contract/generate',
+      method: 'POST'
+    }, {
+      incoterm: 'FOB (Free On Board - Nhava Sheva Port, India)'
+    });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.contract_number.startsWith('CTR-ICC-'), 'Contract number format mismatch');
+    assert(res.body.cryptographic_contract_seal.startsWith('ICC-SEAL-'), 'Missing cryptographic seal');
+    assert(res.body.bilingual_clauses.length >= 6, 'Expected at least 6 standard trade clauses');
+  });
+
+  await test('UCP 600 Letter of Credit Discrepancy Audit verifies trade documents presentation ready', async () => {
+    const res = await request({
+      path: '/api/orders/1/lc-check',
+      method: 'POST'
+    }, {
+      lc_number: 'LC-BARC-2026-8492',
+      issuing_bank: 'Barclays Bank PLC London'
+    });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.ucp_600_compliance_verdict === 'ZERO_DISCREPANCY_BANK_PRESENTATION_READY', 'UCP 600 verdict mismatch');
+    assert(res.body.bank_presentation_guarantee_seal.startsWith('UCP600-SEAL-'), 'Missing bank presentation seal');
+  });
+
+  await test('WhatsApp Zero-Install Camera micro-app coordinates generate and ingest calibrated capture', async () => {
+    const launchRes = await request({
+      path: '/api/orders/1/whatsapp-camera-launch',
+      method: 'POST'
+    }, {
+      stage_id: 2,
+      phone: '+919829012345'
+    });
+    assert(launchRes.statusCode === 200, `Launch failed with ${launchRes.statusCode}`);
+    assert(launchRes.body.direct_camera_url.includes('whatsapp-camera.html'), 'Camera launch URL mismatch');
+    assert(launchRes.body.launch_token.startsWith('wcam-'), 'Invalid launch token');
+
+    const captureRes = await request({
+      path: '/api/floor/whatsapp-camera-capture',
+      method: 'POST'
+    }, {
+      token: launchRes.body.launch_token,
+      image_url: '/uploads/wcam-test-proof.jpg',
+      grid_mode: 'MILLIMETER_FABRIC_WEAVE'
+    });
+    assert(captureRes.statusCode === 200, `Capture failed with ${captureRes.statusCode}`);
+    assert(captureRes.body.status === 'PHOTO_INGESTED_TO_STAGE_GATE', 'Capture status mismatch');
+  });
+
+  await test('OpenTelemetry APM Telemetry Engine reports request metrics and W3C trace context', async () => {
+    const res = await request({ path: '/api/system/telemetry-metrics' });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.observability_standard.includes('OPENTELEMETRY'), 'Observability standard mismatch');
+    assert(res.body.apm_metrics.uptime_seconds >= 0, 'Uptime must be non-negative');
+  });
+
   console.log('\n===============================================================');
   console.log(`📊 TEST EXECUTION COMPLETE:`);
   console.log(`   Total Tests: ${passCount + failCount}`);
