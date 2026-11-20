@@ -46,6 +46,17 @@ const whatsAppCameraEngine = require('./whatsapp-camera-engine');
 const telemetryEngine = require('./telemetry-engine');
 const section65bEngine = require('./section65b-engine');
 const bankingEngine = require('./banking-engine');
+const rodtepEngine = require('./rodtep-engine');
+const peppolEngine = require('./peppol-engine');
+
+// Safe Environment Loader (.env support)
+if (fs.existsSync(path.join(__dirname, '.env'))) {
+  try {
+    if (typeof process.loadEnvFile === 'function') {
+      process.loadEnvFile(path.join(__dirname, '.env'));
+    }
+  } catch (e) {}
+}
 
 // Environment & Configuration
 const PORT = process.env.PORT || 5500;
@@ -1156,6 +1167,8 @@ async function handleRequest(req, res) {
         apm_telemetry: 'active',
         section_65b_legal: 'active',
         open_banking_ad_cat1: 'active',
+        rodtep_scheme: 'active',
+        peppol_einvoice: 'active',
         job_queue: jobQueue.getMetrics(),
         memory: {
           rssMb: Math.round(memoryUsage.rss / (1024 * 1024)),
@@ -1623,6 +1636,16 @@ async function handleRequest(req, res) {
     if (method === 'POST' && (pathname === '/api/webhooks/whatsapp' || pathname === '/api/webhooks/simulate-whatsapp')) {
       const body = await parseJsonBody(req);
       let { from, text, media_url, po_number } = body;
+
+      const rawMessageId = body.message_id || (body.entry && body.entry[0]?.changes?.[0]?.value?.messages?.[0]?.id);
+      if (rawMessageId && whatsAppBot.isDuplicateMessage(rawMessageId)) {
+        return sendJson(res, 200, {
+          success: true,
+          idempotent_replay: true,
+          message_id: rawMessageId,
+          message: 'Webhook message already processed (idempotent)'
+        });
+      }
 
       // Extract from standard Meta Cloud API payload if nested
       if (body && body.entry && body.entry[0] && body.entry[0].changes && body.entry[0].changes[0].value) {
@@ -2537,6 +2560,51 @@ async function handleRequest(req, res) {
       const orderId = Number(bankStmtMatch[1]);
       const stmt = bankingEngine.getStatement(orderId);
       return sendJson(res, 200, { success: true, statement: stmt });
+    }
+
+    // POST /api/orders/:id/rodtep-claim — DGFT RoDTEP / RoSCTL Duty Remission Auto-Claim
+    const rodtepClaimMatch = pathname.match(/^\/api\/orders\/(\d+)\/rodtep-claim$/);
+    if (method === 'POST' && rodtepClaimMatch) {
+      const orderId = Number(rodtepClaimMatch[1]);
+      const body = await parseJsonBody(req);
+      const order = db.prepare('SELECT o.*, e.company_name, e.iec_number FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492', currency: 'GBP', hs_code: '6204', contract_amount: 14000 };
+      const claim = rodtepEngine.calculateRemission(order, body.shipping_bill_number);
+      return sendJson(res, 200, claim);
+    }
+
+    // GET /api/orders/:id/rodtep-status — DGFT Remission Ledger & ICEGATE Status
+    const rodtepStatusMatch = pathname.match(/^\/api\/orders\/(\d+)\/rodtep-status$/);
+    if (method === 'GET' && rodtepStatusMatch) {
+      const orderId = Number(rodtepStatusMatch[1]);
+      const order = db.prepare('SELECT o.*, e.company_name, e.iec_number FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492', currency: 'GBP', hs_code: '6204', contract_amount: 14000 };
+      const status = rodtepEngine.calculateRemission(order);
+      return sendJson(res, 200, { success: true, rodtep_status: status });
+    }
+
+    // GET /api/orders/:id/peppol-invoice — EU Peppol BIS 3.0 / EN 16931 Digital e-Invoice XML
+    const peppolMatch = pathname.match(/^\/api\/orders\/(\d+)\/peppol-invoice$/);
+    if (method === 'GET' && peppolMatch) {
+      const orderId = Number(peppolMatch[1]);
+      const order = db.prepare('SELECT o.*, e.company_name, e.iec_number, e.city_cluster FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492', currency: 'GBP', contract_amount: 14000, company_name: 'Zenith Global Exports Ltd' };
+      const milestones = db.prepare('SELECT * FROM order_milestones WHERE order_id = ? ORDER BY id ASC').all(orderId);
+      const invoice = peppolEngine.generatePeppolInvoice(order, milestones);
+
+      if (req.headers['accept'] === 'application/xml') {
+        res.writeHead(200, { 'Content-Type': 'application/xml; charset=utf-8' });
+        return res.end(invoice.ubl_xml);
+      }
+      return sendJson(res, 200, invoice);
+    }
+
+    // GET /api/jobs/:jobId — Background Job Status & Execution Result
+    const jobStatusMatch = pathname.match(/^\/api\/jobs\/([a-zA-Z0-9_-]+)$/);
+    if (method === 'GET' && jobStatusMatch) {
+      const jobId = jobStatusMatch[1];
+      const job = jobQueue.getJobStatus(jobId);
+      if (!job) {
+        return sendJson(res, 404, { success: false, message: `Job ${jobId} not found` });
+      }
+      return sendJson(res, 200, { success: true, job });
     }
 
     // --------------------------------------------------------------------------

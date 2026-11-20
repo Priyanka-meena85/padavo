@@ -4,6 +4,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const jobQueue = require('./job-queue');
 
 const BASE_URL = 'http://127.0.0.1:5500';
 let passCount = 0;
@@ -852,6 +853,67 @@ IEA*1*000000001~`;
     assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
     assert(res.body.success === true, 'Expected success');
     assert(res.body.statement.ad_bank.includes('AD-Cat 1'), 'AD Bank name mismatch');
+  });
+
+  await test('Meta WhatsApp Webhook guarantees idempotency and ignores replayed duplicate messages', async () => {
+    const dedupMsgId = `wamid-qa-dedup-${Date.now()}`;
+    // First delivery
+    const res1 = await request({
+      path: '/api/webhooks/whatsapp',
+      method: 'POST'
+    }, {
+      message_id: dedupMsgId,
+      from: '919829012345',
+      text: 'PO-UK-8492 First upload',
+      media_url: '/uploads/proof1.jpg'
+    });
+    assert(res1.statusCode === 200, `First delivery failed with ${res1.statusCode}`);
+
+    // Second delivery with identical message_id (Meta webhook network retry)
+    const res2 = await request({
+      path: '/api/webhooks/whatsapp',
+      method: 'POST'
+    }, {
+      message_id: dedupMsgId,
+      from: '919829012345',
+      text: 'PO-UK-8492 Duplicate retry',
+      media_url: '/uploads/proof1.jpg'
+    });
+    assert(res2.statusCode === 200, `Duplicate delivery failed with ${res2.statusCode}`);
+    assert(res2.body.idempotent_replay === true, 'Expected idempotent_replay true for duplicate');
+  });
+
+  await test('DGFT RoDTEP / RoSCTL Auto-Claim Engine calculates transferable export duty scrips', async () => {
+    const res = await request({
+      path: '/api/orders/1/rodtep-claim',
+      method: 'POST'
+    }, { shipping_bill_number: 'SB-2026-INNSA1-94021' });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.success === true, 'Expected claim success');
+    assert(res.body.eligible_scrip_amount_inr > 0, 'Eligible scrip amount must be positive');
+    assert(res.body.icegate_ledger_status === 'CREDIT_SCRIP_ISSUED', 'Ledger status mismatch');
+    assert(res.body.dgft_compliance.tradable_market_value_inr > 0, 'Market value must be positive');
+  });
+
+  await test('EU Peppol BIS 3.0 / EN 16931 Digital e-Invoice XML generates compliant UBL 2.1 schema', async () => {
+    const res = await request({ path: '/api/orders/1/peppol-invoice' });
+    assert(res.statusCode === 200, `Expected 200, got ${res.statusCode}`);
+    assert(res.body.standard === 'PEPPOL_BIS_BILLING_3_0_UBL_2_1', 'Standard mismatch');
+    assert(res.body.en_compliance === 'EN_16931_COMPLIANT', 'EN compliance mismatch');
+    assert(res.body.ubl_xml.includes('<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"'), 'Invalid UBL XML');
+    assert(res.body.ubl_xml.includes('<cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>'), 'Missing Peppol CustomizationID');
+  });
+
+  await test('Background Job Queue offloads asynchronous processing and serves status endpoint', async () => {
+    const resEnqueue = jobQueue.enqueue('ASYNC_PDF_REPORT', { order_id: 1, type: 'DISPUTE_AFFIDAVIT' });
+    assert(resEnqueue.success === true, 'Enqueue failed');
+    assert(resEnqueue.job_id.startsWith('job-'), 'Invalid job id');
+
+    // Wait 70ms for asynchronous execution
+    await new Promise(r => setTimeout(r, 70));
+    const resStatus = await request({ path: `/api/jobs/${resEnqueue.job_id}` });
+    assert(resStatus.statusCode === 200, `Job status failed with ${resStatus.statusCode}`);
+    assert(resStatus.body.job.status === 'COMPLETED', `Expected COMPLETED, got ${resStatus.body.job.status}`);
   });
 
   console.log('\n===============================================================');

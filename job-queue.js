@@ -82,6 +82,8 @@ class JobQueue extends EventEmitter {
         id: currentJob.id,
         type: currentJob.type,
         status: currentJob.status,
+        result: currentJob.result || null,
+        error: currentJob.error || null,
         completed_at: currentJob.completed_at || new Date().toISOString()
       });
       // Keep history bounded
@@ -92,6 +94,15 @@ class JobQueue extends EventEmitter {
         setImmediate(() => this.processNext());
       }
     }
+  }
+
+  getJobStatus(jobId) {
+    if (!jobId) return null;
+    const inQueue = this.queue.find(j => j.id === jobId);
+    if (inQueue) return inQueue;
+    const inHistory = this.history.find(h => h.id === jobId);
+    if (inHistory) return inHistory;
+    return null;
   }
 
   getMetrics() {

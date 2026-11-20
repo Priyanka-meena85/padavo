@@ -12,6 +12,23 @@ class WhatsAppBotEngine {
     this.phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '104829104928102';
     this.apiVersion = 'v21.0';
     this.isLive = !!this.accessToken;
+    this.dedupCache = new Set();
+  }
+
+  /**
+   * Evaluates if a message was already ingested (Meta Webhook Idempotency)
+   */
+  isDuplicateMessage(messageId) {
+    if (!messageId) return false;
+    if (this.dedupCache.has(messageId)) {
+      return true;
+    }
+    this.dedupCache.add(messageId);
+    if (this.dedupCache.size > 10000) {
+      const first = this.dedupCache.values().next().value;
+      this.dedupCache.delete(first);
+    }
+    return false;
   }
 
   /**
@@ -37,10 +54,19 @@ class WhatsAppBotEngine {
       return { success: false, reason: 'NO_MESSAGE_IN_PAYLOAD' };
     }
 
+    const messageId = message.id || `wamid-${Date.now()}`;
+    if (this.isDuplicateMessage(messageId)) {
+      return {
+        success: true,
+        is_duplicate: true,
+        message_id: messageId,
+        message: 'Duplicate Meta webhook message ignored (idempotent)'
+      };
+    }
+
     const senderPhone = message.from || contact?.wa_id || '919829012345';
     const senderName = contact?.profile?.name || 'Factory Supervisor';
     const messageType = message.type; // 'image', 'audio', 'text'
-    const messageId = message.id || `wamid-${Date.now()}`;
 
     let extractedData = {
       message_id: messageId,
