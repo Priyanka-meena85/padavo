@@ -916,6 +916,69 @@ IEA*1*000000001~`;
     assert(resStatus.body.job.status === 'COMPLETED', `Expected COMPLETED, got ${resStatus.body.job.status}`);
   });
 
+  await test('Tier-2 Subcontractor Quality Pass-Through generates zero-login invite and seals proof', async () => {
+    const invRes = await request({
+      path: '/api/orders/1/vendor-invites',
+      method: 'POST'
+    }, {
+      vendor_name: 'Surat Indigo Processing Mill',
+      vendor_service: 'Dyeing & Colorfastness Finishing'
+    });
+    assert(invRes.statusCode === 201, `Invite failed with ${invRes.statusCode}`);
+    assert(invRes.body.invite.token.startsWith('vtok-'), 'Invalid vendor token');
+
+    const proofRes = await request({
+      path: `/api/public/vendor-upload/${invRes.body.invite.token}`,
+      method: 'POST'
+    }, {
+      parameter_name: 'Colorfastness to Washing (ISO 105-C06)',
+      measured_value: 'Grade 4.5',
+      standard_specification: 'Min Grade 4.0'
+    });
+    assert(proofRes.statusCode === 200, `Proof submission failed with ${proofRes.statusCode}`);
+    assert(proofRes.body.proof.cryptographic_sha256_seal.length === 64, 'Invalid SHA256 seal length');
+
+    const listRes = await request({ path: '/api/orders/1/vendor-proofs' });
+    assert(listRes.statusCode === 200, `List proofs failed with ${listRes.statusCode}`);
+    assert(listRes.body.count > 0, 'Expected at least 1 verified vendor proof');
+  });
+
+  await test('Live Ocean Container AIS Satellite Telemetry tracks vessel and demurrage risk', async () => {
+    const res = await request({ path: '/api/orders/1/container-telemetry' });
+    assert(res.statusCode === 200, `Telemetry failed with ${res.statusCode}`);
+    assert(res.body.current_ais_coordinates.speed_knots > 0, 'Expected positive vessel speed');
+    assert(res.body.demurrage_guard.free_days_allowed === 7, 'Free days mismatch');
+    assert(res.body.voyage_waypoints.length >= 3, 'Expected at least 3 waypoints');
+  });
+
+  await test('GST 12-Digit e-Way Bill Engine generates statutory Part-A and Part-B road transit clearance', async () => {
+    const res = await request({
+      path: '/api/orders/1/generate-ewaybill',
+      method: 'POST'
+    }, {
+      vehicle_number: 'RJ-14-GA-9842',
+      distance_km: 1120
+    });
+    assert(res.statusCode === 201, `e-Way Bill failed with ${res.statusCode}`);
+    assert(res.body.eway_bill.eway_bill_number.startsWith('2611'), 'Invalid e-Way bill prefix');
+    assert(res.body.eway_bill.part_b.vehicle_number === 'RJ-14-GA-9842', 'Vehicle number mismatch');
+    assert(res.body.eway_bill.validity_days === 6, 'Validity calculation mismatch');
+  });
+
+  await test('Disaster Recovery Database Backup Engine creates atomic point-in-time snapshot', async () => {
+    const res = await request({
+      path: '/api/system/trigger-backup',
+      method: 'POST'
+    });
+    assert(res.statusCode === 200, `Backup trigger failed with ${res.statusCode}`);
+    assert(res.body.success === true, 'Backup execution failed');
+    assert(res.body.recovery_status === 'POINT_IN_TIME_SNAPSHOT_READY', 'Status mismatch');
+
+    const listRes = await request({ path: '/api/system/backups' });
+    assert(listRes.statusCode === 200, `List backups failed with ${listRes.statusCode}`);
+    assert(listRes.body.count > 0, 'Expected at least 1 backup in snapshots registry');
+  });
+
   console.log('\n===============================================================');
   console.log(`📊 TEST EXECUTION COMPLETE:`);
   console.log(`   Total Tests: ${passCount + failCount}`);

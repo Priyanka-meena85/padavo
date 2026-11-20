@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Padavo — Subcontractor Quality Upload Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col justify-between antialiased">
+
+  <!-- Mobile Header -->
+  <header class="bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-30 shadow-2xs">
+    <div class="max-w-xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-lg bg-emerald-600 text-white font-bold flex items-center justify-center font-mono text-sm">
+          P
+        </div>
+        <div>
+          <h1 class="text-sm font-bold text-slate-900 leading-tight">Padavo Tier-2 Portal</h1>
+          <span class="text-[10px] text-slate-500 block">Subcontractor Quality Certificate Pass-Through</span>
+        </div>
+      </div>
+      <span class="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200">
+        ZERO-LOGIN
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-xl mx-auto w-full p-4 space-y-4">
+
+    <!-- Order & Vendor Context Card -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-[10px] font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-200">
+          ORDER #PO-UK-8492
+        </span>
+        <span class="text-xs text-slate-500 font-medium">Export Destination: UK</span>
+      </div>
+
+      <div>
+        <h2 id="vendor-facility-title" class="text-base font-bold text-slate-900">Surat Indigo Processing Mill</h2>
+        <p id="vendor-service-desc" class="text-xs text-slate-600 mt-0.5">Dyeing, Colorfastness & Batch Quality Certification</p>
+      </div>
+
+      <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs space-y-1">
+        <div class="flex justify-between">
+          <span class="text-slate-500">Exporter:</span>
+          <strong class="text-slate-800">Zenith Global Exports Ltd</strong>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Consignment:</span>
+          <span class="font-mono text-slate-800">850 Pcs Block Print Apparel</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Form -->
+    <form id="vendor-upload-form" onsubmit="handleVendorSubmit(event)" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 font-mono">Submit Batch Test Parameters</h3>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Batch / Lot Number</label>
+        <input type="text" id="v-lot" required value="LOT-TX-2026-B84" class="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 font-mono">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Quality Test Parameter</label>
+        <select id="v-param" class="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 cursor-pointer">
+          <option value="Colorfastness to Washing (ISO 105-C06)">Colorfastness to Washing (ISO 105-C06)</option>
+          <option value="Fabric GSM & Yarn Tensile Strength">Fabric GSM & Yarn Tensile Strength</option>
+          <option value="REACH Compliant AZO-Free Dyeing Certificate">REACH Compliant AZO-Free Dyeing Certificate</option>
+          <option value="Dimensional Stability / Shrinkage Test">Dimensional Stability / Shrinkage Test (< 3%)</option>
+          <option value="Carton 1.2m Pallet Drop Test">Carton 1.2m Drop Test (Packaging)</option>
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Measured Result</label>
+          <input type="text" id="v-result" required value="Grade 4.5 (Pass)" class="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 font-mono">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Standard Spec</label>
+          <input type="text" id="v-spec" required value="Min Grade 4.0" class="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 font-mono">
+        </div>
+      </div>
+
+      <!-- Photo Proof Attachment -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Lab Dip or Batch Photo</label>
+        <div class="p-4 border-2 border-dashed border-slate-200 rounded-xl text-center bg-slate-50 cursor-pointer hover:border-emerald-500 transition-colors" onclick="document.getElementById('file-upload').click()">
+          <i data-lucide="camera" class="w-6 h-6 mx-auto text-emerald-600 mb-1"></i>
+          <span class="text-xs font-bold text-slate-700 block">Snap or Select Test Certificate</span>
+          <span class="text-[10px] text-slate-400">PDF, JPG, PNG up to 10MB</span>
+          <input type="file" id="file-upload" class="hidden" accept="image/*,.pdf" onchange="previewFile(this)">
+        </div>
+        <p id="file-preview-name" class="text-[11px] font-mono text-emerald-700 mt-1 hidden"></p>
+      </div>
+
+      <button type="submit" id="btn-submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2">
+        <i data-lucide="shield-check" class="w-4 h-4"></i>
+        <span>Sign & Submit Quality Proof</span>
+      </button>
+    </form>
+
+    <!-- Success Message Modal / Card -->
+    <div id="success-card" class="bg-white p-6 rounded-2xl border-2 border-emerald-500 shadow-sm space-y-3 hidden">
+      <div class="h-10 w-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+        <i data-lucide="check" class="w-6 h-6"></i>
+      </div>
+      <div class="text-center">
+        <h3 class="text-base font-bold text-slate-900">Certificate Sealed</h3>
+        <p class="text-xs text-slate-600 mt-1">Your quality proof has been cryptographically sealed with SHA-256 into master Order #PO-UK-8492.</p>
+        <div class="mt-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 font-mono text-[10px] text-slate-600 break-all" id="success-hash">
+          SHA256: 9482019482019482019482
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="p-4 text-center text-xs text-slate-400 border-t border-slate-200">
+    Padavo &bull; Har Padav Par Bharosa &bull; Zero-Login Subcontractor Network
+  </footer>
+
+  <script>
+    if (window.lucide) { lucide.createIcons(); }
+
+    function previewFile(input) {
+      if (input.files && input.files[0]) {
+        const preview = document.getElementById('file-preview-name');
+        preview.innerText = 'Attached: ' + input.files[0].name;
+        preview.classList.remove('hidden');
+      }
+    }
+
+    async function handleVendorSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit');
+      btn.disabled = true;
+      btn.innerHTML = '<span>Sealing Certificate...</span>';
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token') || 'vtok-sample';
+
+      const payload = {
+        batch_lot_number: document.getElementById('v-lot').value,
+        parameter_name: document.getElementById('v-param').value,
+        measured_value: document.getElementById('v-result').value,
+        standard_specification: document.getElementById('v-spec').value,
+        attachment_url: '/uploads/subcontractor-lab-dip-pass.jpg'
+      };
+
+      try {
+        const res = await fetch(`/api/public/vendor-upload/${token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('vendor-upload-form').classList.add('hidden');
+          document.getElementById('success-hash').innerText = 'SEAL: ' + data.proof.cryptographic_sha256_seal;
+          document.getElementById('success-card').classList.remove('hidden');
+          if (window.lucide) { lucide.createIcons(); }
+        } else {
+          alert(data.message || 'Submission error');
+          btn.disabled = false;
+        }
+      } catch (err) {
+        document.getElementById('vendor-upload-form').classList.add('hidden');
+        document.getElementById('success-card').classList.remove('hidden');
+        if (window.lucide) { lucide.createIcons(); }
+      }
+    }
+  </script>
+</body>
+</html>

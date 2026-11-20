@@ -48,6 +48,10 @@ const section65bEngine = require('./section65b-engine');
 const bankingEngine = require('./banking-engine');
 const rodtepEngine = require('./rodtep-engine');
 const peppolEngine = require('./peppol-engine');
+const vendorEngine = require('./vendor-engine');
+const containerTrackingEngine = require('./container-tracking-engine');
+const ewaybillEngine = require('./ewaybill-engine');
+const backupEngine = require('./backup-engine');
 
 // Safe Environment Loader (.env support)
 if (fs.existsSync(path.join(__dirname, '.env'))) {
@@ -1169,6 +1173,10 @@ async function handleRequest(req, res) {
         open_banking_ad_cat1: 'active',
         rodtep_scheme: 'active',
         peppol_einvoice: 'active',
+        tier2_vendor_quality: 'active',
+        ais_container_telemetry: 'active',
+        gst_ewaybill: 'active',
+        disaster_recovery_backup: 'active',
         job_queue: jobQueue.getMetrics(),
         memory: {
           rssMb: Math.round(memoryUsage.rss / (1024 * 1024)),
@@ -1539,6 +1547,21 @@ async function handleRequest(req, res) {
         success: true,
         plans: billingEngine.getPlans()
       });
+    }
+
+    // GET /api/public/vendor-upload/:token — Subcontractor Zero-Login Invite Details
+    if (method === 'GET' && pathname.startsWith('/api/public/vendor-upload/')) {
+      const token = pathname.replace('/api/public/vendor-upload/', '').trim();
+      const invite = vendorEngine.getVendorInviteByToken(token);
+      return sendJson(res, 200, { success: true, invite });
+    }
+
+    // POST /api/public/vendor-upload/:token — Subcontractor Quality Certificate Ingestion
+    if (method === 'POST' && pathname.startsWith('/api/public/vendor-upload/')) {
+      const token = pathname.replace('/api/public/vendor-upload/', '').trim();
+      const body = await parseJsonBody(req);
+      const proofResult = vendorEngine.recordVendorProof(token, body);
+      return sendJson(res, 200, proofResult);
     }
 
     // POST /api/public/magic-upload/:token — Factory Floor 1-Click Camera Upload
@@ -2605,6 +2628,62 @@ async function handleRequest(req, res) {
         return sendJson(res, 404, { success: false, message: `Job ${jobId} not found` });
       }
       return sendJson(res, 200, { success: true, job });
+    }
+
+    // POST /api/orders/:id/vendor-invites — Issue Subcontractor Magic Upload Token
+    const vendorInviteMatch = pathname.match(/^\/api\/orders\/(\d+)\/vendor-invites$/);
+    if (method === 'POST' && vendorInviteMatch) {
+      const orderId = Number(vendorInviteMatch[1]);
+      const body = await parseJsonBody(req);
+      const invite = vendorEngine.generateVendorInvite(orderId, body.vendor_name, body.vendor_service, body.contact_phone);
+      return sendJson(res, 201, invite);
+    }
+
+    // GET /api/orders/:id/vendor-proofs — Verified Tier-2 Subcontractor Quality Certificates
+    const vendorProofsMatch = pathname.match(/^\/api\/orders\/(\d+)\/vendor-proofs$/);
+    if (method === 'GET' && vendorProofsMatch) {
+      const orderId = Number(vendorProofsMatch[1]);
+      const proofs = vendorEngine.getVendorProofsForOrder(orderId);
+      return sendJson(res, 200, { success: true, count: proofs.length, proofs });
+    }
+
+    // GET /api/orders/:id/container-telemetry — Satellite AIS Vessel Coordinates & Demurrage Guard
+    const containerTrackMatch = pathname.match(/^\/api\/orders\/(\d+)\/container-telemetry$/);
+    if (method === 'GET' && containerTrackMatch) {
+      const orderId = Number(containerTrackMatch[1]);
+      const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492' };
+      const tracking = containerTrackingEngine.trackContainer(order.container_number || 'MSCU9482019', order);
+      return sendJson(res, 200, tracking);
+    }
+
+    // POST /api/orders/:id/generate-ewaybill — GST 12-Digit e-Way Bill Generator
+    const ewaybillGenMatch = pathname.match(/^\/api\/orders\/(\d+)\/generate-ewaybill$/);
+    if (method === 'POST' && ewaybillGenMatch) {
+      const orderId = Number(ewaybillGenMatch[1]);
+      const body = await parseJsonBody(req);
+      const order = db.prepare('SELECT o.*, e.company_name, e.city_cluster FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492' };
+      const ewb = ewaybillEngine.generateEWayBill(order, body);
+      return sendJson(res, 201, ewb);
+    }
+
+    // GET /api/orders/:id/ewaybill — Retrieve e-Way Bill Record
+    const ewaybillGetMatch = pathname.match(/^\/api\/orders\/(\d+)\/ewaybill$/);
+    if (method === 'GET' && ewaybillGetMatch) {
+      const orderId = Number(ewaybillGetMatch[1]);
+      const ewb = ewaybillEngine.getEWayBill(orderId);
+      return sendJson(res, 200, { success: true, eway_bill: ewb });
+    }
+
+    // POST /api/system/trigger-backup — Disaster Recovery DB Snapshot
+    if (method === 'POST' && pathname === '/api/system/trigger-backup') {
+      const result = backupEngine.createBackup(DB_PATH || 'database.sqlite');
+      return sendJson(res, 200, result);
+    }
+
+    // GET /api/system/backups — List Database Snapshots
+    if (method === 'GET' && pathname === '/api/system/backups') {
+      const backups = backupEngine.listBackups();
+      return sendJson(res, 200, { success: true, count: backups.length, backups });
     }
 
     // --------------------------------------------------------------------------

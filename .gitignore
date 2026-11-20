@@ -5,5 +5,6 @@ uploads/assembled-*
 uploads/padavo-*
 uploads/chunk-*
 uploads/wcam-*
+backups/*.sqlite
 .DS_Store
 Thumbs.db
