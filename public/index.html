@@ -985,11 +985,11 @@
               <span class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">Stage Photo Proofs:</span>
               <div id="current-stage-photos-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div class="relative group rounded-2xl overflow-hidden aspect-video bg-black border border-slate-200 shadow-xs cursor-pointer" onclick="openLightbox('https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=800&q=80', 'Teakwood Block Print Registration')">
-                  <img src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover">
+                  <img src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=300&q=80" alt="Artisan Block Print Proof" class="w-full h-full object-cover">
                   <span class="absolute bottom-1 left-1 bg-black/70 text-[9px] text-white px-2 py-0.5 rounded font-mono">Artisan Table</span>
                 </div>
                 <div class="relative group rounded-2xl overflow-hidden aspect-video bg-black border border-slate-200 shadow-xs cursor-pointer" onclick="openLightbox('https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=800&q=80', 'Sun Drying Yard in Bagru')">
-                  <img src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover">
+                  <img src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=300&q=80" alt="Dye Yard Sun Drying Proof" class="w-full h-full object-cover">
                   <span class="absolute bottom-1 left-1 bg-black/70 text-[9px] text-white px-2 py-0.5 rounded font-mono">Dye Yard</span>
                 </div>
               </div>
@@ -2251,6 +2251,51 @@
       safeCreateIcons();
     }
 
+
+    // GLOBAL KEYBOARD SHORTCUTS & MODAL DISMISSAL
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        const s = document.getElementById('global-search-input');
+        if (s) { s.focus(); s.select(); }
+        return;
+      }
+      if (e.key === 'Escape') {
+        closeModal('modal-new-order');
+        closeWhatsAppSimModal();
+        closeTallyImportModal();
+        closeBillingModal();
+        closeLightbox();
+      }
+    });
+
+    // AUTO INITIALIZATION ON PAGE LOAD
+    window.addEventListener('DOMContentLoaded', () => {
+      checkAuthStatus();
+    });
+
+    // TOAST NOTIFICATION HELPER
+    function showToast(msg, isSuccess = true) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      const toastIcon = document.getElementById('toast-icon');
+      if (!toast) return;
+
+      if (toastMsg) toastMsg.innerText = msg;
+      if (toastIcon) {
+        toastIcon.innerHTML = isSuccess 
+          ? '<i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>' 
+          : '<i data-lucide="alert-circle" class="w-5 h-5 text-rose-600"></i>';
+      }
+      
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      safeCreateIcons();
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3500);
+    }
+
     // NAVIGATION SYSTEM (SIDEBAR + VIEWS)
     function navigate(screenName) {
       if (screenName !== 'auth' && !currentToken) {
@@ -2467,7 +2512,7 @@
           const newCard = document.createElement('div');
           newCard.className = 'relative group rounded-2xl overflow-hidden aspect-video bg-black border-2 border-emerald-500 animate-pulse';
           newCard.innerHTML = `
-            <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover">
+            <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=300&q=80" alt="Milestone Stage Production Proof" class="w-full h-full object-cover">
             <span class="absolute bottom-1 left-1 bg-emerald-600 text-[9px] text-white px-2 py-0.5 rounded font-mono font-bold">New Upload</span>
           `;
           grid.prepend(newCard);
