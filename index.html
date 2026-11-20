@@ -17,6 +17,10 @@
     window.tailwind = window.tailwind || {};
     window.lucide = window.lucide || { createIcons: function() {} };
   </script>
+  <script>
+    // Suppress Tailwind Play CDN developer notice in production browser console
+    (function(){const w=console.warn;console.warn=function(...a){if(a[0]&&typeof a[0]==='string'&&a[0].includes('cdn.tailwindcss.com'))return;w.apply(console,a);};})();
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Local high-speed bundled Lucide with CDN fallback -->
   <script src="/lucide.min.js" onerror="this.onerror=null; this.src='https://unpkg.com/lucide@latest';"></script>
