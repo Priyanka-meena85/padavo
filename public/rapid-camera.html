@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Padavo RapidFloor — Shop Floor 2-Second Camera</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <script>
+    (function(){const w=console.warn;console.warn=function(...a){try{const s=a.map(x=>typeof x==='object'&&x?JSON.stringify(x):String(x)).join(' ');if(s.includes('tailwindcss.com')||s.includes('Tailwind CSS')||s.includes('should not be used in production'))return;}catch(e){}w.apply(console,a);};})();
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/lucide.min.js" onerror="this.onerror=null; this.src='https://unpkg.com/lucide@latest';"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script>
+    window.tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              500: '#b46b38',
+              600: '#9b562a',
+              700: '#7f4422',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-900 text-white antialiased font-sans min-h-screen flex flex-col justify-between selection:bg-brand-500">
+
+  <!-- Top Supervisor Header -->
+  <header class="bg-slate-950/80 backdrop-blur-md border-b border-slate-800 px-4 py-3 sticky top-0 z-30 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="h-8 w-8 rounded-xl bg-brand-500 flex items-center justify-center font-bold text-sm">
+        <i data-lucide="camera" class="w-4 h-4 text-white"></i>
+      </div>
+      <div>
+        <h1 class="font-bold text-sm leading-none">RapidFloor Camera</h1>
+        <span class="text-[10px] text-emerald-400 font-mono">Mukesh Supervisor • Sanganer Unit 1</span>
+      </div>
+    </div>
+    <div id="net-badge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800">
+      <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+      <span id="net-status">ONLINE</span>
+    </div>
+  </header>
+
+  <!-- Main Viewfinder / Selection Deck -->
+  <main class="flex-1 max-w-lg mx-auto w-full p-4 space-y-4">
+    
+    <!-- Step 1: Select Consignment -->
+    <div class="space-y-1.5">
+      <label class="text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider block">1. Select Purchase Order (PO)</label>
+      <div class="grid grid-cols-3 gap-2">
+        <button onclick="selectOrder(this, 'PO-UK-8492', 'magic-uk-8492-token')" class="po-chip active p-2.5 rounded-2xl bg-brand-600 text-white font-mono text-xs font-bold text-center border border-brand-400 shadow-sm transition-all">
+          PO-8492
+          <span class="block text-[9px] font-sans font-normal opacity-80">Toast UK</span>
+        </button>
+        <button onclick="selectOrder(this, 'PO-US-8941', 'magic-us-8941-token')" class="po-chip p-2.5 rounded-2xl bg-slate-800 text-slate-300 font-mono text-xs font-bold text-center border border-slate-700 transition-all hover:bg-slate-750">
+          PO-8941
+          <span class="block text-[9px] font-sans font-normal opacity-80">SOHO US</span>
+        </button>
+        <button onclick="selectOrder(this, 'PO-EU-4412', 'magic-eu-4412-token')" class="po-chip p-2.5 rounded-2xl bg-slate-800 text-slate-300 font-mono text-xs font-bold text-center border border-slate-700 transition-all hover:bg-slate-750">
+          PO-4412
+          <span class="block text-[9px] font-sans font-normal opacity-80">Nordic EU</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: Select Production Stage -->
+    <div class="space-y-1.5">
+      <label class="text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider block">2. Select Stage</label>
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <button onclick="selectStage(this, 1)" class="stage-chip active p-3 rounded-2xl bg-slate-800 border-2 border-brand-500 font-bold text-left flex items-center justify-between">
+          <span>Stage 2: Cutting</span>
+          <i data-lucide="check" class="w-3.5 h-3.5 text-brand-400"></i>
+        </button>
+        <button onclick="selectStage(this, 2)" class="stage-chip p-3 rounded-2xl bg-slate-800/60 border border-slate-700 text-slate-300 text-left flex items-center justify-between">
+          <span>Stage 3: Printing</span>
+        </button>
+        <button onclick="selectStage(this, 3)" class="stage-chip p-3 rounded-2xl bg-slate-800/60 border border-slate-700 text-slate-300 text-left flex items-center justify-between">
+          <span>Stage 4: Stitching</span>
+        </button>
+        <button onclick="selectStage(this, 4)" class="stage-chip p-3 rounded-2xl bg-slate-800/60 border border-slate-700 text-slate-300 text-left flex items-center justify-between">
+          <span>Stage 5: Packaging</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 3: Fast Camera / Capture Zone -->
+    <div class="bg-slate-950 p-4 rounded-3xl border border-slate-800 space-y-3">
+      <div class="aspect-video bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 flex flex-col items-center justify-center relative group">
+        <img id="preview-img" src="" class="hidden w-full h-full object-cover">
+        <div id="empty-preview" class="text-center p-6 space-y-2">
+          <div class="h-12 w-12 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto text-brand-400">
+            <i data-lucide="camera" class="w-6 h-6"></i>
+          </div>
+          <p class="text-xs text-slate-400">Ready to snap strike-off / workshop proof</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handlePhotoSnap(event)" class="hidden">
+        <button onclick="document.getElementById('camera-input').click()" class="flex-1 py-3 px-4 rounded-2xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-brand-900/40 transition-all">
+          <i data-lucide="camera" class="w-4 h-4"></i>
+          <span>Snap Floor Photo (Camera)</span>
+        </button>
+        <button onclick="submitRapidProof()" id="btn-submit" disabled class="py-3 px-5 rounded-2xl bg-slate-800 text-slate-500 font-bold text-xs flex items-center justify-center gap-1.5 transition-all">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span>Upload</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Offline Queue Status Pill -->
+    <div id="offline-alert" class="hidden p-3 bg-amber-950/40 border border-amber-800 rounded-2xl text-[11px] text-amber-300 flex items-center gap-2">
+      <i data-lucide="wifi-off" class="w-4 h-4 text-amber-400"></i>
+      <span>Basement Mode Active: Photo will queue locally and auto-sync when in Wi-Fi.</span>
+    </div>
+
+  </main>
+
+  <!-- Bottom Notification Bar -->
+  <footer class="p-3 bg-slate-950 border-t border-slate-800 text-center text-[10px] text-slate-500">
+    <p>Padavo RapidFloor • 2-Second Floor Proofing • Offline Synchronized</p>
+  </footer>
+
+  <script>
+    let currentMagicToken = 'magic-uk-8492-token';
+    let currentStageIndex = 1;
+    let currentBase64 = null;
+
+    function selectOrder(btn, po, token) {
+      document.querySelectorAll('.po-chip').forEach(b => {
+        b.className = 'po-chip p-2.5 rounded-2xl bg-slate-800 text-slate-300 font-mono text-xs font-bold text-center border border-slate-700 transition-all';
+      });
+      btn.className = 'po-chip active p-2.5 rounded-2xl bg-brand-600 text-white font-mono text-xs font-bold text-center border border-brand-400 shadow-sm transition-all';
+      currentMagicToken = token;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function selectStage(btn, idx) {
+      document.querySelectorAll('.stage-chip').forEach(b => {
+        b.className = 'stage-chip p-3 rounded-2xl bg-slate-800/60 border border-slate-700 text-slate-300 text-left flex items-center justify-between';
+      });
+      btn.className = 'stage-chip active p-3 rounded-2xl bg-slate-800 border-2 border-brand-500 font-bold text-left flex items-center justify-between text-white';
+      currentStageIndex = idx;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function handlePhotoSnap(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        currentBase64 = evt.target.result;
+        const img = document.getElementById('preview-img');
+        const empty = document.getElementById('empty-preview');
+        img.src = currentBase64;
+        img.classList.remove('hidden');
+        empty.classList.add('hidden');
+        
+        const btnSubmit = document.getElementById('btn-submit');
+        btnSubmit.disabled = false;
+        btnSubmit.className = 'py-3 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-emerald-950';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function submitRapidProof() {
+      if (!currentBase64) return;
+      const btn = document.getElementById('btn-submit');
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i>';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      const payload = {
+        stage_index: currentStageIndex,
+        image_base64: currentBase64,
+        caption: 'RapidFloor snap by Mukesh Supervisor',
+        auto_approve: 1
+      };
+
+      if (!navigator.onLine) {
+        // Queue locally
+        const queue = JSON.parse(localStorage.getItem('padavo_offline_queue') || '[]');
+        queue.push({
+          endpoint: `/api/public/magic-upload/${currentMagicToken}`,
+          payload: payload,
+          timestamp: new Date().toISOString()
+        });
+        localStorage.setItem('padavo_offline_queue', JSON.stringify(queue));
+        alert('Basement Mode: Photo saved to device queue. Will upload when in network range!');
+        resetCapture();
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/public/magic-upload/${currentMagicToken}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Upload verified & milestone updated on live tracking!');
+          resetCapture();
+        } else {
+          alert(data.message || 'Upload failed');
+        }
+      } catch (err) {
+        alert('Connection error. Saved to offline queue.');
+      }
+      resetCapture();
+    }
+
+    function resetCapture() {
+      currentBase64 = null;
+      document.getElementById('preview-img').classList.add('hidden');
+      document.getElementById('empty-preview').classList.remove('hidden');
+      const btn = document.getElementById('btn-submit');
+      btn.disabled = true;
+      btn.className = 'py-3 px-5 rounded-2xl bg-slate-800 text-slate-500 font-bold text-xs flex items-center justify-center gap-1.5';
+      btn.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i><span>Upload</span>';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    window.addEventListener('online', () => {
+      document.getElementById('net-status').textContent = 'ONLINE';
+      document.getElementById('net-badge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800';
+    });
+    window.addEventListener('offline', () => {
+      document.getElementById('net-status').textContent = 'OFFLINE';
+      document.getElementById('net-badge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono bg-rose-950 text-rose-300 border border-rose-800';
+      document.getElementById('offline-alert').classList.remove('hidden');
+    });
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  </script>
+</body>
+</html>

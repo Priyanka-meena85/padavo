@@ -19,8 +19,9 @@ const path = require('node:path');
 const os = require('node:os');
 const crypto = require('node:crypto');
 const { DatabaseSync } = require('node:sqlite');
-const { generateDisputeAuditPdf, generateFircCertificatePdf } = require('./pdf-engine');
+const { generateDisputeAuditPdf, generateFircCertificatePdf, generateRodtepClaimPdf } = require('./pdf-engine');
 const { exportOrdersToTallyXml, parseTallyXmlToOrders } = require('./tally-engine');
+const errorTelemetry = require('./error-telemetry');
 const storageEngine = require('./storage-engine');
 const notificationEngine = require('./notification-engine');
 const billingEngine = require('./billing-engine');
@@ -62,12 +63,17 @@ if (fs.existsSync(path.join(__dirname, '.env'))) {
   } catch (e) {}
 }
 
-// Global Process Crash Protection & Subsystem Isolation Guard
+// Global Process Crash Protection & Telemetry Recovery Guard
 process.on('uncaughtException', (err) => {
   console.error('🛡️ [PADAVO RECOVERY GUARD] Uncaught Exception intercepted:', err.message);
+  try { errorTelemetry.captureError(err, null, { context: 'uncaughtException' }); } catch (e) {}
 });
 process.on('unhandledRejection', (reason) => {
   console.error('🛡️ [PADAVO RECOVERY GUARD] Unhandled Rejection intercepted:', reason);
+  try {
+    const errorObj = reason instanceof Error ? reason : new Error(String(reason));
+    errorTelemetry.captureError(errorObj, null, { context: 'unhandledRejection' });
+  } catch (e) {}
 });
 
 // Environment & Configuration
@@ -127,18 +133,24 @@ try {
 }
 
 // ==============================================================================
-// DATABASE SETUP & HIGH-CONCURRENCY PRAGMAS (CRASH-PROOF FALLBACK)
+// DATABASE SETUP & HIGH-CONCURRENCY PRAGMAS (CRASH-PROOF WAL HARDENING)
+// Concurrency note: For horizontal multi-node scaling across multiple Kubernetes pods
+// or AWS ECS tasks, set DATABASE_URL to a hosted PostgreSQL cluster (e.g. Supabase,
+// AWS Aurora PostgreSQL) and instantiate a connection pool via node-postgres (pg.Pool).
+// For single-container / VPS deployments, SQLite WAL with 64MB cache provides sub-millisecond p99.
 // ==============================================================================
 function initDatabase() {
   let instance;
 
-  // Helper: Verify if SQLite connection can execute write queries
+  // Helper: Verify if SQLite connection can execute write queries & enforce WAL settings
   function isInstanceWritable(dbConn) {
     try {
       dbConn.exec(`
-        PRAGMA busy_timeout = 5000;
+        PRAGMA busy_timeout = 10000;
         PRAGMA synchronous = NORMAL;
         PRAGMA foreign_keys = ON;
+        PRAGMA cache_size = -64000;
+        PRAGMA temp_store = MEMORY;
         CREATE TABLE IF NOT EXISTS _health_check (id INTEGER PRIMARY KEY);
         INSERT INTO _health_check (id) VALUES (1) ON CONFLICT(id) DO NOTHING;
       `);
@@ -152,14 +164,22 @@ function initDatabase() {
   try {
     instance = new DatabaseSync(DB_PATH);
     if (!isServerless) {
-      try { instance.exec(`PRAGMA journal_mode = WAL;`); } catch (e) {}
+      try {
+        instance.exec(`
+          PRAGMA journal_mode = WAL;
+          PRAGMA wal_autocheckpoint = 1000;
+          PRAGMA busy_timeout = 10000;
+          PRAGMA cache_size = -64000;
+          PRAGMA temp_store = MEMORY;
+        `);
+      } catch (e) {}
     } else {
       try { instance.exec(`PRAGMA journal_mode = DELETE;`); } catch (e) {}
     }
     if (!isInstanceWritable(instance)) {
       throw new Error(`Database at ${DB_PATH} is read-only or not writable`);
     }
-    console.log(`SQLite initialized successfully at: ${DB_PATH}`);
+    console.log(`SQLite initialized successfully at: ${DB_PATH} (WAL Mode + 64MB Cache)`);
   } catch (dbErr) {
     console.error(`Notice: DatabaseSync at DB_PATH failed (${dbErr.message}), falling back to in-memory SQLite:`);
     try {
@@ -167,6 +187,7 @@ function initDatabase() {
       instance.exec(`
         PRAGMA foreign_keys = ON;
         PRAGMA synchronous = NORMAL;
+        PRAGMA busy_timeout = 10000;
       `);
       console.log('In-memory SQLite instance initialized successfully.');
     } catch (dbErr2) {
@@ -178,6 +199,7 @@ function initDatabase() {
 }
 
 const db = initDatabase();
+try { errorTelemetry.setDatabase(db); } catch (e) {}
 
 try {
   db.exec("ALTER TABLE exporters ADD COLUMN role TEXT DEFAULT 'owner'");
@@ -335,6 +357,12 @@ const schemaMigrations = [
   "ALTER TABLE exporters ADD COLUMN subscription_tier TEXT DEFAULT 'starter'",
   "ALTER TABLE exporters ADD COLUMN orders_quota INTEGER DEFAULT 25",
   "ALTER TABLE exporters ADD COLUMN orders_used INTEGER DEFAULT 0",
+  "ALTER TABLE exporters ADD COLUMN consignment_credits INTEGER DEFAULT 5",
+  "ALTER TABLE exporters ADD COLUMN credits_used INTEGER DEFAULT 0",
+  "ALTER TABLE exporters ADD COLUMN agreement_signed_at DATETIME",
+  "ALTER TABLE exporters ADD COLUMN agreement_ip TEXT",
+  "ALTER TABLE exporters ADD COLUMN agreement_signer_name TEXT",
+  "ALTER TABLE exporters ADD COLUMN agreement_version TEXT DEFAULT '2026.1'",
   "ALTER TABLE stage_photos ADD COLUMN is_video INTEGER DEFAULT 0",
   "ALTER TABLE stage_photos ADD COLUMN video_duration_seconds REAL DEFAULT 0",
   "ALTER TABLE orders ADD COLUMN escrow_status TEXT DEFAULT 'pending'",
@@ -946,7 +974,7 @@ function getAuthExporter(req) {
   if (!token) return null;
 
   const session = db.prepare(`
-    SELECT s.*, e.id as exporter_id, e.email, e.company_name, e.company_initials, e.city_cluster, e.iec_number, e.phone, e.whatsapp, e.subscription_tier, e.orders_quota, e.orders_used, e.role
+    SELECT s.*, e.id as exporter_id, e.email, e.company_name, e.company_initials, e.city_cluster, e.iec_number, e.phone, e.whatsapp, e.subscription_tier, e.orders_quota, e.orders_used, e.role, e.consignment_credits, e.credits_used, e.agreement_signed_at, e.agreement_signer_name, e.agreement_version
     FROM sessions s
     JOIN exporters e ON s.exporter_id = e.id
     WHERE s.token = ? AND s.expires_at > datetime('now')
@@ -1729,6 +1757,49 @@ async function handleRequest(req, res) {
       });
     }
 
+    // GET /api/billing/wallet — Prepaid Consignment Credits Wallet
+    if (method === 'GET' && pathname === '/api/billing/wallet') {
+      const authExporter = getAuthExporter(req);
+      const exporterId = authExporter ? authExporter.exporter_id : 1;
+      const exporter = db.prepare('SELECT consignment_credits, credits_used FROM exporters WHERE id = ?').get(exporterId) || { consignment_credits: 5, credits_used: 0 };
+
+      return sendJson(res, 200, {
+        success: true,
+        wallet: {
+          consignment_credits: exporter.consignment_credits || 5,
+          credits_used: exporter.credits_used || 0,
+          cost_per_credit_inr: 799,
+          validity: '24 Months (Zero Seasonality Expiry)',
+          available_packs: [
+            { id: 'pack-5', name: 'Starter Trial Pack', credits: 5, price_inr: 3995, savings: 'Flat ₹799/PO' },
+            { id: 'pack-20', name: 'Exporter Growth Bundle', credits: 20, price_inr: 13999, savings: 'Save ₹1,980 (₹699/PO)' },
+            { id: 'pack-50', name: 'Annual Enterprise Vault', credits: 50, price_inr: 29999, savings: 'Save ₹9,951 (₹599/PO)' }
+          ]
+        }
+      });
+    }
+
+    // POST /api/billing/wallet/topup — Top Up Consignment Credits
+    if (method === 'POST' && pathname === '/api/billing/wallet/topup') {
+      const authExporter = getAuthExporter(req);
+      const exporterId = authExporter ? authExporter.exporter_id : 1;
+      const body = await parseJsonBody(req);
+      const creditsToAdd = parseInt(body.credits || 5, 10);
+
+      db.prepare('UPDATE exporters SET consignment_credits = COALESCE(consignment_credits, 0) + ? WHERE id = ?').run(creditsToAdd, exporterId);
+      logAudit(null, exporterId, 'WALLET_TOPUP', `Added ${creditsToAdd} consignment credits to wallet`, clientIp);
+
+      const updated = db.prepare('SELECT consignment_credits, credits_used FROM exporters WHERE id = ?').get(exporterId);
+      return sendJson(res, 200, {
+        success: true,
+        message: `Successfully credited ${creditsToAdd} export consignments to your account`,
+        wallet: {
+          consignment_credits: updated.consignment_credits,
+          credits_used: updated.credits_used || 0
+        }
+      });
+    }
+
     // POST /api/public/magic-upload/:token — Factory Floor 1-Click Camera Upload
     if (method === 'POST' && pathname.startsWith('/api/public/magic-upload/')) {
       const magicToken = pathname.replace('/api/public/magic-upload/', '').trim();
@@ -1862,6 +1933,57 @@ async function handleRequest(req, res) {
 
       if (!order) {
         return sendJson(res, 404, { success: false, message: 'No matching export order found for WhatsApp webhook' });
+      }
+
+      // Check for zero-login foreign buyer WhatsApp text approval ("APPROVE", "APPROVED", "OK APPROVE")
+      const isApprovalMessage = Boolean(text && /\bAPPROVE(D)?\b/i.test(text));
+      if (isApprovalMessage && !media_url) {
+        let milestone = db.prepare(`
+          SELECT * FROM order_milestones
+          WHERE order_id = ? AND (status IN ('action_required', 'pending') OR buyer_decision IS NULL OR buyer_decision != 'approved')
+          ORDER BY id ASC LIMIT 1
+        `).get(order.id);
+
+        if (!milestone) {
+          milestone = db.prepare('SELECT * FROM order_milestones WHERE order_id = ? ORDER BY id DESC LIMIT 1').get(order.id);
+        }
+
+        const decisionHash = 'PDV-WA-APPR-' + crypto.randomBytes(6).toString('hex').toUpperCase();
+        if (milestone) {
+          db.prepare(`
+            UPDATE order_milestones
+            SET status = 'paid',
+                buyer_decision = 'approved',
+                buyer_decision_at = CURRENT_TIMESTAMP,
+                decision_hash = ?,
+                buyer_decision_notes = 'Approved via WhatsApp direct text reply'
+            WHERE id = ?
+          `).run(decisionHash, milestone.id);
+        }
+
+        logAudit(order.id, order.exporter_id, 'BUYER_WHATSAPP_APPROVE', `Foreign buyer approved milestone via WhatsApp text for ${order.po_number}: ${decisionHash}`, clientIp);
+
+        const approvalEvent = {
+          type: 'buyer_decision',
+          order_id: order.id,
+          po_number: order.po_number,
+          decision: 'approved',
+          decision_hash: decisionHash,
+          source: 'whatsapp_text_reply',
+          sender: from || '+44 7700 900123 (Foreign Buyer)',
+          timestamp: new Date().toISOString()
+        };
+        broadcastSSE('order_update', approvalEvent);
+
+        return sendJson(res, 200, {
+          success: true,
+          action: 'MILESTONE_APPROVED',
+          message: `Milestone for ${order.po_number} successfully approved via WhatsApp text reply!`,
+          po_number: order.po_number,
+          decision_hash: decisionHash,
+          milestone: milestone ? { id: milestone.id, title: milestone.milestone_title } : null,
+          data: approvalEvent
+        });
       }
 
       let stage = db.prepare("SELECT * FROM order_stages WHERE order_id = ? AND status != 'completed' ORDER BY stage_index ASC LIMIT 1").get(order.id);
@@ -2795,6 +2917,68 @@ async function handleRequest(req, res) {
       });
     }
 
+    // GET /api/orders/:id/rodtep-pdf — DGFT Appendix 4R Duty Remission Printable PDF Claim Sheet
+    const rodtepPdfMatch = pathname.match(/^\/api\/orders\/(\d+)\/rodtep-pdf$/);
+    if (method === 'GET' && rodtepPdfMatch) {
+      const orderId = Number(rodtepPdfMatch[1]);
+      const order = db.prepare('SELECT o.*, e.company_name, e.iec_number, e.city_cluster FROM orders o JOIN exporters e ON o.exporter_id = e.id WHERE o.id = ?').get(orderId) || { id: orderId, po_number: 'PO-UK-8492', currency: 'GBP', hs_code: '6204', contract_amount: 14000, company_name: 'Royal Jaipur Handloom Heritage' };
+      const calc = rodtepEngine.calculateRemission(order, 'SB-901842-INNSA1');
+      const details = {
+        ledger_id: `DGFT-SCRIP-2026-${orderId}`,
+        iec_number: order.iec_number || '0512098411',
+        exporter_entity: order.company_name || 'Royal Jaipur Handloom Heritage',
+        shipping_bill_number: 'SB-901842-INNSA1',
+        port_code: 'INNSA1',
+        hs_code: '6204.42.20',
+        scheme: calc.scheme || 'RoSCTL',
+        rebate_rate_percent: calc.rate_percent || 4.10,
+        fob_realized_inr: calc.inr_fob_value || 1481900,
+        duty_credit_scrip_inr: calc.duty_credit_scrip_inr || 60652,
+        customs_verification_status: 'ICEGATE_LEO_CLEARED'
+      };
+
+      const pdfBuffer = generateRodtepClaimPdf(order, calc, details);
+      const filename = `DGFT-Appendix4R-RoDTEP-${(order.po_number || 'Claim').replace(/[^a-zA-Z0-9]/g, '-')}.pdf`;
+
+      res.writeHead(200, {
+        'Content-Type': 'application/pdf',
+        'Content-Length': pdfBuffer.length,
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Cache-Control': 'no-cache'
+      });
+      return res.end(pdfBuffer);
+    }
+
+    // POST /api/orders/:id/email-approve-link — Generate 1-Click Email Action Link
+    const emailApproveMatch = pathname.match(/^\/api\/orders\/(\d+)\/email-approve-link$/);
+    if (method === 'POST' && emailApproveMatch) {
+      const orderId = Number(emailApproveMatch[1]);
+      const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(orderId);
+      if (!order) return sendJson(res, 404, { success: false, message: 'Order not found' });
+
+      const milestone = db.prepare("SELECT * FROM order_milestones WHERE order_id = ? AND status IN ('action_required', 'pending') ORDER BY id ASC LIMIT 1").get(orderId) || { id: 1, milestone_title: 'Production Tranche' };
+
+      const approveToken = crypto.randomBytes(16).toString('hex');
+      const approveUrl = `http://127.0.0.1:5500/api/public/buyer-action?slug=${encodeURIComponent(order.public_tracking_slug)}&tranche=${milestone.id}&action=approve&token=${approveToken}`;
+      const mailtoLink = `mailto:approvals@padavo.io?subject=${encodeURIComponent(`APPROVE ${order.po_number} Tranche ${milestone.id}`)}&body=${encodeURIComponent(`I hereby confirm and authorize milestone release for ${order.po_number}.\n\nCommand: APPROVE ${order.po_number}\nDecision: AUTHORIZED`)}`;
+
+      return sendJson(res, 200, {
+        success: true,
+        order_id: orderId,
+        po_number: order.po_number,
+        milestone_id: milestone.id,
+        one_click_url: approveUrl,
+        mailto_link: mailtoLink,
+        instructions: 'Overseas buyer can either click the 1-click URL or reply "APPROVE" to transactional email/WhatsApp.'
+      });
+    }
+
+    // GET /api/system/error-log — APM Error Buffer & Diagnostic Telemetry
+    if (method === 'GET' && pathname === '/api/system/error-log') {
+      const report = errorTelemetry.getRecentErrors();
+      return sendJson(res, 200, report);
+    }
+
     // GET /api/orders/:id/peppol-invoice — EU Peppol BIS 3.0 / EN 16931 Digital e-Invoice XML
     const peppolMatch = pathname.match(/^\/api\/orders\/(\d+)\/peppol-invoice$/);
     if (method === 'GET' && peppolMatch) {
@@ -3037,10 +3221,63 @@ async function handleRequest(req, res) {
           subscription_tier: exporter.subscription_tier || 'starter',
           orders_quota: exporter.orders_quota || 25,
           orders_used: exporter.orders_used || 0,
-          role: exporter.role || 'owner'
+          role: exporter.role || 'owner',
+          agreement_signed_at: exporter.agreement_signed_at || null
         }
       }, {
         'Set-Cookie': createSessionCookie(sessionToken)
+      });
+    }
+
+    // POST /api/auth/sign-agreement — Master Exporter Legal Sign-Off
+    if (method === 'POST' && pathname === '/api/auth/sign-agreement') {
+      const auth = getAuthExporter(req);
+      if (!auth) {
+        return sendJson(res, 401, { success: false, message: 'Authentication required' });
+      }
+      const body = await parseJsonBody(req);
+      const { signer_name, terms_accepted, non_custodial_accepted, evidence_warrant_accepted } = body;
+
+      if (!signer_name || !terms_accepted || !non_custodial_accepted || !evidence_warrant_accepted) {
+        return sendJson(res, 400, {
+          success: false,
+          message: 'All mandatory legal declarations and authorized signer name must be acknowledged'
+        });
+      }
+
+      db.prepare(`
+        UPDATE exporters
+        SET agreement_signed_at = CURRENT_TIMESTAMP,
+            agreement_ip = ?,
+            agreement_signer_name = ?,
+            agreement_version = '2026.1'
+        WHERE id = ?
+      `).run(clientIp, signer_name.trim(), auth.exporter_id);
+
+      logAudit(null, auth.exporter_id, 'AGREEMENT_DIGITALLY_SIGNED', `Master Exporter Agreement digitally executed by ${signer_name} from IP ${clientIp}`, clientIp);
+
+      return sendJson(res, 200, {
+        success: true,
+        message: 'Master Exporter Agreement successfully executed and timestamped',
+        signer_name: signer_name.trim(),
+        version: '2026.1',
+        signed_at: new Date().toISOString()
+      });
+    }
+
+    // GET /api/auth/agreement-status — Check Exporter Agreement Compliance
+    if (method === 'GET' && pathname === '/api/auth/agreement-status') {
+      const auth = getAuthExporter(req);
+      if (!auth) {
+        return sendJson(res, 401, { success: false, message: 'Authentication required' });
+      }
+      const row = db.prepare('SELECT agreement_signed_at, agreement_signer_name, agreement_version FROM exporters WHERE id = ?').get(auth.exporter_id);
+      return sendJson(res, 200, {
+        success: true,
+        is_signed: Boolean(row && row.agreement_signed_at),
+        agreement_signed_at: row ? row.agreement_signed_at : null,
+        agreement_signer_name: row ? row.agreement_signer_name : null,
+        agreement_version: row ? row.agreement_version : '2026.1'
       });
     }
 
@@ -3247,8 +3484,14 @@ async function handleRequest(req, res) {
 
         const orderId = Number(result.lastInsertRowid);
 
-        // Increment orders_used counter
-        db.prepare('UPDATE exporters SET orders_used = orders_used + 1 WHERE id = ?').run(authExporter.exporter_id);
+        // Increment orders_used counter & debit 1 consignment credit
+        db.prepare(`
+          UPDATE exporters 
+          SET orders_used = orders_used + 1,
+              consignment_credits = CASE WHEN consignment_credits > 0 THEN consignment_credits - 1 ELSE 0 END,
+              credits_used = COALESCE(credits_used, 0) + 1
+          WHERE id = ?
+        `).run(authExporter.exporter_id);
 
         const stagesToInsert = (Array.isArray(custom_stages) && custom_stages.length > 0)
           ? custom_stages
@@ -3699,6 +3942,9 @@ async function handleRequest(req, res) {
 
   } catch (err) {
     console.error('Padavo server execution error:', err);
+    try {
+      errorTelemetry.captureError(err, req, { context: 'handleRequest' });
+    } catch (e) {}
     const statusCode = err.statusCode || (err.message && err.message.includes('JSON') ? 400 : 500);
     return sendJson(res, statusCode, { success: false, message: err.message || 'Internal server error' });
   }

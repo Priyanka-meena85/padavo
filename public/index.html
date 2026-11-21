@@ -363,6 +363,13 @@
                 <span>Company & Wire Settings</span>
               </button>
 
+                            <a href="/rapid-camera.html" target="_blank" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">
+                <span class="flex items-center gap-2.5">
+                  <i data-lucide="camera" class="w-4 h-4 text-emerald-400"></i>
+                  <span>RapidFloor Camera</span>
+                </span>
+                <span class="bg-emerald-500/20 text-emerald-300 text-[10px] font-mono px-2 py-0.5 rounded-full font-bold">2-Sec Floor</span>
+              </a>
               <button onclick="openBillingModal()" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">
                 <span class="flex items-center gap-2.5">
                   <i data-lucide="credit-card" class="w-4 h-4 text-purple-400"></i>
@@ -1946,6 +1953,30 @@
         if (roleSelect && exporter.role) {
           roleSelect.value = exporter.role;
           switchUserRole(exporter.role);
+        }
+
+        // Section 65B & FEMA Onboarding Compliance Banner Check
+        const existingBanner = document.getElementById('legal-compliance-banner');
+        if (!exporter.agreement_signed_at) {
+          if (!existingBanner) {
+            const banner = document.createElement('div');
+            banner.id = 'legal-compliance-banner';
+            banner.className = 'bg-amber-500/10 border-b border-amber-500/30 px-4 py-2.5 text-xs text-amber-200 flex items-center justify-between sticky top-0 z-50 backdrop-blur';
+            banner.innerHTML = `
+              <div class="flex items-center gap-2 max-w-4xl mx-auto w-full justify-between">
+                <span class="flex items-center gap-1.5 font-medium">
+                  <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                  <strong>Compliance Action Required:</strong> Master Exporter Agreement pending digital signature for FEMA & Section 65B protection.
+                </span>
+                <a href="/onboarding-agreement.html" class="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg font-bold text-[11px] transition shadow">
+                  Sign Digitally Now →
+                </a>
+              </div>
+            `;
+            document.body.prepend(banner);
+          }
+        } else if (existingBanner) {
+          existingBanner.remove();
         }
       }
 
