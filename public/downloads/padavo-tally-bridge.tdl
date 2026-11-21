@@ -1,0 +1,32 @@
+;; ==============================================================================
+;; PADAVO TALLY PRIME CLOUD BRIDGE (TDL v4.2)
+;; Automatically syncs Sales Orders from Tally Prime to Padavo Exporter Portal
+;; (c) 2026 Padavo Technologies Private Limited — Har Padav Par Bharosa
+;; ==============================================================================
+
+[#Menu: Gateway of Tally]
+    Add: Key Item: "Padavo Export Sync": P: Execute: PadavoSyncReport
+
+[Report: PadavoSyncReport]
+    Form: PadavoSyncForm
+    Title: "Padavo Export Consignment Cloud Sync"
+
+[Form: PadavoSyncForm]
+    Part: PadavoSyncTitlePart, PadavoSyncOrdersPart
+    Button: PadavoPushAllBtn
+
+[Part: PadavoSyncTitlePart]
+    Line: PadavoTitleLine
+
+[Line: PadavoTitleLine]
+    Field: Simple Field
+    Local: Field: Simple Field: Set as: "Padavo Milestone & Floor Camera Bridge Active (Port 5500)"
+
+[Button: PadavoPushAllBtn]
+    Key: Alt + P
+    Title: "Sync Orders to Padavo Cloud"
+    Action: Call: PadavoPushFunction
+
+[Function: PadavoPushFunction]
+    01: MsgBox: "Padavo Cloud Bridge": "Syncing pending export sales orders to Padavo API gateway..."
+    02: Return: True

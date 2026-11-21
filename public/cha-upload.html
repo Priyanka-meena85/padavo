@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customs House Agent (CHA) Gate-In &amp; LEO Portal — Padavo (पड़ाव)</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <script>
+    (function(){const w=console.warn;console.warn=function(...a){try{const s=a.map(x=>typeof x==='object'&&x?JSON.stringify(x):String(x)).join(' ');if(s.includes('tailwindcss.com')||s.includes('Tailwind CSS')||s.includes('should not be used in production'))return;}catch(e){}w.apply(console,a);};})();
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/lucide.min.js" onerror="this.onerror=null; this.src='https://unpkg.com/lucide@latest';"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    window.tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              500: '#b46b38',
+              600: '#9b562a',
+              700: '#7f4422',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased font-sans min-h-screen flex flex-col justify-between">
+  
+  <header class="bg-white border-b border-slate-200">
+    <div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-800 flex items-center justify-center text-white font-bold text-sm shadow-xs">
+          <i data-lucide="anchor" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="font-bold text-slate-900 tracking-tight text-base">Padavo PortRail</span>
+          <span class="text-[11px] text-blue-600 font-mono ml-1 font-bold">CHA DESK</span>
+        </div>
+      </div>
+      <span class="text-xs font-mono bg-blue-50 text-blue-800 px-3 py-1 rounded-full border border-blue-200">
+        Zero-Login Port Ingestion
+      </span>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-6 py-10 w-full space-y-6">
+    
+    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-2">
+      <div class="flex items-center gap-2">
+        <span class="bg-blue-100 text-blue-900 text-[10px] font-bold px-2.5 py-0.5 rounded-full font-mono">Nhava Sheva (INNSA1) / Mundra (INMUN1)</span>
+      </div>
+      <h1 class="text-2xl font-bold text-slate-900">Customs Clearance &amp; Gate-In Upload</h1>
+      <p class="text-xs text-slate-500">Authorized Customs House Agent portal for submitting Shipping Bill LEO and Container Seal records directly to the exporter's milestone blockchain.</p>
+    </div>
+
+    <!-- Active Consignment Info -->
+    <div class="bg-slate-900 text-white p-6 rounded-3xl shadow-sm space-y-3">
+      <div class="flex items-center justify-between text-xs">
+        <span class="text-slate-400 font-mono">EXPORT PURCHASE ORDER</span>
+        <span class="font-mono bg-slate-800 text-brand-400 px-2.5 py-0.5 rounded font-bold">PO-UK-8492</span>
+      </div>
+      <div class="text-sm">
+        <h3 class="font-bold text-lg">Indigo Organic Cotton Midi Dresses (850 Pcs)</h3>
+        <p class="text-slate-400 text-xs mt-0.5">Exporter: Zenith Global Exports • Buyer: Toast &amp; Co. London (UK)</p>
+      </div>
+    </div>
+
+    <!-- Submission Form -->
+    <form id="cha-form" onsubmit="handleChaSubmit(event)" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-5">
+      <div class="space-y-1.5">
+        <label for="shipping-bill" class="text-xs font-bold text-slate-700 block">Shipping Bill Number (ICEGATE)</label>
+        <input type="text" id="shipping-bill" required value="SB-901842-INNSA1" placeholder="e.g. SB-123456-INNSA1" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-mono">
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="space-y-1.5">
+          <label for="leo-date" class="text-xs font-bold text-slate-700 block">LEO (Let Export Order) Date</label>
+          <input type="date" id="leo-date" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs">
+        </div>
+        <div class="space-y-1.5">
+          <label for="container-no" class="text-xs font-bold text-slate-700 block">Container Number (40ft HC / 20ft)</label>
+          <input type="text" id="container-no" required value="MSKU-982104-7" placeholder="e.g. MSKU-123456-7" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-mono">
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <label for="customs-seal" class="text-xs font-bold text-slate-700 block">Customs High-Security Bolt Seal Number</label>
+        <input type="text" id="customs-seal" required value="CUST-BOLT-IN-88910" placeholder="e.g. CUST-SEAL-99214" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-mono">
+      </div>
+
+      <div class="space-y-1.5">
+        <label for="cha-name" class="text-xs font-bold text-slate-700 block">CHA Company &amp; Officer Name</label>
+        <input type="text" id="cha-name" required value="Parekh Marine Clearing Agency (JNPT Officer: V. Kulkarni)" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs">
+      </div>
+
+      <div class="pt-2">
+        <button type="submit" id="submit-btn" class="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-xs transition-all">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>Verify ICEGATE LEO &amp; Advance Milestone</span>
+        </button>
+      </div>
+
+      <div id="result-success" class="hidden p-4 bg-emerald-50 text-emerald-900 rounded-2xl border border-emerald-200 text-xs space-y-1.5">
+        <div class="flex items-center gap-2 font-bold text-sm">
+          <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>
+          <span>LEO Successfully Validated &amp; Logged!</span>
+        </div>
+        <p class="text-[11px] text-emerald-800">
+          The Customs Let Export Order was verified against ICEGATE EDI rules. Milestone 4 (Customs Clearance &amp; Port Gate-In) has been advanced on the buyer's live tracking link.
+        </p>
+      </div>
+    </form>
+
+  </main>
+
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400">
+    <p>&copy; 2026 Padavo PortRail • Zero-Login CHA Ingestion</p>
+  </footer>
+
+  <script>
+    document.getElementById('leo-date').value = new Date().toISOString().slice(0, 10);
+
+    async function handleChaSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      const resSuccess = document.getElementById('result-success');
+      
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>Submitting to ICEGATE Validator...</span>';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      const payload = {
+        shipping_bill: document.getElementById('shipping-bill').value,
+        leo_date: document.getElementById('leo-date').value,
+        container_no: document.getElementById('container-no').value,
+        customs_seal: document.getElementById('customs-seal').value,
+        cha_name: document.getElementById('cha-name').value
+      };
+
+      try {
+        const res = await fetch('/api/public/cha-upload/cha-token-default', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          resSuccess.classList.remove('hidden');
+          btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Verified</span>';
+          btn.classList.remove('bg-blue-600');
+          btn.classList.add('bg-emerald-600');
+        } else {
+          alert(data.message || 'Verification failed');
+          btn.disabled = false;
+          btn.innerHTML = '<span>Try Again</span>';
+        }
+      } catch (err) {
+        alert('Network connection error.');
+        btn.disabled = false;
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  </script>
+</body>
+</html>

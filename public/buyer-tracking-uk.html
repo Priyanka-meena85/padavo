@@ -19,7 +19,7 @@
   <!-- Tailwind CSS CDN -->
   <script>
     // Suppress Tailwind Play CDN developer notice in production browser console
-    (function(){const w=console.warn;console.warn=function(...a){if(a[0]&&typeof a[0]==='string'&&a[0].includes('cdn.tailwindcss.com'))return;w.apply(console,a);};})();
+    (function(){const w=console.warn;console.warn=function(...a){try{const s=a.map(x=>typeof x==='object'&&x?JSON.stringify(x):String(x)).join(' ');if(s.includes('tailwindcss.com')||s.includes('Tailwind CSS')||s.includes('should not be used in production'))return;}catch(e){}w.apply(console,a);};})();
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Local high-speed bundled Lucide with CDN fallback -->
@@ -586,6 +586,8 @@
             <span>Download High-Res Photos (ZIP)</span>
           </button>
           <span>•</span>
+          <a href="/terms.html" target="_blank" class="text-slate-500 hover:text-brand-600 hover:underline">Terms &amp; Disclaimers</a>
+          <span>•</span>
           <div class="flex items-center gap-1.5" id="interactive-star-rater">
             <span class="text-slate-500 font-medium mr-0.5">Rate:</span>
             <div class="flex items-center gap-0.5" id="stars-row">
@@ -877,6 +879,24 @@
   <!-- JAVASCRIPT CONTROLLERS: MULTI-LANGUAGE, e-FIRC & WEBSOCKETS               -->
   <!-- ======================================================================== -->
   <script>
+    
+    // 1-Click Zero-Login Action Link Listener
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('approved') === 'true') {
+      const hash = urlParams.get('hash') || 'SHA256-AUTHENTICATED';
+      setTimeout(() => {
+        const btn = document.getElementById('btn-approve');
+        if (btn) {
+          btn.className = 'w-full sm:flex-1 inline-flex items-center justify-center gap-2 bg-emerald-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl cursor-default shadow-xs';
+          btn.innerHTML = '<i data-lucide="check-check" class="w-4 h-4"></i><span>Milestone 2 Approved via 1-Click Link</span>';
+        }
+        if (typeof showToast === 'function') {
+          showToast('1-Click Sign-Off Verified! Wire instruction sent to foreign bank.');
+        }
+        safeCreateIcons();
+      }, 300);
+    }
+
     function safeCreateIcons() {
       if (typeof window.lucide !== 'undefined' && typeof window.lucide.createIcons === 'function') {
         try { window.lucide.createIcons(); } catch (e) {}

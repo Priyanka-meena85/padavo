@@ -6,7 +6,7 @@
   <title>Padavo — Subcontractor Quality Upload Portal</title>
   <script>
     // Suppress Tailwind Play CDN developer notice in production browser console
-    (function(){const w=console.warn;console.warn=function(...a){if(a[0]&&typeof a[0]==='string'&&a[0].includes('cdn.tailwindcss.com'))return;w.apply(console,a);};})();
+    (function(){const w=console.warn;console.warn=function(...a){try{const s=a.map(x=>typeof x==='object'&&x?JSON.stringify(x):String(x)).join(' ');if(s.includes('tailwindcss.com')||s.includes('Tailwind CSS')||s.includes('should not be used in production'))return;}catch(e){}w.apply(console,a);};})();
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
