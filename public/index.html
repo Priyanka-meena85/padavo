@@ -2632,7 +2632,50 @@ Rajesh Sharma (+91 98290 12345)`;
       }
     }
 
-        function simulateFloorStaffUpload() {
+        
+    // =========================================================================
+    // SHOP FLOOR OFFLINE PWA QUEUE & AUTO-SYNC ENGINE
+    // =========================================================================
+    window.offlineUploadQueue = JSON.parse(localStorage.getItem('padavo_offline_queue') || '[]');
+
+    function queueOfflineProof(item) {
+      window.offlineUploadQueue.push({
+        id: 'off-' + Date.now(),
+        endpoint: item.endpoint || '/api/public/magic-upload/magic-uk-8492-token',
+        payload: item.payload,
+        queued_at: new Date().toISOString()
+      });
+      localStorage.setItem('padavo_offline_queue', JSON.stringify(window.offlineUploadQueue));
+      showToast('Basement Offline Guard: Photo saved to device memory. Will auto-sync when in range.');
+    }
+
+    async function flushOfflineProofQueue() {
+      if (!window.offlineUploadQueue || window.offlineUploadQueue.length === 0) return;
+      if (!navigator.onLine) return;
+
+      const queue = [...window.offlineUploadQueue];
+      let synced = 0;
+      for (const item of queue) {
+        try {
+          const res = await fetch(item.endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(item.payload)
+          });
+          if (res.ok) synced++;
+        } catch (e) {}
+      }
+
+      if (synced > 0) {
+        window.offlineUploadQueue = [];
+        localStorage.removeItem('padavo_offline_queue');
+        showToast(`⚡ Auto-Synced ${synced} offline photos from shop floor queue!`);
+      }
+    }
+
+    window.addEventListener('online', flushOfflineProofQueue);
+
+    function simulateFloorStaffUpload() {
       showToast('Simulating floor supervisor Mukesh uploading photo via WhatsApp...');
       setTimeout(() => {
         showToast('Mukesh uploaded "Indigo vat immersion photo" from shop floor!');
